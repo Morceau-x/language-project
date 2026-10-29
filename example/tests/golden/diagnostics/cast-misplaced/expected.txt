@@ -1,0 +1,6 @@
+-- MISPLACED CAST - ../../language-project/compiler/test/fixtures/golden/diagnostics/cast-misplaced/Main.mx
+
+3| cast (n: Int) -> Bool {
+4|   n > 0
+5| }
+   ^^^^^^^^^^^^^^^^^^^^^^^ casts between built-in types are wired into the language

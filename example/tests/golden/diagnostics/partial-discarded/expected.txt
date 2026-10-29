@@ -1,0 +1,6 @@
+-- DISCARDED FUNCTION - ../../language-project/compiler/test/fixtures/golden/diagnostics/partial-discarded/Main.mx
+
+8|   add(1)
+     ^^^^^^ this expression is a function, and its result is thrown away
+
+Hint: Did you forget arguments? A call with too few builds a function instead of running one.

@@ -1,0 +1,6 @@
+-- SYNTAX ERROR - ../../language-project/compiler/test/fixtures/golden/diagnostics/parse-unexpected-token/Main.mx
+
+I was expecting a lowercase name like `area`, a capitalized name like `Shape`, `_`, a number, a string, an interpolated string, an element like `<div>`, or `(`, among other things.
+
+3| fn area(] {
+           ^ I got stuck on this `]`

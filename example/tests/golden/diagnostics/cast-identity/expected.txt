@@ -1,0 +1,8 @@
+-- IDENTITY CAST - ../../language-project/compiler/test/fixtures/golden/diagnostics/cast-identity/Main.mx
+
+5| cast (p: Port) -> Port {
+6|   p
+7| }
+   ^^^^^^^^^^^^^^^^^^^^^^^^ this casts `Port` to itself
+
+Hint: `::` already treats a same-type cast as the identity — delete this declaration.

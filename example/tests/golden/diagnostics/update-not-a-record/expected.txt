@@ -1,0 +1,6 @@
+-- NOT A RECORD - ../../language-project/compiler/test/fixtures/golden/diagnostics/update-not-a-record/Main.mx
+
+7|   Circle(..s)
+     ^^^^^^^^^^^ `Circle` is not a record constructor
+
+Hint: Only record constructors can be updated: `User(..u, age: 31)`.

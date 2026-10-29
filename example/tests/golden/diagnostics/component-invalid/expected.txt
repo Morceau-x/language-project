@@ -1,0 +1,6 @@
+-- INVALID COMPONENT - ../../language-project/compiler/test/fixtures/golden/diagnostics/component-invalid/Main.mx
+
+15| component Broken(init: init, view: view)
+                           ^^^^ `Broken` wires an `init` but no `update` — state without messages could never change
+
+Hint: The shapes: `init: () -> Model` or `(Props) -> Model` with Props a record; `update: (Model, Msg) -> Model` (or returning a `Step(Model, List<Out>)`-shaped type); `view: (Props, Model) -> Html<Msg>` (just `(Model)` without props).

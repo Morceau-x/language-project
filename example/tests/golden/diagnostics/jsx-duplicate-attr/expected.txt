@@ -1,0 +1,4 @@
+-- DUPLICATE ATTRIBUTE - ../../language-project/compiler/test/fixtures/golden/diagnostics/jsx-duplicate-attr/Main.mx
+
+4|   Debug.log(Html.toString(<div class="a" class="b">x</div>))
+                                            ^^^^^ `class` appears twice on this element

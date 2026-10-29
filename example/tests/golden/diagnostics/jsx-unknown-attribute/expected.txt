@@ -1,0 +1,13 @@
+-- UNKNOWN ATTRIBUTE - ../../language-project/compiler/test/fixtures/golden/diagnostics/jsx-unknown-attribute/Main.mx
+
+7|     <Card title="a" titel="b"/>
+                       ^^^^^ component `Card` has no parameter named `titel`
+
+Hint: Did you mean `title`?
+
+-- UNKNOWN ATTRIBUTE - ../../language-project/compiler/test/fixtures/golden/diagnostics/jsx-unknown-attribute/Main.mx
+
+8|     <Card title="a">children here</Card>
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ component `Card` has no `children` parameter, but this element has a closing tag
+
+Hint: Self-close it — component `Card` takes no children.

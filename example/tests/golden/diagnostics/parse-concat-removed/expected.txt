@@ -1,0 +1,6 @@
+-- REMOVED OPERATOR - ../../language-project/compiler/test/fixtures/golden/diagnostics/parse-concat-removed/Main.mx
+
+3| let greeting = "hello, " ++ name
+                            ^^ `++` is no longer an operator
+
+Hint: Build strings with interpolation instead: `"${a}${b}"`.

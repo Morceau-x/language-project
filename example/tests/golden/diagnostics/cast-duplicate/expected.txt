@@ -1,0 +1,11 @@
+-- DUPLICATE CAST - ../../language-project/compiler/test/fixtures/golden/diagnostics/cast-duplicate/Main.mx
+
+ 9| cast (m: Int) -> Port {
+10|   Port(value: m + 1)
+11| }
+    ^^^^^^^^^^^^^^^^^^^^^^^ there is already a cast from `Int` to `Port` in this module
+
+5| cast (n: Int) -> Port {
+6|   Port(value: n)
+7| }
+   ^^^^^^^^^^^^^^^^^^^^^^^ the first one is here

@@ -1,0 +1,9 @@
+-- ? RETURN CONFLICT - ../../language-project/compiler/test/fixtures/golden/diagnostics/try-mixed/Main.mx
+
+For the failure to escape, `pick` must return a `Result` or an `Option` — but it returns `Result<String, Int>`.
+
+4|   Ok(o? + 1)
+         ^ this `?` early-returns an `Option` failure to the caller
+
+3| fn pick(o: Option<Int>) -> Result<String, Int> {
+                              ^^^^^^^^^^^^^^^^^^^ but the return type here is `Result<String, Int>`

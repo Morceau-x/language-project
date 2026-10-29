@@ -1,0 +1,6 @@
+-- MIXED ARGUMENTS - ../../language-project/compiler/test/fixtures/golden/diagnostics/call-mixed-args/Main.mx
+
+7| let bad = move(1, dy: 2)
+             ^^^^^^^^^^^^^^ this call mixes labeled and positional arguments
+
+Hint: Either label every argument or none of them (a pipeline subject counts as positional).

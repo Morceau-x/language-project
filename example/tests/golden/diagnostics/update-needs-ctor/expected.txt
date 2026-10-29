@@ -1,0 +1,6 @@
+-- UPDATE NEEDS A CONSTRUCTOR - ../../language-project/compiler/test/fixtures/golden/diagnostics/update-needs-ctor/Main.mx
+
+4|   g(..u, age: 1)
+     ^ `..` updates a record, and this is not a record constructor
+
+Hint: Record update spreads into a constructor: `User(..u, age: 31)`.

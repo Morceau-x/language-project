@@ -1,0 +1,6 @@
+-- CANNOT UNWRAP - ../../language-project/compiler/test/fixtures/golden/diagnostics/try-not-result/Main.mx
+
+`?` unwraps a `Result` or an `Option`, returning the failure to the caller — but this is `Int`.
+
+4|   Ok(n? + 1)
+        ^ this is `Int`

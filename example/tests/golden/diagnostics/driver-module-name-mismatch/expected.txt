@@ -1,0 +1,6 @@
+-- MODULE NAME MISMATCH - ../../language-project/compiler/test/fixtures/golden/diagnostics/driver-module-name-mismatch/Main.mx
+
+1| module Hello
+          ^^^^^ the file is named `Main.mx` but the module calls itself `Hello`
+
+Hint: Rename the file or the module so they agree.

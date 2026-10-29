@@ -1,0 +1,6 @@
+-- UNKNOWN MEMBER - ../../language-project/compiler/test/fixtures/golden/diagnostics/names-unknown-member/Main.mx
+
+4|   Debug.log(List.mpa([1, 2], fn(x) { x }))
+                    ^^^ the module `List` has nothing named `mpa`
+
+Hint: Did you mean `map`?

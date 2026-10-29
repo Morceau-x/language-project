@@ -1,0 +1,338 @@
+State 10 conflicts: 1 reduce/reduce
+
+
+Grammar
+
+    0 $accept: type_decl $end
+
+    1 type_decl: TYPE ID '=' type ';'
+
+    2 type: '(' id_list ')'
+    3     | expr DOTDOT expr
+
+    4 id_list: ID
+    5        | id_list ',' ID
+
+    6 expr: '(' expr ')'
+    7     | expr '+' expr
+    8     | expr '-' expr
+    9     | expr '*' expr
+   10     | expr '/' expr
+   11     | ID
+
+
+Terminals, with rules where they appear
+
+$end (0) 0
+'(' (40) 2 6
+')' (41) 2 6
+'*' (42) 9
+'+' (43) 7
+',' (44) 5
+'-' (45) 8
+'/' (47) 10
+';' (59) 1
+'=' (61) 1
+error (256)
+TYPE (258) 1
+DOTDOT (259) 3
+ID (260) 1 4 5 11
+
+
+Nonterminals, with rules where they appear
+
+$accept (15)
+    on left: 0
+type_decl (16)
+    on left: 1, on right: 0
+type (17)
+    on left: 2 3, on right: 1
+id_list (18)
+    on left: 4 5, on right: 2 5
+expr (19)
+    on left: 6 7 8 9 10 11, on right: 3 6 7 8 9 10
+
+
+state 0
+
+    0 $accept: . type_decl $end
+
+    TYPE  shift, and go to state 1
+
+    type_decl  go to state 2
+
+
+state 1
+
+    1 type_decl: TYPE . ID '=' type ';'
+
+    ID  shift, and go to state 3
+
+
+state 2
+
+    0 $accept: type_decl . $end
+
+    $end  shift, and go to state 4
+
+
+state 3
+
+    1 type_decl: TYPE ID . '=' type ';'
+
+    '='  shift, and go to state 5
+
+
+state 4
+
+    0 $accept: type_decl $end .
+
+    $default  accept
+
+
+state 5
+
+    1 type_decl: TYPE ID '=' . type ';'
+
+    ID   shift, and go to state 6
+    '('  shift, and go to state 7
+
+    type  go to state 8
+    expr  go to state 9
+
+
+state 6
+
+   11 expr: ID .
+
+    $default  reduce using rule 11 (expr)
+
+
+state 7
+
+    2 type: '(' . id_list ')'
+    6 expr: '(' . expr ')'
+
+    ID   shift, and go to state 10
+    '('  shift, and go to state 11
+
+    id_list  go to state 12
+    expr     go to state 13
+
+
+state 8
+
+    1 type_decl: TYPE ID '=' type . ';'
+
+    ';'  shift, and go to state 14
+
+
+state 9
+
+    3 type: expr . DOTDOT expr
+    7 expr: expr . '+' expr
+    8     | expr . '-' expr
+    9     | expr . '*' expr
+   10     | expr . '/' expr
+
+    DOTDOT  shift, and go to state 15
+    '+'     shift, and go to state 16
+    '-'     shift, and go to state 17
+    '*'     shift, and go to state 18
+    '/'     shift, and go to state 19
+
+
+state 10
+
+    4 id_list: ID .
+   11 expr: ID .
+
+    ')'       reduce using rule 4 (id_list)
+    ')'       [reduce using rule 11 (expr)]
+    ','       reduce using rule 4 (id_list)
+    $default  reduce using rule 11 (expr)
+
+
+state 11
+
+    6 expr: '(' . expr ')'
+
+    ID   shift, and go to state 6
+    '('  shift, and go to state 11
+
+    expr  go to state 13
+
+
+state 12
+
+    2 type: '(' id_list . ')'
+    5 id_list: id_list . ',' ID
+
+    ')'  shift, and go to state 20
+    ','  shift, and go to state 21
+
+
+state 13
+
+    6 expr: '(' expr . ')'
+    7     | expr . '+' expr
+    8     | expr . '-' expr
+    9     | expr . '*' expr
+   10     | expr . '/' expr
+
+    '+'  shift, and go to state 16
+    '-'  shift, and go to state 17
+    '*'  shift, and go to state 18
+    '/'  shift, and go to state 19
+    ')'  shift, and go to state 22
+
+
+state 14
+
+    1 type_decl: TYPE ID '=' type ';' .
+
+    $default  reduce using rule 1 (type_decl)
+
+
+state 15
+
+    3 type: expr DOTDOT . expr
+
+    ID   shift, and go to state 6
+    '('  shift, and go to state 11
+
+    expr  go to state 23
+
+
+state 16
+
+    7 expr: expr '+' . expr
+
+    ID   shift, and go to state 6
+    '('  shift, and go to state 11
+
+    expr  go to state 24
+
+
+state 17
+
+    8 expr: expr '-' . expr
+
+    ID   shift, and go to state 6
+    '('  shift, and go to state 11
+
+    expr  go to state 25
+
+
+state 18
+
+    9 expr: expr '*' . expr
+
+    ID   shift, and go to state 6
+    '('  shift, and go to state 11
+
+    expr  go to state 26
+
+
+state 19
+
+   10 expr: expr '/' . expr
+
+    ID   shift, and go to state 6
+    '('  shift, and go to state 11
+
+    expr  go to state 27
+
+
+state 20
+
+    2 type: '(' id_list ')' .
+
+    $default  reduce using rule 2 (type)
+
+
+state 21
+
+    5 id_list: id_list ',' . ID
+
+    ID  shift, and go to state 28
+
+
+state 22
+
+    6 expr: '(' expr ')' .
+
+    $default  reduce using rule 6 (expr)
+
+
+state 23
+
+    3 type: expr DOTDOT expr .
+    7 expr: expr . '+' expr
+    8     | expr . '-' expr
+    9     | expr . '*' expr
+   10     | expr . '/' expr
+
+    '+'  shift, and go to state 16
+    '-'  shift, and go to state 17
+    '*'  shift, and go to state 18
+    '/'  shift, and go to state 19
+
+    $default  reduce using rule 3 (type)
+
+
+state 24
+
+    7 expr: expr . '+' expr
+    7     | expr '+' expr .
+    8     | expr . '-' expr
+    9     | expr . '*' expr
+   10     | expr . '/' expr
+
+    '*'  shift, and go to state 18
+    '/'  shift, and go to state 19
+
+    $default  reduce using rule 7 (expr)
+
+
+state 25
+
+    7 expr: expr . '+' expr
+    8     | expr . '-' expr
+    8     | expr '-' expr .
+    9     | expr . '*' expr
+   10     | expr . '/' expr
+
+    '*'  shift, and go to state 18
+    '/'  shift, and go to state 19
+
+    $default  reduce using rule 8 (expr)
+
+
+state 26
+
+    7 expr: expr . '+' expr
+    8     | expr . '-' expr
+    9     | expr . '*' expr
+    9     | expr '*' expr .
+   10     | expr . '/' expr
+
+    $default  reduce using rule 9 (expr)
+
+
+state 27
+
+    7 expr: expr . '+' expr
+    8     | expr . '-' expr
+    9     | expr . '*' expr
+   10     | expr . '/' expr
+   10     | expr '/' expr .
+
+    $default  reduce using rule 10 (expr)
+
+
+state 28
+
+    5 id_list: id_list ',' ID .
+
+    $default  reduce using rule 5 (id_list)

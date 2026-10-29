@@ -1,0 +1,31 @@
+-- TYPE MISMATCH - ../../language-project/compiler/test/fixtures/golden/diagnostics/jsx-splice-types/Main.mx
+
+The attribute `data-n` of an element takes a `String`.
+
+4|   <div data-n={n}>
+                  ^ this is `Int`
+
+Hint: Convert it first: `Int.toString(n)`.
+
+-- TYPE MISMATCH - ../../language-project/compiler/test/fixtures/golden/diagnostics/jsx-splice-types/Main.mx
+
+Everything spliced into a string with `${…}` must be a `String`.
+
+5|     ${n}
+         ^ this is `Int`
+
+Hint: Convert it first: `Int.toString(n)`.
+
+-- TYPE MISMATCH - ../../language-project/compiler/test/fixtures/golden/diagnostics/jsx-splice-types/Main.mx
+
+A `{…}` child must be `Html<a>`.
+
+6|     {n}
+        ^ this is `Int`
+
+-- TYPE MISMATCH - ../../language-project/compiler/test/fixtures/golden/diagnostics/jsx-splice-types/Main.mx
+
+A `{..…}` child spreads `List<Html<a>>` into the element.
+
+7|     {..n}
+          ^ this is `Int`

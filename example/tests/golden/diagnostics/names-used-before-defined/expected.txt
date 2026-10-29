@@ -1,0 +1,9 @@
+-- USED BEFORE DEFINED - ../../language-project/compiler/test/fixtures/golden/diagnostics/names-used-before-defined/Main.mx
+
+3| let total = base + 1
+               ^^^^ `base` is defined later in this module
+
+5| let base = 41
+   ^^^^^^^^^^^^^ it is defined down here
+
+Hint: Top-level `let`s run top to bottom; `fn` definitions can be used anywhere.

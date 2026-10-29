@@ -1,0 +1,6 @@
+-- WRONG NUMBER OF ARGUMENTS - ../../language-project/compiler/test/fixtures/golden/diagnostics/call-zero-args/Main.mx
+
+7| let bad = add()
+             ^^^^^ `add` expects 2 arguments, but I see 0
+
+Hint: To partially apply, pass at least one argument.

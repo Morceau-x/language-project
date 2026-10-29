@@ -1,0 +1,6 @@
+-- ARROW LAMBDA - ../../language-project/compiler/test/fixtures/golden/diagnostics/parse-arrow-lambda/Main.mx
+
+3| let double = (x) => x * 2
+                    ^^ Maxim lambdas are written with `fn`
+
+Hint: `(x, y) => body` is written `fn(x, y) { body }` now.

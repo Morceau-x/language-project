@@ -1,0 +1,9 @@
+-- MISMATCHED CLOSING TAG - ../../language-project/compiler/test/fixtures/golden/diagnostics/jsx-mismatched-tag/Main.mx
+
+4|   <p>oops</div>
+            ^^^^^^ this closes `div`, but the open element is `p`
+
+4|   <p>oops</div>
+     ^^ the element opens here
+
+Hint: Every element closes with its own tag: `</p>`.

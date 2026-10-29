@@ -1,0 +1,6 @@
+-- UNKNOWN PARAMETERS - ../../language-project/compiler/test/fixtures/golden/diagnostics/call-unnamed-params/Main.mx
+
+6|   f(x: 1)
+     ^ I don't know the parameters of this function yet, so I can't match these labels
+
+Hint: Annotate it, like `f: (x: Int, y: Int) -> Int`, so I know the parameter names.

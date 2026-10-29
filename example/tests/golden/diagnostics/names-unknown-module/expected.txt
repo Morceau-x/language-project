@@ -1,0 +1,7 @@
+-- UNKNOWN MODULE - ../../language-project/compiler/test/fixtures/golden/diagnostics/names-unknown-module/Main.mx
+
+4|   Debug.log(Lst.map([1, 2], fn(x) { x }))
+               ^^^ I don't know a module named `Lst`
+
+Hint: Did you mean `List`?
+Hint: Did you mean `Int`?

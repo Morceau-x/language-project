@@ -1,0 +1,6 @@
+-- HANDLER MISMATCH - ../../language-project/compiler/test/fixtures/golden/diagnostics/jsx-handler-mismatch/Main.mx
+
+Every `on:` handler of one element carries the same message type; `on:blur` here needs `A`.
+
+10|   Debug.log(Html.toString(<button on:click={MsgA} on:blur={MsgB}>x</button>))
+                                                               ^^^^ this handler carries `B`

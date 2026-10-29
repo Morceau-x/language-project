@@ -1,0 +1,26 @@
+[package]
+name = "maxim-compiler"
+version = "0.1.0"
+edition = "2024"
+description = "The Maxim compiler, translated from the Haskell reference implementation"
+
+[lib]
+name = "maxim_compiler"
+
+[[bin]]
+name = "maxim"
+path = "src/bin/maxim.rs"
+
+[dependencies]
+cfgrammar = "=0.15.0"
+lrpar = "=0.15.0"
+lrlex = "=0.15.0"
+lrtable = "=0.15.0"
+
+[build-dependencies]
+cfgrammar = "=0.15.0"
+lrpar = "=0.15.0"
+lrlex = "=0.15.0"
+
+[dev-dependencies]
+proptest = "1"

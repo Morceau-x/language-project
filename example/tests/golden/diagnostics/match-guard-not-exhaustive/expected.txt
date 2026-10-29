@@ -1,0 +1,9 @@
+-- MISSING PATTERNS - ../../language-project/compiler/test/fixtures/golden/diagnostics/match-guard-not-exhaustive/Main.mx
+
+4|   match n {
+5|     x if x > 0 -> x
+6|   }
+     ^^^^^^^^^ this `match` does not cover _
+
+Hint: Add the missing pattern, or a final `_ ->` arm.
+Hint: A guarded arm can fail its guard, so it never counts as coverage.

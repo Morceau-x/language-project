@@ -1,0 +1,6 @@
+-- UNKNOWN COMPONENT - ../../language-project/compiler/test/fixtures/golden/diagnostics/jsx-no-view/Main.mx
+
+6|   Debug.log(Html.toString(<Helper text="x"/>))
+                             ^^^^^^^ there is no component `Helper` in scope
+
+Hint: A capitalized tag names a `component` declaration — declare one, or import the module that does.

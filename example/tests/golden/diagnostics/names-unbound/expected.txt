@@ -1,0 +1,6 @@
+-- UNBOUND NAME - ../../language-project/compiler/test/fixtures/golden/diagnostics/names-unbound/Main.mx
+
+8|   Debug.log(aera(2.0))
+               ^^^^ I don't know a value named `aera`
+
+Hint: Did you mean `area`?

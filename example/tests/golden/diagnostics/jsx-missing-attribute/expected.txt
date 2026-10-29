@@ -1,0 +1,13 @@
+-- MISSING ATTRIBUTE - ../../language-project/compiler/test/fixtures/golden/diagnostics/jsx-missing-attribute/Main.mx
+
+6|   Debug.log(Html.toString(<Card title="x"/>))
+                             ^^^^^ component `Card` needs `urgent`
+
+Hint: Add `urgent={…}` to the tag.
+
+-- MISSING ATTRIBUTE - ../../language-project/compiler/test/fixtures/golden/diagnostics/jsx-missing-attribute/Main.mx
+
+6|   Debug.log(Html.toString(<Card title="x"/>))
+                             ^^^^^ component `Card` needs `children`
+
+Hint: Children fill it: write `<…></…>` (an empty pair passes `children: []`).

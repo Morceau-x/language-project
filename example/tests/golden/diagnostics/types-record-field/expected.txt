@@ -1,0 +1,4 @@
+-- UNKNOWN FIELD - ../../language-project/compiler/test/fixtures/golden/diagnostics/types-record-field/Main.mx
+
+6|   Debug.log(User(name: "Ada", age: 30).email)
+                                          ^^^^^ `User` has no field `email`

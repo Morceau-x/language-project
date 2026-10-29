@@ -1,0 +1,8 @@
+-- TYPE MISMATCH - ../../language-project/compiler/test/fixtures/golden/diagnostics/partial-unknown-callee/Main.mx
+
+The 1st argument of `use` should be `(number) -> (number2) -> a`.
+
+12| let bad = use(add)
+                  ^^^ this is `(x: Int, y: Int) -> Int`
+
+Hint: Maxim applies a function to all its arguments at once unless the callee's full type is already known. If you meant a partial application, annotate the function, like `f: (Int, Int) -> Int`.

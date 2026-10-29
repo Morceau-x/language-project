@@ -1,0 +1,6 @@
+-- UNKNOWN PARAMETER - ../../language-project/compiler/test/fixtures/golden/diagnostics/call-unknown-param/Main.mx
+
+7| let bad = move(dx: 1, dz: 2)
+             ^^^^^^^^^^^^^^^^^^ `move` has no parameter named `dz`
+
+Hint: Did you mean `dx`?

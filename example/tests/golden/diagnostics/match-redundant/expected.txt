@@ -1,0 +1,4 @@
+-- REDUNDANT PATTERN - ../../language-project/compiler/test/fixtures/golden/diagnostics/match-redundant/Main.mx
+
+6|     1 -> "one"
+       ^^^^^^^^^^ this pattern can never match

@@ -1,0 +1,6 @@
+-- NO SUCH CAST - ../../language-project/compiler/test/fixtures/golden/diagnostics/cast-missing/Main.mx
+
+5| let bad = 1::User
+             ^^^^^^^ no cast from `Int` to `User` is declared
+
+Hint: Declare `cast (x: Int) -> User { … }` in the module that defines `User`.

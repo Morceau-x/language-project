@@ -1,0 +1,8 @@
+# One Cargo workspace for every crate in this folder: they share a single
+# Cargo.lock and target/ directory, and `cargo test` here runs them all.
+[workspace]
+resolver = "3"
+members = [
+    "example", # the full Maxim compiler, kept as a reference
+    "mini",    # the compiler you build step by step (see tutorial/)
+]

@@ -1,0 +1,6 @@
+-- UNTERMINATED STRING - ../../language-project/compiler/test/fixtures/golden/diagnostics/lex-unterminated-string/Main.mx
+
+3| let greeting = "hello
+                  ^^^^^^ this string never closes
+
+Hint: Strings are single-line in Maxim; escape newlines as `\n`.

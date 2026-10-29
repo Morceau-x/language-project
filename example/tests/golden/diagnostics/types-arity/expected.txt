@@ -1,0 +1,4 @@
+-- WRONG NUMBER OF ARGUMENTS - ../../language-project/compiler/test/fixtures/golden/diagnostics/types-arity/Main.mx
+
+8|   Debug.log(area(1.0, 2.0, 3.0))
+               ^^^^^^^^^^^^^^^^^^^ `area` expects 2 arguments, but I see 3

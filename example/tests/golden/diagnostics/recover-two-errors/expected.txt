@@ -1,0 +1,22 @@
+-- SYNTAX ERROR - ../../language-project/compiler/test/fixtures/golden/diagnostics/recover-two-errors/Main.mx
+
+I was expecting a lowercase name like `area`, a capitalized name like `Shape`, `_`, a number, a string, an interpolated string, an element like `<div>`, or `(`, among other things.
+
+3| fn broken(
+             ^ I got to the end of the file but I was still expecting more
+
+-- SYNTAX ERROR - ../../language-project/compiler/test/fixtures/golden/diagnostics/recover-two-errors/Main.mx
+
+I was expecting a lowercase name like `area`, a capitalized name like `Shape`, `_`, a number, a string, an interpolated string, an element like `<div>`, or `(`, among other things.
+
+9| fn alsoBroken( ->
+                  ^^ I got stuck on this `->`
+
+-- RETURN MISMATCH - ../../language-project/compiler/test/fixtures/golden/diagnostics/recover-two-errors/Main.mx
+
+The signature of `badTypes` declares the return type `Int`.
+
+11| fn badTypes(s: String) -> Int {
+12|   s
+13| }
+                                  ^ the body produces `String`

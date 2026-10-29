@@ -1,0 +1,28 @@
+-- MODULE SKIPPED - ../../language-project/compiler/test/fixtures/golden/diagnostics/driver-import-cycle/Main.mx
+
+1| module Main
+          ^^^^ skipping `Main` because its import failed: A
+
+-- IMPORT CYCLE - ../../language-project/compiler/test/fixtures/golden/diagnostics/driver-import-cycle/A.mx
+
+1| module A
+          ^ modules import each other in a loop: A -> B -> A
+
+-- MODULE SKIPPED - ../../language-project/compiler/test/fixtures/golden/diagnostics/driver-import-cycle/A.mx
+
+1| module A
+          ^ skipping `A` because its import failed: B
+
+-- UNKNOWN MODULE - ../../language-project/compiler/test/fixtures/golden/diagnostics/driver-import-cycle/B.mx
+
+3| import A
+          ^ I can't find a module named `A`
+
+Hint: Did you mean `App`?
+
+-- UNKNOWN MODULE - ../../language-project/compiler/test/fixtures/golden/diagnostics/driver-import-cycle/B.mx
+
+5| let two = A.one
+             ^ I don't know a module named `A`
+
+Hint: Did you mean `App`?

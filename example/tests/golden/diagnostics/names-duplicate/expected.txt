@@ -1,0 +1,11 @@
+-- DUPLICATE DEFINITION - ../../language-project/compiler/test/fixtures/golden/diagnostics/names-duplicate/Main.mx
+
+7| fn area() {
+8|   2
+9| }
+   ^^^^^^^^^^^ there is already a definition named `area` in this module
+
+3| fn area() {
+4|   1
+5| }
+   ^^^^^^^^^^^ it was first defined here

@@ -1,0 +1,8 @@
+-- MISSING RESULT - ../../language-project/compiler/test/fixtures/golden/diagnostics/parse-missing-result/Main.mx
+
+3| fn main() {
+4|   let x = 1
+5| }
+             ^ this block doesn't end with a value
+
+Hint: Every block is an expression in Maxim; finish it with the value it produces.

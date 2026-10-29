@@ -1,0 +1,8 @@
+-- MISSING PATTERNS - ../../language-project/compiler/test/fixtures/golden/diagnostics/match-non-exhaustive/Main.mx
+
+ 8|   match s {
+ 9|     Circle(r) -> 3.14 * r * r
+10|   }
+      ^^^^^^^^^ this `match` does not cover Rect(_, _)
+
+Hint: Add the missing pattern, or a final `_ ->` arm.

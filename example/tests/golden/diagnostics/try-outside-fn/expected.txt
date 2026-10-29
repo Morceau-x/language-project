@@ -1,0 +1,6 @@
+-- ? OUTSIDE A FUNCTION - ../../language-project/compiler/test/fixtures/golden/diagnostics/try-outside-fn/Main.mx
+
+7| let a = parse("x")?
+                     ^ there is no function for `?` to return from
+
+Hint: `?` early-returns from the nearest `fn` or lambda; a top-level `let` has neither.

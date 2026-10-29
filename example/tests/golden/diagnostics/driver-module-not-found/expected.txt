@@ -1,0 +1,14 @@
+-- MODULE NOT FOUND - ../../language-project/compiler/test/fixtures/golden/diagnostics/driver-module-not-found/Main.mx
+
+3| import Geometry
+          ^^^^^^^^ I can't find `Geometry` — I looked for ../../language-project/compiler/test/fixtures/golden/diagnostics/driver-module-not-found/Geometry.mx
+
+-- UNKNOWN MODULE - ../../language-project/compiler/test/fixtures/golden/diagnostics/driver-module-not-found/Main.mx
+
+3| import Geometry
+          ^^^^^^^^ I can't find a module named `Geometry`
+
+-- UNKNOWN MODULE - ../../language-project/compiler/test/fixtures/golden/diagnostics/driver-module-not-found/Main.mx
+
+6|   Debug.log(Geometry.area(1.0))
+               ^^^^^^^^ I don't know a module named `Geometry`

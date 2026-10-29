@@ -1,0 +1,6 @@
+-- UNKNOWN OUT EVENT - ../../language-project/compiler/test/fixtures/golden/diagnostics/jsx-on-component/Main.mx
+
+9|   Debug.log(Html.toString(<Card title="x" on:click={Clicked}/>))
+                                             ^^^^^^^^ component `Card` is stateless — it has no out event `click`
+
+Hint: Out events come from a stateful component's `Out` type; component `Card` wires only a view. Pass the handler as an ordinary attribute instead.

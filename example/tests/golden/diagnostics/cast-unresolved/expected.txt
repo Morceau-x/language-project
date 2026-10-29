@@ -1,0 +1,6 @@
+-- UNRESOLVED CAST SOURCE - ../../language-project/compiler/test/fixtures/golden/diagnostics/cast-unresolved/Main.mx
+
+4|   x::String
+     ^ I can't tell what type this is yet (it looks like `a`), so I can't pick a conversion
+
+Hint: Annotate the value so the cast knows its source type.

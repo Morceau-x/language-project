@@ -1,0 +1,8 @@
+-- NUMBER NEEDED - ../../language-project/compiler/test/fixtures/golden/diagnostics/types-mismatch/Main.mx
+
+`+` works on Int or Float, but this is `String`.
+
+3| let answer = 1 + "one"
+                    ^^^^^ this is `String`
+
+Hint: To build strings, use interpolation: `"${a}${b}"`.

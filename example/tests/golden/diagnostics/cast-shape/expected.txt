@@ -1,0 +1,6 @@
+-- INVALID CAST - ../../language-project/compiler/test/fixtures/golden/diagnostics/cast-shape/Main.mx
+
+5| cast (n: Int, offset: Int) -> Port {
+        ^^^^^^^^^^^^^^^^^^^^^ a cast converts exactly one value, but this one takes 2 parameters
+
+Hint: a cast is `cast (value: Source) -> Target { … }`

@@ -1,0 +1,8 @@
+[package]
+name = "mini"
+version = "0.1.0"
+edition = "2024"
+description = "A small compiler from Mini to JavaScript, built step by step (see ../tutorial)"
+
+# No dependencies on purpose: every piece of the compiler is yours to write.
+[dependencies]

@@ -1,0 +1,7 @@
+-- NO TUPLES - ../../language-project/compiler/test/fixtures/golden/diagnostics/parse-no-tuples/Main.mx
+
+3| let pair = (1, 2)
+               ^^^^ this looks like a tuple
+
+Hint: Maxim has no tuples. To group several values, declare a record type
+Hint: or pass them as separate function arguments.

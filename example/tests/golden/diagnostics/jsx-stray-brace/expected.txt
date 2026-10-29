@@ -1,0 +1,6 @@
+-- STRAY BRACE IN ELEMENT TEXT - ../../language-project/compiler/test/fixtures/golden/diagnostics/jsx-stray-brace/Main.mx
+
+4|   Debug.log(Html.toString(<p>a } b</p>))
+                                  ^ a bare `}` cannot appear in element text
+
+Hint: Write `\}` for a literal `}` in element text.
