@@ -432,8 +432,9 @@ pub fn check_module(
     for (d, ma) in decls.iter().zip(&assumptions) {
         match (d, ma) {
             (Decl::Fn(fnd), Some((_, a))) => {
-                let (n, sch) =
-                    isolated(&mut tc, &cx, fnd.name.clone(), |tc| check_fn(tc, &cx, fnd, a));
+                let (n, sch) = isolated(&mut tc, &cx, fnd.name.clone(), |tc| {
+                    check_fn(tc, &cx, fnd, a)
+                });
                 cx = bind_val(&n, sch.clone(), &cx);
                 finals.push((n, sch));
             }
@@ -495,7 +496,10 @@ pub fn check_module(
                     .flat_map(|i| i.ctors.iter())
                     .map(|c| (c.name.unique, c.clone()))
                     .collect(),
-                ty_cons: infos.iter().map(|i| (i.con.name.unique, i.clone())).collect(),
+                ty_cons: infos
+                    .iter()
+                    .map(|i| (i.con.name.unique, i.clone()))
+                    .collect(),
                 casts: cast_table,
                 components: comp_table,
             }),
@@ -509,12 +513,7 @@ pub fn check_module(
 
 /// Run a declaration check; if it reported anything, its public type
 /// becomes the error type (cascade suppression).
-fn isolated(
-    tc: &mut Tc,
-    cx: &Cx,
-    n: Name,
-    act: impl FnOnce(&mut Tc) -> Scheme,
-) -> (Name, Scheme) {
+fn isolated(tc: &mut Tc, cx: &Cx, n: Name, act: impl FnOnce(&mut Tc) -> Scheme) -> (Name, Scheme) {
     let before = tc.diags.len();
     let sch = act(tc);
     flush_pending(tc, cx);
@@ -752,7 +751,8 @@ fn label_params(params: &[FnParam<Name>], tys: &[Type]) -> Vec<TParam> {
 fn assume_fn(tc: &mut Tc, cx: &Cx, fnd: &FnDef<Name>) -> Assumption {
     if fnd.params.iter().all(|p| p.ann.is_some()) {
         if let Some(ret) = &fnd.ret {
-            let mut anns: Vec<&TypeAnn> = fnd.params.iter().filter_map(|p| p.ann.as_ref()).collect();
+            let mut anns: Vec<&TypeAnn> =
+                fnd.params.iter().filter_map(|p| p.ann.as_ref()).collect();
             anns.push(ret);
             let scope = rigid_scope_for(tc, &anns);
             let cx2 = Cx {
@@ -853,10 +853,7 @@ fn check_fn(tc: &mut Tc, cx: &Cx, fnd: &FnDef<Name>, assumption: &Assumption) ->
             let (ret_ty, ret_reason) = match &fnd.ret {
                 Some(r) => {
                     let rty = resolve_ann(tc, &cx_sig, r);
-                    (
-                        rty,
-                        Reason::RetAnn(fnd.name.text.clone(), fnd.body.span()),
-                    )
+                    (rty, Reason::RetAnn(fnd.name.text.clone(), fnd.body.span()))
                 }
                 None => {
                     let rm = tc.fresh_meta_at(cx.level.bump(), Flavor::Star);
@@ -869,11 +866,7 @@ fn check_fn(tc: &mut Tc, cx: &Cx, fnd: &FnDef<Name>, assumption: &Assumption) ->
             let body_ty = infer_expr(tc, &cx_body, &fnd.body);
             tc.unify_r(&ret_reason, &body_ty, &ret_ty);
             let fn_ty = Type::Fun(label_params(&fnd.params, &ptys), Box::new(ret_ty));
-            tc.unify_r(
-                &Reason::RetAnn(fnd.name.text.clone(), fnd.span),
-                &fn_ty,
-                m,
-            );
+            tc.unify_r(&Reason::RetAnn(fnd.name.text.clone(), fnd.span), &fn_ty, m);
             generalize_at(tc, TOP_LEVEL, &fn_ty)
         }
     }
@@ -1223,7 +1216,8 @@ fn infer_jsx_component(
             if sig.stateful {
                 infer_instance_tag(tc, cx, html_con, el, tag_sp, &sig)
             } else {
-                tc.instances.insert(tag_sp, InstLower::Call(sig.view.clone()));
+                tc.instances
+                    .insert(tag_sp, InstLower::Call(sig.view.clone()));
                 infer_stateless_tag(tc, cx, html_con, el, tag_sp, &sig)
             }
         }
@@ -1412,8 +1406,7 @@ fn infer_instance_tag(
     let msg = tc.fresh_meta(cx, Flavor::Star);
     let this = Type::Con(html_con.clone(), vec![msg.clone()]);
     let desc = format!("component `{}`", sig.name.text);
-    let props_by_lbl: BTreeMap<&String, &Type> =
-        sig.props.iter().map(|(l, t, _)| (l, t)).collect();
+    let props_by_lbl: BTreeMap<&String, &Type> = sig.props.iter().map(|(l, t, _)| (l, t)).collect();
     let outs_by_name: BTreeMap<&String, &Vec<Type>> =
         sig.outs.iter().map(|(n, ps)| (n, ps)).collect();
     for a in &el.attrs {
@@ -1602,13 +1595,17 @@ fn check_component(
         (None, Some((usp, _)), _) => bad(
             tc,
             *usp,
-            format!("`{cname}` wires an `update` but no `init` — a stateless component wires only `view`"),
+            format!(
+                "`{cname}` wires an `update` but no `init` — a stateless component wires only `view`"
+            ),
         ),
         (None, None, Some(_)) => stateless,
         (Some((isp, _)), None, _) => bad(
             tc,
             *isp,
-            format!("`{cname}` wires an `init` but no `update` — state without messages could never change"),
+            format!(
+                "`{cname}` wires an `init` but no `update` — state without messages could never change"
+            ),
         ),
         (Some(init_w), Some(update_w), Some((vsp, view_sch))) => {
             let minit = scheme_of(tc, "init", init_w);
@@ -1620,7 +1617,9 @@ fn check_component(
                 return bad(
                     tc,
                     cd.span,
-                    format!("`{cname}`'s wired functions must be monomorphic — generic components don't exist yet"),
+                    format!(
+                        "`{cname}`'s wired functions must be monomorphic — generic components don't exist yet"
+                    ),
                 );
             }
             if !view_sch.vars.is_empty() {
@@ -1635,39 +1634,66 @@ fn check_component(
             let update_ty = &update_sch.ty;
             let view_ty = &view_sch.ty;
             let Type::Fun(ips, model_ty) = init_ty else {
-                return bad(tc, isp, "`init:` must be a function returning the Model".to_string());
+                return bad(
+                    tc,
+                    isp,
+                    "`init:` must be a function returning the Model".to_string(),
+                );
             };
             let model_ty = &**model_ty;
             // init: () -> Model, or (Props) -> Model with Props a record
             let mprops: Option<Option<(Type, CtorInfo, Vec<String>)>> = match &ips[..] {
                 [] => Some(None),
-                [TParam { ty: p_ty @ Type::Con(p_con, args), .. }] if args.is_empty() => {
-                    match ty_cons.get(&p_con.name.unique) {
-                        Some(ti) if ti.ctors.len() == 1 && ti.ctors[0].fields.is_some() => {
-                            let ctor = ti.ctors[0].clone();
-                            let lbls = ctor.fields.clone().unwrap();
-                            Some(Some((p_ty.clone(), ctor, lbls)))
-                        }
-                        _ => {
-                            bad(tc, isp, "`init:` takes nothing, or one record of props".to_string());
-                            None
-                        }
+                [
+                    TParam {
+                        ty: p_ty @ Type::Con(p_con, args),
+                        ..
+                    },
+                ] if args.is_empty() => match ty_cons.get(&p_con.name.unique) {
+                    Some(ti) if ti.ctors.len() == 1 && ti.ctors[0].fields.is_some() => {
+                        let ctor = ti.ctors[0].clone();
+                        let lbls = ctor.fields.clone().unwrap();
+                        Some(Some((p_ty.clone(), ctor, lbls)))
                     }
-                }
+                    _ => {
+                        bad(
+                            tc,
+                            isp,
+                            "`init:` takes nothing, or one record of props".to_string(),
+                        );
+                        None
+                    }
+                },
                 _ => {
-                    bad(tc, isp, "`init:` takes nothing, or one record of props".to_string());
+                    bad(
+                        tc,
+                        isp,
+                        "`init:` takes nothing, or one record of props".to_string(),
+                    );
                     None
                 }
             };
             let mprops = mprops?;
             let Type::Fun(ups, ret_ty) = update_ty else {
-                return bad(tc, usp, "`update:` is `(Model, Msg) -> Model` (or `-> Step`)".to_string());
+                return bad(
+                    tc,
+                    usp,
+                    "`update:` is `(Model, Msg) -> Model` (or `-> Step`)".to_string(),
+                );
             };
             let [TParam { ty: m1, .. }, TParam { ty: msg_ty, .. }] = &ups[..] else {
-                return bad(tc, usp, "`update:` is `(Model, Msg) -> Model` (or `-> Step`)".to_string());
+                return bad(
+                    tc,
+                    usp,
+                    "`update:` is `(Model, Msg) -> Model` (or `-> Step`)".to_string(),
+                );
             };
             if !same_type(m1, model_ty) {
-                return bad(tc, usp, "`update:`'s first parameter must be `init:`'s Model".to_string());
+                return bad(
+                    tc,
+                    usp,
+                    "`update:`'s first parameter must be `init:`'s Model".to_string(),
+                );
             }
             let ret_ty = &**ret_ty;
             let step_info: Option<(bool, Vec<(String, Vec<Type>)>)> = if same_type(ret_ty, model_ty)
@@ -1682,7 +1708,9 @@ fn check_component(
                             if !same_type(a, model_ty) {
                                 return None;
                             }
-                            let Type::Con(lc, l_args) = b else { return None };
+                            let Type::Con(lc, l_args) = b else {
+                                return None;
+                            };
                             if *lc != tc_list() {
                                 return None;
                             }
@@ -1735,7 +1763,9 @@ fn check_component(
             };
             let view_ok = match (&mprops, view_ty) {
                 (Some((p_ty, _, _)), Type::Fun(vps, vret)) if vps.len() == 2 => {
-                    same_type(&vps[0].ty, p_ty) && same_type(&vps[1].ty, model_ty) && ret_is_html(vret)
+                    same_type(&vps[0].ty, p_ty)
+                        && same_type(&vps[1].ty, model_ty)
+                        && ret_is_html(vret)
                 }
                 (None, Type::Fun(vps, vret)) if vps.len() == 1 => {
                     same_type(&vps[0].ty, model_ty) && ret_is_html(vret)
@@ -1812,10 +1842,7 @@ fn same_type(a: &Type, b: &Type) -> bool {
         (Type::Var(v1), Type::Var(v2)) => v1 == v2,
         (Type::Fun(ps1, r1), Type::Fun(ps2, r2)) => {
             ps1.len() == ps2.len()
-                && ps1
-                    .iter()
-                    .zip(ps2)
-                    .all(|(p, q)| same_type(&p.ty, &q.ty))
+                && ps1.iter().zip(ps2).all(|(p, q)| same_type(&p.ty, &q.ty))
                 && same_type(r1, r2)
         }
         (Type::Error, Type::Error) => true,
@@ -1991,10 +2018,7 @@ fn conflicting_return(tc: &mut Tc, q_sp: Span, rc: &RetCx, ret_z: &Type, m_kind:
         None => "the enclosing function".to_string(),
     };
     let secondary = match &rc.name {
-        Some(_) => vec![(
-            rc.span,
-            format!("but the return type here is `{ret_r}`"),
-        )],
+        Some(_) => vec![(rc.span, format!("but the return type here is `{ret_r}`"))],
         None => Vec::new(),
     };
     tc.report(
@@ -2026,9 +2050,7 @@ pub fn resolve_try_con(env: &TcEnv, kind: TryKind) -> Option<TyCon> {
         matches!(args, [Type::Var(v2)] if v2.unique == v.unique)
     };
     let ctor_with = |nm: &str, p: &dyn Fn(&[Type]) -> bool| -> bool {
-        ti.ctors
-            .iter()
-            .any(|c| c.name.text == nm && p(&c.args))
+        ti.ctors.iter().any(|c| c.name.text == nm && p(&c.args))
     };
     let shape_ok = match (kind, &ti.params[..]) {
         (TryKind::Result, [e, a]) => {
@@ -2232,10 +2254,7 @@ fn check_cast_sig(
                     Box::new(tgt_ty),
                 ),
             };
-            Some((
-                (src.name.unique, tgt.name.unique),
-                (cd.name.clone(), sch),
-            ))
+            Some(((src.name.unique, tgt.name.unique), (cd.name.clone(), sch)))
         }
     }
 }
@@ -2271,14 +2290,7 @@ fn check_cast_body(tc: &mut Tc, cx: &Cx, cd: &CastDef<Name>, sch: &Scheme) {
 /// `cast_fns` for Core lowering, and the cast's type is the conversion's
 /// (instantiated) return type — so a cast to a generic type gets its
 /// arguments from the conversion.
-fn infer_cast(
-    tc: &mut Tc,
-    cx: &Cx,
-    sp: Span,
-    e: &Expr<Name>,
-    ty_sp: Span,
-    ty_txt: &str,
-) -> Type {
+fn infer_cast(tc: &mut Tc, cx: &Cx, sp: Span, e: &Expr<Name>, ty_sp: Span, ty_txt: &str) -> Type {
     let src_ty0 = infer_expr(tc, cx, e);
     // A still-numeric literal source means Int: `1::Float` is Int→Float.
     let src_z = tc.arena.zonk(&src_ty0);
@@ -2445,11 +2457,7 @@ fn infer_call(tc: &mut Tc, cx: &Cx, sp: Span, callee: &Expr<Name>, pre_args: &[P
                 }
                 Type::Fun(ps, ret) if !ps.is_empty() => {
                     let p1 = &ps[0];
-                    tc.unify_r(
-                        &Reason::CallArg(1, desc.clone(), *subj_sp),
-                        subj_ty,
-                        &p1.ty,
-                    );
+                    tc.unify_r(&Reason::CallArg(1, desc.clone(), *subj_sp), subj_ty, &p1.ty);
                     for pa in rest {
                         if let PreArg::Arg(Arg::Lab(_, lbl, _)) = pa {
                             if Some(lbl) == p1.label.as_ref() {
@@ -2854,8 +2862,7 @@ fn infer_update(
                 &base_ty,
                 &result,
             );
-            let field_ty: BTreeMap<&String, &Type> =
-                field_names.iter().zip(&arg_tys).collect();
+            let field_ty: BTreeMap<&String, &Type> = field_names.iter().zip(&arg_tys).collect();
             for (_, lbl, e) in fields {
                 let t = infer_expr(tc, cx, e);
                 if let Some(want) = field_ty.get(lbl) {
@@ -3023,10 +3030,7 @@ pub fn check_pat(tc: &mut Tc, cx: &Cx, pat: &Pat<Name>, ty: &Type) -> Vec<(Name,
                 .iter()
                 .flat_map(|p| check_pat(tc, cx, p, &el))
                 .collect();
-            if let Some(PatRest {
-                name: Some(n), ..
-            }) = rest
-            {
+            if let Some(PatRest { name: Some(n), .. }) = rest {
                 binds.push((n.clone(), t_list(el)));
             }
             binds
@@ -3092,54 +3096,51 @@ fn solve_field(tc: &mut Tc, cx: &Cx, is_final: bool, pf: &PendingField) -> bool 
     let rec = tc.arena.zonk(&pf.rec_ty);
     match rec {
         Type::Error => true,
-        Type::Con(c, args) => {
-            match cx.env.ty_cons.get(&c.name.unique).cloned() {
-                Some(ti) if ti.fields.is_some() => {
-                    let fields = ti.fields.clone().unwrap();
-                    match fields.iter().find(|(l, _)| *l == pf.label) {
-                        Some((_, fty)) => {
-                            let sub: BTreeMap<Unique, Type> = ti
-                                .params
-                                .iter()
-                                .map(|v| v.unique)
-                                .zip(args.iter().cloned())
-                                .collect();
-                            let want = subst_ty_vars(&sub, fty);
-                            tc.unify_r(
-                                &Reason::FieldAccess(pf.label.clone(), pf.span),
-                                &pf.result,
-                                &want,
-                            );
-                            true
-                        }
-                        None => {
-                            let cands: Vec<String> =
-                                fields.iter().map(|(l, _)| l.clone()).collect();
-                            tc.report(
-                                Diagnostic::error(
-                                    "E3009",
-                                    "UNKNOWN FIELD",
-                                    pf.span,
-                                    format!("`{}` has no field `{}`", c.name.text, pf.label),
-                                )
-                                .with_hints(did_you_mean(&pf.label, &cands)),
-                            );
-                            true
-                        }
+        Type::Con(c, args) => match cx.env.ty_cons.get(&c.name.unique).cloned() {
+            Some(ti) if ti.fields.is_some() => {
+                let fields = ti.fields.clone().unwrap();
+                match fields.iter().find(|(l, _)| *l == pf.label) {
+                    Some((_, fty)) => {
+                        let sub: BTreeMap<Unique, Type> = ti
+                            .params
+                            .iter()
+                            .map(|v| v.unique)
+                            .zip(args.iter().cloned())
+                            .collect();
+                        let want = subst_ty_vars(&sub, fty);
+                        tc.unify_r(
+                            &Reason::FieldAccess(pf.label.clone(), pf.span),
+                            &pf.result,
+                            &want,
+                        );
+                        true
+                    }
+                    None => {
+                        let cands: Vec<String> = fields.iter().map(|(l, _)| l.clone()).collect();
+                        tc.report(
+                            Diagnostic::error(
+                                "E3009",
+                                "UNKNOWN FIELD",
+                                pf.span,
+                                format!("`{}` has no field `{}`", c.name.text, pf.label),
+                            )
+                            .with_hints(did_you_mean(&pf.label, &cands)),
+                        );
+                        true
                     }
                 }
-                _ => {
-                    let c_r = tc.render(&Type::Con(c, args));
-                    tc.report(Diagnostic::error(
-                        "E3020",
-                        "NOT A RECORD",
-                        pf.span,
-                        format!("this is `{c_r}`, which has no fields"),
-                    ));
-                    true
-                }
             }
-        }
+            _ => {
+                let c_r = tc.render(&Type::Con(c, args));
+                tc.report(Diagnostic::error(
+                    "E3020",
+                    "NOT A RECORD",
+                    pf.span,
+                    format!("this is `{c_r}`, which has no fields"),
+                ));
+                true
+            }
+        },
         Type::Meta(_) => {
             if is_final {
                 tc.report(

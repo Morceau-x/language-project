@@ -1,11 +1,11 @@
 //! Ported from `compiler/test/LexerTests.hs` — test names match the
 //! Haskell cases for diffability.
 
+use super::lex_tokens;
 use super::token::NewlineKind::*;
 use super::token::TokenKind::{self, *};
 use super::token::Trivia::*;
 use super::token::{F64, IntLit, Operator, Token};
-use super::lex_tokens;
 use crate::span::FileId;
 
 const FID: FileId = FileId(0);
@@ -108,11 +108,7 @@ fn eof_carries_final_trivia() {
     assert_eq!(eof.kind, Eof);
     assert_eq!(
         eof.leading,
-        vec![
-            Newline(Lf),
-            LineComment("// bye".to_string()),
-            Newline(Lf)
-        ]
+        vec![Newline(Lf), LineComment("// bye".to_string()), Newline(Lf)]
     );
 }
 
@@ -811,9 +807,8 @@ mod properties {
 
     // Random printable-ASCII soup: whenever it lexes, it must round-trip.
     const CHARS: &[char] = &[
-        ' ', '\t', '\n', 'a', 'b', 'z', 'A', 'Z', '0', '9', '_', '(', ')', '{', '}', '[', ']',
-        '<', '>', '=', '+', '-', '*', '/', '%', '|', ',', '.', ':', '"', '\\', ' ', '!', '&',
-        '$', '?',
+        ' ', '\t', '\n', 'a', 'b', 'z', 'A', 'Z', '0', '9', '_', '(', ')', '{', '}', '[', ']', '<',
+        '>', '=', '+', '-', '*', '/', '%', '|', ',', '.', ':', '"', '\\', ' ', '!', '&', '$', '?',
     ];
 
     proptest! {
@@ -856,5 +851,8 @@ fn repo_corpus_round_trips() {
             }
         }
     }
-    assert!(checked >= 10, "corpus should contain .mx files, found {checked}");
+    assert!(
+        checked >= 10,
+        "corpus should contain .mx files, found {checked}"
+    );
 }

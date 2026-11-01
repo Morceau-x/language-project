@@ -2,15 +2,15 @@
 
 Rust compilers for the Maxim language family, in one Cargo workspace.
 
-| Folder | What |
-|---|---|
-| [`mini/`](mini) | **Mini**, the compiler you're building step by step to learn Rust |
-| [`tutorial/`](tutorial) | the tutorial that guides you through `mini/` ([start here](tutorial/README.md)) |
-| [`example/`](example) | the full Maxim compiler (package `maxim-compiler`), a Rust translation of the Haskell reference implementation, kept as a reference |
+| Folder                  | What                                                                                                                                |
+|-------------------------|-------------------------------------------------------------------------------------------------------------------------------------|
+| [`mini/`](mini)         | **Mini**, the compiler you're building step by step to learn Rust                                                                   |
+| [`tutorial/`](tutorial) | the tutorial that guides you through `mini/` ([start here](tutorial/README.md))                                                     |
+| [`example/`](example)   | the full Maxim compiler (package `maxim-compiler`), a Rust translation of the Haskell reference implementation, kept as a reference |
 
 ## Getting started
 
-1. [Set up RustRover](tutorial/00-setup-rustrover.md)
+1. [Set up RustRover](tutorial/00-setup/00-setup-rustrover.md)
 2. [Step 1 — A minimal compiler](tutorial/01-minimal-compiler/guide.md)
 
 ## Commands

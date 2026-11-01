@@ -365,9 +365,7 @@ fn named_arguments_work_on_a_plain_function_any_order() {
 
 #[test]
 fn named_arguments_work_on_a_let_bound_lambda() {
-    let schemes = tc_ok(
-        "module M\nlet myfn = fn(x: Int) -> Int { x + 1 }\nlet y = myfn(x: 1)\n",
-    );
+    let schemes = tc_ok("module M\nlet myfn = fn(x: Int) -> Int { x + 1 }\nlet y = myfn(x: 1)\n");
     expect_scheme("y", "Int", &schemes);
 }
 
@@ -395,9 +393,7 @@ fn labeled_call_on_an_unresolved_callee_asks_for_an_annotation() {
 
 #[test]
 fn a_labeled_call_leaves_unnamed_parameters_for_the_closure() {
-    let schemes = tc_ok(
-        "module M\nlet g = fn(_: Int, y: Int) -> Int { y }\nlet z = g(y: 2)\n",
-    );
+    let schemes = tc_ok("module M\nlet g = fn(_: Int, y: Int) -> Int { y }\nlet z = g(y: 2)\n");
     expect_scheme("z", "(Int) -> Int", &schemes);
 }
 
@@ -479,9 +475,8 @@ fn the_pipe_subjects_parameter_cannot_be_renamed() {
 
 #[test]
 fn parens_opt_a_piped_call_out_of_prepending() {
-    let schemes = tc_ok(
-        "module M\nfn add(x: Int, y: Int) -> Int {\n  x + y\n}\nlet r = 3 |> (add(1))\n",
-    );
+    let schemes =
+        tc_ok("module M\nfn add(x: Int, y: Int) -> Int {\n  x + y\n}\nlet r = 3 |> (add(1))\n");
     expect_scheme("r", "Int", &schemes);
 }
 
@@ -680,11 +675,7 @@ fn option_try_unwraps() {
     let schemes = tc_ok(
         "module M\ntype Option<a> =\n  | Some(a)\n  | None\nfn tenfold(o: Option<String>) -> Option<String> {\n  Some(\"${o?}0\")\n}\n",
     );
-    expect_scheme(
-        "tenfold",
-        "(o: Option<String>) -> Option<String>",
-        &schemes,
-    );
+    expect_scheme("tenfold", "(o: Option<String>) -> Option<String>", &schemes);
 }
 
 #[test]
@@ -721,9 +712,7 @@ fn e3023_option_try_inside_a_result_fn() {
 fn e3023_try_in_a_fn_returning_a_plain_type() {
     expect_error(
         "E3023",
-        &format!(
-            "module M\n{RESULT_DECL}fn f(r: Result<String, Int>) -> Int {{\n  r? + 1\n}}\n"
-        ),
+        &format!("module M\n{RESULT_DECL}fn f(r: Result<String, Int>) -> Int {{\n  r? + 1\n}}\n"),
     );
 }
 

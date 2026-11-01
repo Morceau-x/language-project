@@ -50,7 +50,12 @@ pub struct Diagnostic {
 }
 
 impl Diagnostic {
-    pub fn error(code: &'static str, title: impl Into<String>, span: Span, label: impl Into<String>) -> Diagnostic {
+    pub fn error(
+        code: &'static str,
+        title: impl Into<String>,
+        span: Span,
+        label: impl Into<String>,
+    ) -> Diagnostic {
         Diagnostic {
             severity: Severity::Error,
             code: DiagCode(code),
@@ -62,7 +67,12 @@ impl Diagnostic {
         }
     }
 
-    pub fn warning(code: &'static str, title: impl Into<String>, span: Span, label: impl Into<String>) -> Diagnostic {
+    pub fn warning(
+        code: &'static str,
+        title: impl Into<String>,
+        span: Span,
+        label: impl Into<String>,
+    ) -> Diagnostic {
         Diagnostic {
             severity: Severity::Warning,
             ..Diagnostic::error(code, title, span, label)

@@ -2,8 +2,8 @@
 //! into friendly diagnostics, and the cover-grammar validators (lambda
 //! params vs parenthesized expressions — the ECMAScript technique).
 
-use crate::cst::{CstExpr, Separated, Wrapped};
 use crate::cst::print::span_of;
+use crate::cst::{CstExpr, Separated, Wrapped};
 use crate::diag::{Diagnostic, dtext};
 use crate::lexer::token::{Token, TokenKind};
 
@@ -58,11 +58,7 @@ pub fn sentence_list(names: &[String]) -> String {
         [] => String::new(),
         [x] => x.clone(),
         [x, y] => format!("{x} or {y}"),
-        xs => format!(
-            "{}, or {}",
-            xs[..xs.len() - 1].join(", "),
-            xs[xs.len() - 1]
-        ),
+        xs => format!("{}, or {}", xs[..xs.len() - 1].join(", "), xs[xs.len() - 1]),
     }
 }
 

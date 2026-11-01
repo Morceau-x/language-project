@@ -114,7 +114,14 @@ fn real_main() -> ExitCode {
             let Some(stdlib) = resolve_stdlib(stdlib_flag) else {
                 return ExitCode::FAILURE;
             };
-            if run_build(&stdlib, &PathBuf::from(entry), &PathBuf::from("build"), true).succeeded {
+            if run_build(
+                &stdlib,
+                &PathBuf::from(entry),
+                &PathBuf::from("build"),
+                true,
+            )
+            .succeeded
+            {
                 ExitCode::SUCCESS
             } else {
                 ExitCode::FAILURE
@@ -129,7 +136,12 @@ fn real_main() -> ExitCode {
             let Some(stdlib) = resolve_stdlib(stdlib_flag) else {
                 return ExitCode::FAILURE;
             };
-            let outcome = run_build(&stdlib, &PathBuf::from(entry), &PathBuf::from("build"), false);
+            let outcome = run_build(
+                &stdlib,
+                &PathBuf::from(entry),
+                &PathBuf::from("build"),
+                false,
+            );
             if !outcome.succeeded {
                 return ExitCode::FAILURE;
             }
@@ -194,7 +206,12 @@ fn parse_build_args(args: &[String]) -> Result<(PathBuf, PathBuf), ExitCode> {
     }
 }
 
-fn run_build(stdlib: &PathBuf, entry: &PathBuf, out_dir: &PathBuf, check_only: bool) -> BuildOutcome {
+fn run_build(
+    stdlib: &PathBuf,
+    entry: &PathBuf,
+    out_dir: &PathBuf,
+    check_only: bool,
+) -> BuildOutcome {
     let mut loader = DiskLoader;
     let outcome = build_entry(
         &mut loader,
@@ -228,9 +245,10 @@ fn resolve_stdlib(flag: Option<PathBuf>) -> Option<PathBuf> {
     if let Some(dir) = std::env::var_os("MAXIM_STDLIB") {
         return Some(PathBuf::from(dir));
     }
-    let installed = std::env::current_exe()
-        .ok()
-        .and_then(|exe| exe.parent().map(|d| d.join("..").join("lib").join("maxim").join("stdlib")));
+    let installed = std::env::current_exe().ok().and_then(|exe| {
+        exe.parent()
+            .map(|d| d.join("..").join("lib").join("maxim").join("stdlib"))
+    });
     if let Some(installed) = installed {
         if installed.is_dir() {
             return Some(installed);

@@ -225,8 +225,7 @@ mod tests {
                 ),
             ],
         );
-        let want: BTreeSet<Name> =
-            [fn_f(), ctor_some(), local(3, "x"), local(4, "y")].into();
+        let want: BTreeSet<Name> = [fn_f(), ctor_some(), local(3, "x"), local(4, "y")].into();
         assert_eq!(core_refs(&e), want);
     }
 
@@ -243,8 +242,7 @@ mod tests {
                 ),
             ],
         );
-        let want: BTreeSet<Name> =
-            [local(3, "x"), local(6, "ok"), local(4, "y"), fn_f()].into();
+        let want: BTreeSet<Name> = [local(3, "x"), local(6, "ok"), local(4, "y"), fn_f()].into();
         assert_eq!(core_refs(&m), want);
     }
 

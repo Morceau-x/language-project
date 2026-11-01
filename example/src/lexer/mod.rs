@@ -304,7 +304,11 @@ impl<'a> Lx<'a> {
                                 }
                                 ChunkEnd::Interp => {
                                     stack.push(Frame::Interp(inp, 0));
-                                    acc.push(Item::Token(sp2, TokenKind::StringBegin(payload), raw));
+                                    acc.push(Item::Token(
+                                        sp2,
+                                        TokenKind::StringBegin(payload),
+                                        raw,
+                                    ));
                                 }
                             }
                             inp = inp3;
@@ -440,7 +444,12 @@ impl<'a> Lx<'a> {
                     Some(b'/') => {
                         let (i3, close_name) = self.scan_close_tag(i_stop, self.advance1(i1))?;
                         if stack.pop().is_none() {
-                            return Err(self.bad_tag(i_stop, i3, "no element is open here", vec![]));
+                            return Err(self.bad_tag(
+                                i_stop,
+                                i3,
+                                "no element is open here",
+                                vec![],
+                            ));
                         }
                         acc.push(Item::Token(
                             self.span_between(i_stop, i3),
@@ -676,7 +685,11 @@ impl<'a> Lx<'a> {
     }
 
     fn unterm_hole(&self, open: Cursor, dollar: bool, i: Cursor) -> Diagnostic {
-        let what = if dollar { "`${…}` hole" } else { "`{…}` splice" };
+        let what = if dollar {
+            "`${…}` hole"
+        } else {
+            "`{…}` splice"
+        };
         Diagnostic::error(
             "E1006",
             "UNTERMINATED ELEMENT",

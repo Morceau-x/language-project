@@ -88,7 +88,11 @@ impl Expr {
 /// glance, which is exactly what parser tests need to check.
 impl fmt::Display for Expr {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        todo!("Part 3: Display for Expr")
+        match &self.kind {
+            ExprKind::Int(value) => write!(f, "{value}"),
+            ExprKind::Neg(operand) => write!(f, "(neg {operand})"),
+            ExprKind::Binary { op, lhs, rhs } => write!(f, "({} {lhs} {rhs})", op.symbol()),
+        }
     }
 }
 

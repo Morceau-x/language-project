@@ -238,9 +238,9 @@ fn lower_type_rhs(type_name: &str, rhs: &CstTypeRhs) -> Lower<a::TypeRhs<RawName
                     a::Variant {
                         span: span_of(v),
                         name: raw(name),
-                        args: args.as_ref().map_or_else(Vec::new, |w| {
-                            w.value.iter().map(lower_type).collect()
-                        }),
+                        args: args
+                            .as_ref()
+                            .map_or_else(Vec::new, |w| w.value.iter().map(lower_type).collect()),
                     }
                 })
                 .collect(),
@@ -367,7 +367,9 @@ pub fn lower_expr(cst: &CstExpr) -> Lower<a::Expr<RawName>> {
                             if matches!(&**q, CstExpr::Con(_))
                                 && matches!(member.kind, TokenKind::Upper(_)) =>
                         {
-                            let CstExpr::Con(q) = &**q else { unreachable!() };
+                            let CstExpr::Con(q) = &**q else {
+                                unreachable!()
+                            };
                             (
                                 RawName {
                                     qualifier: Some(token_text(q)),
@@ -826,11 +828,9 @@ fn lower_arm(arm: &CstArm) -> Lower<a::Arm<RawName>> {
 fn lower_arg(arg: &CstArg) -> Lower<a::Arg<RawName>> {
     match arg {
         CstArg::Pos(e) => Ok(a::Arg::Pos(lower_expr(e)?)),
-        CstArg::Lab(name, _colon, e) => Ok(a::Arg::Lab(
-            name.span,
-            token_text(name),
-            lower_expr(e)?,
-        )),
+        CstArg::Lab(name, _colon, e) => {
+            Ok(a::Arg::Lab(name.span, token_text(name), lower_expr(e)?))
+        }
         CstArg::Spread(dd, _) => Err(Diagnostic::error(
             "E1107",
             "MISPLACED SPREAD",

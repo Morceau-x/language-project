@@ -48,9 +48,7 @@ fn cases_under(group: &str) -> Vec<String> {
 }
 
 fn scratch_dir(case: &str) -> PathBuf {
-    let dir = std::env::temp_dir()
-        .join("maxim-rust-golden")
-        .join(case);
+    let dir = std::env::temp_dir().join("maxim-rust-golden").join(case);
     let _ = std::fs::remove_dir_all(&dir);
     std::fs::create_dir_all(&dir).unwrap();
     dir
@@ -95,7 +93,10 @@ fn diagnostics_goldens() {
         let rendered = render_diagnostics(false, &srcs, &outcome.diags);
         check_golden(
             &case,
-            &expected_root().join("diagnostics").join(&case).join("expected.txt"),
+            &expected_root()
+                .join("diagnostics")
+                .join(&case)
+                .join("expected.txt"),
             &rendered,
         );
     }
@@ -145,7 +146,10 @@ fn codegen_goldens() {
         let combined = parts.join("\n");
         check_golden(
             &case,
-            &expected_root().join("codegen").join(&case).join("expected.mjs"),
+            &expected_root()
+                .join("codegen")
+                .join(&case)
+                .join("expected.mjs"),
             &combined,
         );
     }

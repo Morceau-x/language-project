@@ -100,7 +100,10 @@ fn discover_stdlib_names(dir: &Path) -> Vec<String> {
         .collect();
     mods.sort();
     let mut out: Vec<String> = PRELUDE_MODULE_NAMES.iter().map(|s| s.to_string()).collect();
-    out.extend(mods.into_iter().filter(|m| !PRELUDE_MODULE_NAMES.contains(&m.as_str())));
+    out.extend(
+        mods.into_iter()
+            .filter(|m| !PRELUDE_MODULE_NAMES.contains(&m.as_str())),
+    );
     out
 }
 
@@ -230,10 +233,8 @@ pub fn build_entry(load: &mut dyn Loader, opts: &CompileOptions) -> BuildOutcome
         .parent()
         .map(Path::to_path_buf)
         .unwrap_or_default();
-    let stdlib_set: BTreeSet<ModuleName> = stdlib_names
-        .iter()
-        .map(|n| ModuleName(n.clone()))
-        .collect();
+    let stdlib_set: BTreeSet<ModuleName> =
+        stdlib_names.iter().map(|n| ModuleName(n.clone())).collect();
     let virtual_set: BTreeSet<ModuleName> = ["Debug", "String", "Int"]
         .iter()
         .map(|n| ModuleName(n.to_string()))
@@ -274,9 +275,7 @@ pub fn build_entry(load: &mut dyn Loader, opts: &CompileOptions) -> BuildOutcome
         let imports = l.imports.clone();
         user_modules.insert(name.clone(), l);
         for (m, sp) in imports {
-            if user_modules.contains_key(&m)
-                || stdlib_set.contains(&m)
-                || virtual_set.contains(&m)
+            if user_modules.contains_key(&m) || stdlib_set.contains(&m) || virtual_set.contains(&m)
             {
                 continue;
             }
@@ -343,8 +342,7 @@ pub fn build_entry(load: &mut dyn Loader, opts: &CompileOptions) -> BuildOutcome
     let mut failed: BTreeSet<ModuleName> = BTreeSet::new();
     let mut entry_has_main = false;
     let mut seed: i64 = 0;
-    let mut renamed_modules: Vec<(a::Module<Name>, BTreeMap<ModuleName, Vec<String>>)> =
-        Vec::new();
+    let mut renamed_modules: Vec<(a::Module<Name>, BTreeMap<ModuleName, Vec<String>>)> = Vec::new();
     let mut expr_types_all: BTreeMap<Span, Type> = BTreeMap::new();
     let mut occurrences: Vec<(Span, Name)> = Vec::new();
     if !opts.check_only {
@@ -446,9 +444,7 @@ pub fn build_entry(load: &mut dyn Loader, opts: &CompileOptions) -> BuildOutcome
                 for (m, _) in &l.imports {
                     if let Some(e) = exports_map.get(m) {
                         for (k, v) in &e.types {
-                            imported_types
-                                .entry(k.clone())
-                                .or_insert_with(|| v.clone());
+                            imported_types.entry(k.clone()).or_insert_with(|| v.clone());
                         }
                     }
                 }
@@ -508,9 +504,8 @@ pub fn build_entry(load: &mut dyn Loader, opts: &CompileOptions) -> BuildOutcome
                             match_diags.extend(ds);
                             trees.insert(sp, tree);
                         }
-                        let match_has_error = match_diags
-                            .iter()
-                            .any(|d| d.severity == Severity::Error);
+                        let match_has_error =
+                            match_diags.iter().any(|d| d.severity == Severity::Error);
                         diags.extend(match_diags);
                         // A statement-position expression of function type
                         // is almost always a missing-argument bug now that
@@ -621,10 +616,7 @@ pub fn build_entry(load: &mut dyn Loader, opts: &CompileOptions) -> BuildOutcome
 
 /// DFS topological sort over the user modules, reporting cycles with
 /// their full path.
-fn topo_order(
-    diags: &mut Vec<Diagnostic>,
-    mods: &BTreeMap<ModuleName, Loaded>,
-) -> Vec<ModuleName> {
+fn topo_order(diags: &mut Vec<Diagnostic>, mods: &BTreeMap<ModuleName, Loaded>) -> Vec<ModuleName> {
     // 1 = visiting, 2 = done.
     fn visit(
         diags: &mut Vec<Diagnostic>,
@@ -737,9 +729,9 @@ fn discarded_functions(tys: &BTreeMap<Span, Type>, m: &a::Module<Name>) -> Vec<S
                 expr(tys, l, out);
                 expr(tys, r, out);
             }
-            Expr::Unary(_, _, e2)
-            | Expr::Field(_, e2, _, _)
-            | Expr::Try(_, _, e2) => expr(tys, e2, out),
+            Expr::Unary(_, _, e2) | Expr::Field(_, e2, _, _) | Expr::Try(_, _, e2) => {
+                expr(tys, e2, out)
+            }
             Expr::Update(_, _, _, b, fs) => {
                 expr(tys, b, out);
                 for (_, _, e2) in fs {

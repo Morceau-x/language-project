@@ -150,14 +150,57 @@ fn emit_decl(env: &Env, es: &mut Es, d: &CoreDecl) -> JsDecl {
 // Names ---------------------------------------------------------------------------
 
 const RESERVED_WORDS: &[&str] = &[
-    "await", "break", "case", "catch", "class", "const", "continue", "debugger", "default",
-    "delete", "do", "else", "enum", "export", "extends", "false", "finally", "for", "function",
-    "if", "import", "in", "instanceof", "let", "new", "null", "return", "static", "super",
-    "switch", "this", "throw", "true", "try", "typeof", "undefined", "var", "void", "while",
-    "with", "yield",
+    "await",
+    "break",
+    "case",
+    "catch",
+    "class",
+    "const",
+    "continue",
+    "debugger",
+    "default",
+    "delete",
+    "do",
+    "else",
+    "enum",
+    "export",
+    "extends",
+    "false",
+    "finally",
+    "for",
+    "function",
+    "if",
+    "import",
+    "in",
+    "instanceof",
+    "let",
+    "new",
+    "null",
+    "return",
+    "static",
+    "super",
+    "switch",
+    "this",
+    "throw",
+    "true",
+    "try",
+    "typeof",
+    "undefined",
+    "var",
+    "void",
+    "while",
+    "with",
+    "yield",
     // Reserved only in strict mode; emitted ES modules are always strict,
     // so these would otherwise produce a SyntaxError at module load.
-    "arguments", "eval", "implements", "interface", "package", "private", "protected", "public",
+    "arguments",
+    "eval",
+    "implements",
+    "interface",
+    "package",
+    "private",
+    "protected",
+    "public",
 ];
 
 fn mangle(t: &str) -> String {
@@ -231,12 +274,7 @@ fn with_scope<T>(
 
 /// Push a block scope whose blocked set is derived from the Core about
 /// to be emitted inside it.
-fn in_block<T>(
-    env: &Env,
-    es: &mut Es,
-    cores: &[&Core],
-    act: impl FnOnce(&Env, &mut Es) -> T,
-) -> T {
+fn in_block<T>(env: &Env, es: &mut Es, cores: &[&Core], act: impl FnOnce(&Env, &mut Es) -> T) -> T {
     let blocked = scope_blocked(env, es, cores);
     with_scope(env, es, blocked, act)
 }
@@ -553,9 +591,7 @@ fn to_expr(env: &Env, es: &mut Es, core: &Core) -> (Vec<JsStmt>, JsExpr) {
             }
             let mut it = exprs.into_iter();
             let first = it.next().expect("concat spine is never empty");
-            let acc = it.fold(first, |acc, e| {
-                JsExpr::Bin("+", Box::new(acc), Box::new(e))
-            });
+            let acc = it.fold(first, |acc, e| JsExpr::Bin("+", Box::new(acc), Box::new(e)));
             (ss, acc)
         }
         Core::Bin(op, l, r) => {
@@ -569,10 +605,7 @@ fn to_expr(env: &Env, es: &mut Es, core: &Core) -> (Vec<JsStmt>, JsExpr) {
             let (ss, je) = to_expr(env, es, e);
             (
                 ss,
-                JsExpr::Un(
-                    if *op == UnOp::Neg { "-" } else { "!" },
-                    Box::new(je),
-                ),
+                JsExpr::Un(if *op == UnOp::Neg { "-" } else { "!" }, Box::new(je)),
             )
         }
         Core::If(c, t, e) => {
@@ -739,15 +772,12 @@ fn bin_js(es: &mut Es, op: BinOp, l: JsExpr, r: JsExpr) -> JsExpr {
 fn intrinsic_js(es: &mut Es, i: Intrinsic, args: Vec<JsExpr>) -> JsExpr {
     let rt_call = |es: &mut Es, f: &str, args: Vec<JsExpr>| {
         let rt = need_runtime(es);
-        JsExpr::Call(
-            Box::new(JsExpr::Field(Box::new(rt), f.to_string())),
-            args,
-        )
+        JsExpr::Call(Box::new(JsExpr::Field(Box::new(rt), f.to_string())), args)
     };
     let one = |args: Vec<JsExpr>| -> JsExpr {
-        let [e] = args.try_into().unwrap_or_else(|_| {
-            maxim_panic!("emit: intrinsic arity mismatch")
-        });
+        let [e] = args
+            .try_into()
+            .unwrap_or_else(|_| maxim_panic!("emit: intrinsic arity mismatch"));
         e
     };
     match i {
@@ -764,10 +794,9 @@ fn intrinsic_js(es: &mut Es, i: Intrinsic, args: Vec<JsExpr>) -> JsExpr {
                 vec![o, n],
             )
         }
-        Intrinsic::IntToString | Intrinsic::FloatToString => JsExpr::Call(
-            Box::new(JsExpr::Var("String".to_string())),
-            vec![one(args)],
-        ),
+        Intrinsic::IntToString | Intrinsic::FloatToString => {
+            JsExpr::Call(Box::new(JsExpr::Var("String".to_string())), vec![one(args)])
+        }
         // Int and Float are both JS numbers; widening is the identity.
         Intrinsic::FloatFromInt => one(args),
         Intrinsic::IntFromFloat | Intrinsic::FloatTrunc => rt_call(es, "$trunc", args),
@@ -782,10 +811,9 @@ fn intrinsic_js(es: &mut Es, i: Intrinsic, args: Vec<JsExpr>) -> JsExpr {
 fn occ_js(env: &Env, root: &JsExpr, occ: &Occ) -> JsExpr {
     match occ {
         Occ::Root => root.clone(),
-        Occ::Arg(i, c, p) => JsExpr::Field(
-            Box::new(occ_js(env, root, p)),
-            ctor_field_name(env, c, *i),
-        ),
+        Occ::Arg(i, c, p) => {
+            JsExpr::Field(Box::new(occ_js(env, root, p)), ctor_field_name(env, c, *i))
+        }
     }
 }
 
@@ -989,7 +1017,10 @@ fn walk(
                 dest,
                 JsExpr::Call(
                     Box::new(JsExpr::Var(jp.clone())),
-                    binds.iter().map(|(_, occ)| occ_js(env, root, occ)).collect(),
+                    binds
+                        .iter()
+                        .map(|(_, occ)| occ_js(env, root, occ))
+                        .collect(),
                 ),
             )],
             None => {

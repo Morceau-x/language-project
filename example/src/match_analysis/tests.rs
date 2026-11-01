@@ -82,7 +82,9 @@ fn missing_constructor_is_named_with_a_witness() {
     expect_diag(
         "E4001",
         "Rect(_, _)",
-        &format!("{SHAPE_PRELUDE}fn f(s: Shape) -> Int {{\n  match s {{\n    Circle(_) -> 1\n  }}\n}}\n"),
+        &format!(
+            "{SHAPE_PRELUDE}fn f(s: Shape) -> Int {{\n  match s {{\n    Circle(_) -> 1\n  }}\n}}\n"
+        ),
     );
 }
 
@@ -154,7 +156,9 @@ fn arm_after_a_wildcard_is_redundant() {
     expect_diag(
         "W4002",
         "never match",
-        &format!("{SHAPE_PRELUDE}fn f(s: Shape) -> Int {{\n  match s {{\n    _ -> 0\n    Circle(_) -> 1\n  }}\n}}\n"),
+        &format!(
+            "{SHAPE_PRELUDE}fn f(s: Shape) -> Int {{\n  match s {{\n    _ -> 0\n    Circle(_) -> 1\n  }}\n}}\n"
+        ),
     );
 }
 
@@ -325,10 +329,7 @@ mod agreement {
     use proptest::prelude::*;
 
     fn gen_lit() -> impl Strategy<Value = Lit> {
-        prop_oneof![
-            Just(Lit::Float(F64(1.0))),
-            Just(Lit::Float(F64(2.0))),
-        ]
+        prop_oneof![Just(Lit::Float(F64(1.0))), Just(Lit::Float(F64(2.0))),]
     }
 
     fn gen_arg_pat() -> impl Strategy<Value = SP> {

@@ -78,9 +78,7 @@ fn record_update_spread() {
 
 #[test]
 fn qualified_record_update_bare_copy() {
-    round_trips(
-        "module M\n\nimport Geo\n\nlet q = Geo.Point(..p, x: 1.0)\n\nlet r = Point(..p)\n",
-    );
+    round_trips("module M\n\nimport Geo\n\nlet q = Geo.Point(..p, x: 1.0)\n\nlet r = Point(..p)\n");
 }
 
 #[test]
@@ -189,7 +187,8 @@ fn bare_variable_body_before_constructor_pattern() {
 
 #[test]
 fn nested_match_one_liner_followed_by_outer_arm() {
-    let m = parse_ok("module M\n\nfn f(x: T) -> Int { match x { A -> match y { B -> 1 } C -> 2 } }\n");
+    let m =
+        parse_ok("module M\n\nfn f(x: T) -> Int { match x { A -> match y { B -> 1 } C -> 2 } }\n");
     match &m.decls[..] {
         [CstDecl::Fn(_, _, _, _, CstBlock(_, stmts, _))] => match &stmts[..] {
             [CstStmt::Expr(CstExpr::Match(_, _, _, arms, _))] => assert_eq!(arms.len(), 2),
@@ -566,10 +565,10 @@ mod properties {
     use proptest::prelude::*;
 
     const SOUP: &[char] = &[
-        ' ', '\t', '\n', 'a', 'b', 'z', 'A', 'Z', '0', '9', '_', '(', ')', '{', '}', '[', ']',
-        '<', '>', '=', '+', '-', '*', '/', '%', '|', ',', '.', ':', '"', '\\', ' ', '!', '&',
-        '$', '?', 'f', 'n', 'l', 'e', 't', 't', 'y', 'p', 'e', 'i', 'm', 'p', 'o', 'r', 't',
-        'm', 'a', 't', 'c', 'h',
+        ' ', '\t', '\n', 'a', 'b', 'z', 'A', 'Z', '0', '9', '_', '(', ')', '{', '}', '[', ']', '<',
+        '>', '=', '+', '-', '*', '/', '%', '|', ',', '.', ':', '"', '\\', ' ', '!', '&', '$', '?',
+        'f', 'n', 'l', 'e', 't', 't', 'y', 'p', 'e', 'i', 'm', 'p', 'o', 'r', 't', 'm', 'a', 't',
+        'c', 'h',
     ];
 
     proptest! {

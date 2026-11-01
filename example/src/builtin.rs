@@ -12,7 +12,7 @@
 
 use std::collections::BTreeMap;
 
-use crate::names::{ModuleName, Name, NameSort, ModuleExports};
+use crate::names::{ModuleExports, ModuleName, Name, NameSort};
 use crate::span::{FileId, START_POS, Span};
 use crate::unique::Unique;
 

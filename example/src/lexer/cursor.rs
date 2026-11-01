@@ -124,8 +124,14 @@ fn walk(buf: &[u8], mut c: Cursor, keep: impl Fn(u8) -> bool) -> Cursor {
 /// Match the next lexeme at `c` (maximal munch, first-rule-wins on ties),
 /// mirroring the rule set in the Haskell `Alex.x`.
 pub fn next_lexeme(buf: &[u8], c: Cursor, mode: Mode) -> Scan {
-    use Action::{BeginBlockComment, BeginString, Float, Hole, Int, JsxAttrName, LineComment, Lower, NewlineCrLf, NewlineLf, Plain, Spaces, Tabs, Upper};
-    use TokenKind::{Arrow, Bang, Bar, Colon, ColonColon, Comma, Dot, DotDot, FatArrow, Gt, JsxSelfClose, JsxTagEnd, LBrace, LBracket, LParen, Lt, Op, Pipeline, Question, RBrace, RBracket, RParen};
+    use Action::{
+        BeginBlockComment, BeginString, Float, Hole, Int, JsxAttrName, LineComment, Lower,
+        NewlineCrLf, NewlineLf, Plain, Spaces, Tabs, Upper,
+    };
+    use TokenKind::{
+        Arrow, Bang, Bar, Colon, ColonColon, Comma, Dot, DotDot, FatArrow, Gt, JsxSelfClose,
+        JsxTagEnd, LBrace, LBracket, LParen, Lt, Op, Pipeline, Question, RBrace, RBracket, RParen,
+    };
 
     let Some((b, c1)) = get_byte(buf, c) else {
         return Scan::Eof;

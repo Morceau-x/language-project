@@ -180,9 +180,7 @@ fn bind_meta(
             // Outside operator contexts a flavor failure reads better as
             // an ordinary mismatch with the meta rendered as `number`.
             _ => match reason {
-                Reason::BinOp(_, _) | Reason::Unary(_, _) => {
-                    num_mismatch(arena, diags, reason, t)
-                }
+                Reason::BinOp(_, _) | Reason::Unary(_, _) => num_mismatch(arena, diags, reason, t),
                 _ => {
                     if meta_is_got {
                         mismatch(arena, diags, reason, &Type::Meta(m), t);

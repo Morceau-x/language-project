@@ -176,11 +176,9 @@ fn do_rename(rn: &mut Rn, env: &RenameEnv, m: &Module<RawName>) -> (Module<Name>
                 let e2 = rename_expr(rn, &ctx, e);
                 // Always present: pass 1 inserted it (on duplicates, the
                 // first wins).
-                let name = tops
-                    .values
-                    .get(&r.base)
-                    .cloned()
-                    .unwrap_or_else(|| maxim_panic!("renamer: top-level value missing from pass 1"));
+                let name = tops.values.get(&r.base).cloned().unwrap_or_else(|| {
+                    maxim_panic!("renamer: top-level value missing from pass 1")
+                });
                 visible_lets.insert(r.base.clone(), name.clone());
                 decls.push(Decl::Let(*sp, name, ann.clone(), e2));
             }
@@ -215,12 +213,7 @@ fn do_rename(rn: &mut Rn, env: &RenameEnv, m: &Module<RawName>) -> (Module<Name>
 fn collect_tops(rn: &mut Rn, mn: &ModuleName, decls: &[Decl<RawName>]) -> TopDefs {
     let mut tops = TopDefs::default();
 
-    fn insert_checked(
-        rn: &mut Rn,
-        what: &str,
-        m: &mut BTreeMap<String, Name>,
-        n: Name,
-    ) {
+    fn insert_checked(rn: &mut Rn, what: &str, m: &mut BTreeMap<String, Name>, n: Name) {
         match m.get(&n.text) {
             None => {
                 m.insert(n.text.clone(), n);
@@ -236,7 +229,10 @@ fn collect_tops(rn: &mut Rn, mn: &ModuleName, decls: &[Decl<RawName>]) -> TopDef
                             n.text
                         ),
                     )
-                    .with_secondary(vec![(prev.def_span, "it was first defined here".to_string())]),
+                    .with_secondary(vec![(
+                        prev.def_span,
+                        "it was first defined here".to_string(),
+                    )]),
                 );
             }
         }
@@ -253,7 +249,10 @@ fn collect_tops(rn: &mut Rn, mn: &ModuleName, decls: &[Decl<RawName>]) -> TopDef
                     n.def_span,
                     format!("a cast in this module already emits as `{}`", n.text),
                 )
-                .with_secondary(vec![(prev.def_span, "the cast is declared here".to_string())]),
+                .with_secondary(vec![(
+                    prev.def_span,
+                    "the cast is declared here".to_string(),
+                )]),
             );
         }
     }
@@ -301,10 +300,7 @@ fn collect_tops(rn: &mut Rn, mn: &ModuleName, decls: &[Decl<RawName>]) -> TopDef
                 insert_checked(rn, "component", &mut tops.components, n);
             }
             Decl::Type(TypeDecl {
-                span,
-                name: r,
-                rhs,
-                ..
+                span, name: r, rhs, ..
             }) => {
                 let ty_n = rn.fresh(&r.base, NameSort::TyCon(mn.clone()), *span);
                 insert_checked(rn, "type", &mut tops.types, ty_n);
@@ -576,9 +572,7 @@ fn rename_expr(rn: &mut Rn, ctx: &Ctx, expr: &Expr<RawName>) -> Expr<Name> {
         Expr::List(sp, elems, spread) => Expr::List(
             *sp,
             elems.iter().map(|e| rename_expr(rn, ctx, e)).collect(),
-            spread
-                .as_ref()
-                .map(|e| Box::new(rename_expr(rn, ctx, e))),
+            spread.as_ref().map(|e| Box::new(rename_expr(rn, ctx, e))),
         ),
         Expr::Block(sp, stmts, result) => {
             let mut ctx2 = ctx.clone();
@@ -602,12 +596,9 @@ fn rename_expr(rn: &mut Rn, ctx: &Ctx, expr: &Expr<RawName>) -> Expr<Name> {
             Expr::Block(*sp, stmts2, Box::new(result2))
         }
         Expr::Try(sp, q_sp, e) => Expr::Try(*sp, *q_sp, Box::new(rename_expr(rn, ctx, e))),
-        Expr::Cast(sp, e, ty_sp, ty) => Expr::Cast(
-            *sp,
-            Box::new(rename_expr(rn, ctx, e)),
-            *ty_sp,
-            ty.clone(),
-        ),
+        Expr::Cast(sp, e, ty_sp, ty) => {
+            Expr::Cast(*sp, Box::new(rename_expr(rn, ctx, e)), *ty_sp, ty.clone())
+        }
         Expr::Interp(sp, parts) => Expr::Interp(
             *sp,
             parts
@@ -693,11 +684,9 @@ fn rename_jsx_elem(rn: &mut Rn, ctx: &Ctx, el: &JsxElem<RawName>) -> JsxElem<Nam
         .attrs
         .iter()
         .map(|a| match a {
-            JsxAttr::Attr(asp, n, v) => JsxAttr::Attr(
-                *asp,
-                n.clone(),
-                v.as_ref().map(|e| rename_expr(rn, ctx, e)),
-            ),
+            JsxAttr::Attr(asp, n, v) => {
+                JsxAttr::Attr(*asp, n.clone(), v.as_ref().map(|e| rename_expr(rn, ctx, e)))
+            }
             JsxAttr::On(asp, ev, e) => JsxAttr::On(*asp, ev.clone(), rename_expr(rn, ctx, e)),
         })
         .collect();
@@ -808,7 +797,10 @@ fn lookup_value(rn: &mut Rn, ctx: &Ctx, sp: Span, txt: &str) -> Name {
                 sp,
                 format!("`{txt}` is defined later in this module"),
             )
-            .with_secondary(vec![(later.def_span, "it is defined down here".to_string())])
+            .with_secondary(vec![(
+                later.def_span,
+                "it is defined down here".to_string(),
+            )])
             .with_hints(vec![
                 "Top-level `let`s run top to bottom; `fn` definitions can be used anywhere."
                     .to_string(),
@@ -870,10 +862,13 @@ fn rename_dot(
     m_sp: Span,
     member: &str,
 ) -> Expr<Name> {
-    if let Expr::Con(_, RawName {
-        qualifier: None,
-        base: q,
-    }) = e
+    if let Expr::Con(
+        _,
+        RawName {
+            qualifier: None,
+            base: q,
+        },
+    ) = e
     {
         if let Some(ex) = ctx.quals.get(q) {
             return if is_upper_text(member) {
@@ -938,7 +933,13 @@ fn unknown_module_diag(sp: Span, txt: &str, cands: &[String]) -> Diagnostic {
     .with_hints(suggestion_hints(txt, cands))
 }
 
-fn unbound_diag(code: &'static str, what: &str, sp: Span, txt: &str, cands: &[String]) -> Diagnostic {
+fn unbound_diag(
+    code: &'static str,
+    what: &str,
+    sp: Span,
+    txt: &str,
+    cands: &[String],
+) -> Diagnostic {
     Diagnostic::error(
         code,
         "UNBOUND NAME",

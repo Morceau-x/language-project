@@ -50,7 +50,8 @@ pub fn render_diagnostic(color: bool, srcs: &SourceMap, d: &Diagnostic) -> Strin
             .unwrap_or_else(|| "<unknown>".to_string())
     };
 
-    let line_index_of = |FileId(fid): FileId| -> Option<&LineIndex> { srcs.get(&fid).map(|(_, li)| li) };
+    let line_index_of =
+        |FileId(fid): FileId| -> Option<&LineIndex> { srcs.get(&fid).map(|(_, li)| li) };
 
     let header = {
         let path = file_path_of(d.primary.0.file);

@@ -15,9 +15,11 @@
 //! `{ ... }` means "zero or more times". Rules lower in the list bind
 //! tighter, so `1 + 2 * 3` parses as `1 + (2 * 3)`.
 
-use crate::ast::{BinOp, Expr};
+use crate::ast::{BinOp, Expr, ExprKind};
 use crate::diagnostic::Diagnostic;
+use crate::span::Span;
 use crate::token::{Token, TokenKind};
+use std::ops::Deref;
 
 /// Parse a whole program. `tokens` must end with [`TokenKind::Eof`], as
 /// [`crate::lexer::lex`] guarantees.
@@ -58,27 +60,78 @@ impl<'t> Parser<'t> {
     /// Consume the next token if it is a `kind`, or report what was found
     /// instead.
     fn expect(&mut self, kind: TokenKind) -> Result<Token, Diagnostic> {
-        todo!("Part 4: Parser::expect")
+        let next = self.peek();
+        if next.kind != kind {
+            Err(Diagnostic {
+                message: format!("expected {kind}, found {}", next.kind),
+                span: next.span,
+            })
+        } else {
+            Ok(self.advance())
+        }
     }
 
     /// `expr = term { ( "+" | "-" ) term } ;`
     fn expr(&mut self) -> Result<Expr, Diagnostic> {
-        todo!("Part 4: Parser::expr")
+        let mut lhs = self.term()?;
+        loop {
+            let op = match self.peek().kind {
+                TokenKind::Plus => BinOp::Add,
+                TokenKind::Minus => BinOp::Sub,
+                _ => return Ok(lhs),
+            };
+            self.advance();
+            let rhs = self.term()?;
+            lhs = Expr::binary(op, lhs, rhs);
+        }
     }
 
     /// `term = unary { ( "*" | "/" ) unary } ;`
     fn term(&mut self) -> Result<Expr, Diagnostic> {
-        todo!("Part 4: Parser::term")
+        let mut lhs = self.unary()?;
+        loop {
+            let op = match self.peek().kind {
+                TokenKind::Star => BinOp::Mul,
+                TokenKind::Slash => BinOp::Div,
+                _ => return Ok(lhs),
+            };
+            self.advance();
+            let rhs = self.unary()?;
+            lhs = Expr::binary(op, lhs, rhs);
+        }
     }
 
     /// `unary = "-" unary | primary ;`
     fn unary(&mut self) -> Result<Expr, Diagnostic> {
-        todo!("Part 4: Parser::unary")
+        if self.peek().kind == TokenKind::Minus {
+            let minus = self.advance();
+            let operand = self.unary()?;
+            return Ok(Expr::neg(minus.span, operand));
+        }
+        self.primary()
     }
 
     /// `primary = INT | "(" expr ")" ;`
     fn primary(&mut self) -> Result<Expr, Diagnostic> {
-        todo!("Part 4: Parser::primary")
+        let token = self.advance();
+        match token.kind {
+            TokenKind::Int(value) => Ok(Expr {
+                kind: ExprKind::Int(value),
+                span: token.span,
+            }),
+            TokenKind::LParen => {
+                let inner = self.expr()?;
+                let close = self.expect(TokenKind::RParen)?;
+                Ok(Expr {
+                    span: token.span.merge(close.span),
+                    ..inner
+                })
+            }
+            _ => Err(Diagnostic {
+                message: format!("expected an expression, found {}", token.kind),
+                span: token.span,
+            }),
+        }
     }
 }
 

@@ -9,7 +9,7 @@ use std::sync::LazyLock;
 use cfgrammar::Span as GSpan;
 use cfgrammar::yacc::YaccGrammar;
 use lrlex::{DefaultLexeme, DefaultLexerTypes, LRLexError};
-use lrpar::{Lexeme, Lexer, LexParseError, NonStreamingLexer};
+use lrpar::{LexParseError, Lexeme, Lexer, NonStreamingLexer};
 use lrtable::{Minimiser, StIdx, StateTable, from_yacc};
 
 use crate::cst::{CstDecl, CstExpr, CstModule, Separated, Wrapped};
@@ -105,9 +105,7 @@ impl TokenLexer {
 }
 
 impl Lexer<DefaultLexerTypes<u32>> for TokenLexer {
-    fn iter<'a>(
-        &'a self,
-    ) -> Box<dyn Iterator<Item = Result<DefaultLexeme<u32>, LRLexError>> + 'a> {
+    fn iter<'a>(&'a self) -> Box<dyn Iterator<Item = Result<DefaultLexeme<u32>, LRLexError>> + 'a> {
         Box::new(self.lexemes.iter().map(|&l| Ok(l)))
     }
 }

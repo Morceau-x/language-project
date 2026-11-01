@@ -19,7 +19,7 @@ The scaffold in `mini/` already has the structure, the data types and
 the tests (47 of them). You write the 12 functions that do the work,
 one at a time, and watch the tests turn green.
 
-**Before you start:** do [Step 0](../00-setup-rustrover.md), and skim
+**Before you start:** do [Step 0](../00-setup/00-setup-rustrover.md), and skim
 [the Rust you need](rust-concepts.md). Each part below links to the
 sections it uses. Expect 3–5 hours, spread over as many sessions as
 you like.
@@ -90,17 +90,17 @@ exact place in the source.
 Real compilers (rustc, Go, Swift, TypeScript…) share a few habits, and
 Mini follows them from day one:
 
-| Practice | Why | Where |
-|---|---|---|
-| **Separate phases with explicit types between them** | each phase can be understood, tested and replaced on its own | `lexer` → `Vec<Token>` → `parser` → `Expr` → `codegen` |
-| **Every token and tree node carries a span** | errors point at the exact code, and later phases (type checking!) can too | `span.rs` |
-| **Errors are values, never crashes** | a user's mistake must never crash the compiler | `Result<_, Diagnostic>` everywhere |
-| **The grammar is written down; one function per rule** | the parser *is* the grammar, so it's easy to check and extend | top of `parser.rs` |
-| **A hand-written recursive descent parser** | full control over error messages. rustc, clang, Go and Swift all hand-write theirs. (The reference compiler in `example/` uses a parser *generator* instead, another valid approach.) | `parser.rs` |
-| **Code generation keeps meaning, not syntax** | JavaScript is a different language, with different rules | `codegen.rs` |
-| **A library with a thin command-line wrapper** | tests and future tools (a language server, a REPL…) reuse the compiler directly | `lib.rs` vs `main.rs` |
-| **Tests at every level** | unit tests per function, plus end-to-end tests that *run* the output | `#[cfg(test)]` modules, `tests/` |
-| **No dependencies** (for now) | you learn by writing every piece; real projects might use crates for lexing or error reporting | `Cargo.toml` |
+| Practice                                               | Why                                                                                                                                                                                   | Where                                                  |
+|--------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------|
+| **Separate phases with explicit types between them**   | each phase can be understood, tested and replaced on its own                                                                                                                          | `lexer` → `Vec<Token>` → `parser` → `Expr` → `codegen` |
+| **Every token and tree node carries a span**           | errors point at the exact code, and later phases (type checking!) can too                                                                                                             | `span.rs`                                              |
+| **Errors are values, never crashes**                   | a user's mistake must never crash the compiler                                                                                                                                        | `Result<_, Diagnostic>` everywhere                     |
+| **The grammar is written down; one function per rule** | the parser *is* the grammar, so it's easy to check and extend                                                                                                                         | top of `parser.rs`                                     |
+| **A hand-written recursive descent parser**            | full control over error messages. rustc, clang, Go and Swift all hand-write theirs. (The reference compiler in `example/` uses a parser *generator* instead, another valid approach.) | `parser.rs`                                            |
+| **Code generation keeps meaning, not syntax**          | JavaScript is a different language, with different rules                                                                                                                              | `codegen.rs`                                           |
+| **A library with a thin command-line wrapper**         | tests and future tools (a language server, a REPL…) reuse the compiler directly                                                                                                       | `lib.rs` vs `main.rs`                                  |
+| **Tests at every level**                               | unit tests per function, plus end-to-end tests that *run* the output                                                                                                                  | `#[cfg(test)]` modules, `tests/`                       |
+| **No dependencies** (for now)                          | you learn by writing every piece; real projects might use crates for lexing or error reporting                                                                                        | `Cargo.toml`                                           |
 
 ---
 
@@ -144,19 +144,19 @@ cover the error formatter, which is provided.
 
 ### What's in `mini/`
 
-| File | What | Yours? |
-|---|---|---|
-| `src/lib.rs` | lists the modules; `compile()` chains the phases | provided |
-| `src/span.rs` | `Span`: a location in the source | **Part 1** |
-| `src/token.rs` | `Token` and `TokenKind`: the lexer's output | provided, read it |
-| `src/lexer.rs` | text → tokens | **Part 2** |
-| `src/ast.rs` | `Expr`: the syntax tree | **Part 3** |
-| `src/parser.rs` | tokens → tree | **Part 4** |
-| `src/codegen.rs` | tree → JavaScript | **Part 5** |
-| `src/diagnostic.rs` | `Diagnostic` and how it's printed | provided, explained in Part 6 |
-| `src/main.rs` | the `mini` command | provided, explained in Part 6 |
-| `tests/end_to_end.rs` | whole-compiler tests that run the output with Node | provided |
-| `programs/*.mini` | sample programs | provided |
+| File                  | What                                               | Yours?                        |
+|-----------------------|----------------------------------------------------|-------------------------------|
+| `src/lib.rs`          | lists the modules; `compile()` chains the phases   | provided                      |
+| `src/span.rs`         | `Span`: a location in the source                   | **Part 1**                    |
+| `src/token.rs`        | `Token` and `TokenKind`: the lexer's output        | provided, read it             |
+| `src/lexer.rs`        | text → tokens                                      | **Part 2**                    |
+| `src/ast.rs`          | `Expr`: the syntax tree                            | **Part 3**                    |
+| `src/parser.rs`       | tokens → tree                                      | **Part 4**                    |
+| `src/codegen.rs`      | tree → JavaScript                                  | **Part 5**                    |
+| `src/diagnostic.rs`   | `Diagnostic` and how it's printed                  | provided, explained in Part 6 |
+| `src/main.rs`         | the `mini` command                                 | provided, explained in Part 6 |
+| `tests/end_to_end.rs` | whole-compiler tests that run the output with Node | provided                      |
+| `programs/*.mini`     | sample programs                                    | provided                      |
 
 Open **`src/token.rs`** now and read it. It's short, and it's the
 vocabulary for everything after: a `Token` is a `TokenKind` (which
@@ -236,8 +236,8 @@ allowed (`$`). Two classic rules:
   token, so the parser never runs off the end of the list.
 
 Open `src/lexer.rs`. `lex()` (provided) calls `next_token()` in a loop
-until it gets `Eof`. The `Lexer` struct holds the source and `pos`, the
-**byte** offset of the next character. `peek()` is provided too: it
+until it gets `Eof`. The `Lexer` struct holds the source and `pos`, the **byte** offset of the next character. `peek()`
+is provided too: it
 takes the text from `pos` onwards and returns its first character.
 
 **Rust you'll use:** [strings and UTF-8](rust-concepts.md#5-strings-string-str-and-utf-8),
@@ -341,11 +341,11 @@ The heart of the lexer:
 1. skip whitespace
 2. remember where the token starts (`self.pos`)
 3. consume one character and decide what it begins:
-   - nothing left → an `Eof` token with an empty span `start..start`
-   - `+ - * / ( )` → the matching `TokenKind`
-   - a digit `0`–`9` → an integer: call `self.int(start)` (Part 2d)
-   - anything else → an error: `` unexpected character `$` ``, with the
-     span of that character
+    - nothing left → an `Eof` token with an empty span `start..start`
+    - `+ - * / ( )` → the matching `TokenKind`
+    - a digit `0`–`9` → an integer: call `self.int(start)` (Part 2d)
+    - anything else → an error: `` unexpected character `$` ``, with the
+      span of that character
 4. return the token, spanning from `start` to the current `pos`
 
 <details>
@@ -513,11 +513,11 @@ To test the parser, we need to *see* a tree. The standard trick is to
 print it as an **S-expression**, operator first, with parentheses
 around every node:
 
-| Mini | Tree printed as |
-|---|---|
-| `42` | `42` |
-| `-1` | `(neg 1)` |
-| `1 + 2 * 3` | `(+ 1 (* 2 3))` |
+| Mini           | Tree printed as       |
+|----------------|-----------------------|
+| `42`           | `42`                  |
+| `-1`           | `(neg 1)`             |
+| `1 + 2 * 3`    | `(+ 1 (* 2 3))`       |
 | `(1 + 2) * -3` | `(* (+ 1 2) (neg 3))` |
 
 **Rust you'll use:** [enums](rust-concepts.md#7-enums),
@@ -774,11 +774,11 @@ fold both sides into a `Binary` node. Fold to the **left**, so
 <summary>Hint 1: the shape</summary>
 
 ```rust
-let mut lhs = self.unary()?;
+let mut lhs = self .unary() ?;
 loop {
-    // look at the next token: `*` → Mul, `/` → Div, anything else → we're done
-    // consume the operator, parse the right-hand side
-    lhs = Expr::binary(op, lhs, rhs);
+// look at the next token: `*` → Mul, `/` → Div, anything else → we're done
+// consume the operator, parse the right-hand side
+lhs = Expr::binary(op, lhs, rhs);
 }
 ```
 
@@ -887,14 +887,14 @@ which is JavaScript's **decrement** operator and a syntax error.
 Parentheses around every negation, `(-(-1))`, avoid it. A test
 checks this.
 
-| Mini | JavaScript |
-|---|---|
-| `42` | `42` |
-| `-1` | `(-1)` |
-| `1 + 2` | `(1 + 2)` |
-| `7 / 2` | `Math.trunc(7 / 2)` |
-| `- -1` | `(-(-1))` |
-| `(1 + 2) * 3` | `((1 + 2) * 3)` |
+| Mini          | JavaScript          |
+|---------------|---------------------|
+| `42`          | `42`                |
+| `-1`          | `(-1)`              |
+| `1 + 2`       | `(1 + 2)`           |
+| `7 / 2`       | `Math.trunc(7 / 2)` |
+| `- -1`        | `(-(-1))`           |
+| `(1 + 2) * 3` | `((1 + 2) * 3)`     |
 
 `generate` (provided) writes `console.log(` + the expression + `);`.
 

@@ -38,23 +38,86 @@ impl<'src> Lexer<'src> {
 
     /// Consume the next character and return it (`None` at end of input).
     fn bump(&mut self) -> Option<char> {
-        todo!("Part 2: Lexer::bump")
+        let c = self.peek()?;
+        self.pos += c.len_utf8();
+        Some(c)
     }
 
     /// Skip spaces, tabs and newlines: they separate tokens but mean nothing.
     fn skip_whitespace(&mut self) {
-        todo!("Part 2: Lexer::skip_whitespace")
+        loop {
+            let c = self.peek();
+            let is_white = c.is_some_and(|c| c.is_whitespace());
+            if is_white {
+                self.bump();
+            } else {
+                break;
+            }
+        }
     }
 
     /// Read the next token, or report a character that starts no token.
     fn next_token(&mut self) -> Result<Token, Diagnostic> {
-        todo!("Part 2: Lexer::next_token")
+        self.skip_whitespace();
+        let start = self.pos;
+
+        let Some(c) = self.bump() else {
+            return Ok(Token {
+                kind: TokenKind::Eof,
+                span: Span { start, end: start },
+            });
+        };
+        let kind = match c {
+            '+' => TokenKind::Plus,
+            '-' => TokenKind::Minus,
+            '*' => TokenKind::Star,
+            '/' => TokenKind::Slash,
+            '(' => TokenKind::LParen,
+            ')' => TokenKind::RParen,
+            v => {
+                return if c.is_numeric() {
+                    let t = self.int(start)?;
+                    let end = self.pos;
+                    Ok(Token {
+                        kind: t,
+                        span: Span::new(start, end),
+                    })
+                } else {
+                    let end = self.pos;
+                    Err(Diagnostic::new(
+                        format!("unexpected character `{v}`"),
+                        Span { start, end },
+                    ))
+                };
+            }
+        };
+
+        let end = self.pos;
+        Ok(Token {
+            kind,
+            span: Span::new(start, end),
+        })
     }
 
     /// Finish an integer literal that starts at `start` (its first digit
     /// is already consumed) and parse its value.
     fn int(&mut self, start: usize) -> Result<TokenKind, Diagnostic> {
-        todo!("Part 2: Lexer::int")
+        while self.peek().is_some_and(|c| c.is_ascii_digit()) {
+            self.bump();
+        }
+        let text = &self.source[start..self.pos];
+        text.parse::<i64>().map_or_else(
+            |_| {
+                Err(Diagnostic {
+                    message: "integer literal is too large".to_string(),
+                    span: Span {
+                        start,
+                        end: self.pos,
+                    },
+                })
+            },
+            |v| Ok(TokenKind::Int(v)),
+        )
     }
 }
 

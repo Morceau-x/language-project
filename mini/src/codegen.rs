@@ -10,6 +10,7 @@
 //!   JavaScript's `/` gives `3.5`, so it is wrapped in `Math.trunc(...)`.
 
 use crate::ast::{BinOp, Expr, ExprKind};
+use std::ops::Deref;
 
 /// The JavaScript program for a Mini program: print its value.
 pub fn generate(expr: &Expr) -> String {
@@ -22,7 +23,24 @@ pub fn generate(expr: &Expr) -> String {
 
 /// Append the JavaScript for `expr` to `out`.
 fn emit_expr(expr: &Expr, out: &mut String) {
-    todo!("Part 5: emit_expr")
+    match &expr.kind {
+        ExprKind::Int(value) => out.push_str(&format!("{}", value)),
+        ExprKind::Neg(value) => {
+            out.push_str("(-");
+            emit_expr(value, out);
+            out.push(')');
+        }
+        ExprKind::Binary { op, lhs, rhs } => {
+            if op == &BinOp::Div {
+                out.push_str("Math.trunc");
+            }
+            out.push('(');
+            emit_expr(lhs.deref(), out);
+            out.push_str(&format!(" {} ", op.symbol()));
+            emit_expr(rhs.deref(), out);
+            out.push(')');
+        }
+    };
 }
 
 #[cfg(test)]

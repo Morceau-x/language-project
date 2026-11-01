@@ -62,7 +62,9 @@ fn simplify(pat: &Pat<Name>) -> SP {
     match pat {
         Pat::Wild(_) | Pat::Var(_, _) => SP::Wild,
         Pat::Lit(_, l) => SP::Lit(l.clone()),
-        Pat::Ctor(_, n, args) => SP::Ctor(n.clone(), args.len(), args.iter().map(simplify).collect()),
+        Pat::Ctor(_, n, args) => {
+            SP::Ctor(n.clone(), args.len(), args.iter().map(simplify).collect())
+        }
         Pat::List(_, elems, rest) => desugar_list(elems, rest),
     }
 }
@@ -197,7 +199,11 @@ fn complete_sig(siblings: Siblings, rows: &[Row]) -> Option<Vec<(Name, usize)>> 
 /// the matrix — i.e. is something NOT covered? Returns a witness vector.
 fn missing(siblings: Siblings, rows: &[Row], n: usize) -> Option<Vec<SP>> {
     if n == 0 {
-        return if rows.is_empty() { Some(Vec::new()) } else { None };
+        return if rows.is_empty() {
+            Some(Vec::new())
+        } else {
+            None
+        };
     }
     match complete_sig(siblings, rows) {
         Some(sigs) => sigs.iter().find_map(|(c, a)| {
@@ -302,7 +308,9 @@ pub fn compile_tree(
             .unwrap_or_default()
     };
     let rebind = |sub: Vec<Row>| -> Vec<(Vec<SP>, usize, Vec<(Name, Occ)>)> {
-        sub.into_iter().map(|(ps, i)| (ps, i, binds_of(i))).collect()
+        sub.into_iter()
+            .map(|(ps, i)| (ps, i, binds_of(i)))
+            .collect()
     };
     let swapped_occs = swap(j, occs);
     let Some((occ_j, occ_rest)) = swapped_occs.split_first() else {

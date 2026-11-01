@@ -126,7 +126,8 @@ fn the_canonical_sample_renames_cleanly() {
 
 #[test]
 fn imports_make_qualified_names_work() {
-    let src = "module Main\n\nimport Geometry\n\nfn f() {\n  Geometry.area(Geometry.Circle(1.0))\n}\n";
+    let src =
+        "module Main\n\nimport Geometry\n\nfn f() {\n  Geometry.area(Geometry.Circle(1.0))\n}\n";
     rn(src).unwrap_or_else(|ds| panic!("{ds:?}"));
 }
 

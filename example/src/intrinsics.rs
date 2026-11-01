@@ -180,11 +180,10 @@ fn nil_info() -> CtorInfo {
 }
 
 pub fn base_tc_env() -> TcEnv {
-    let ctors: BTreeMap<Unique, CtorInfo> =
-        [true_info(), false_info(), cons_info(), nil_info()]
-            .into_iter()
-            .map(|ci| (ci.name.unique, ci))
-            .collect();
+    let ctors: BTreeMap<Unique, CtorInfo> = [true_info(), false_info(), cons_info(), nil_info()]
+        .into_iter()
+        .map(|ci| (ci.name.unique, ci))
+        .collect();
     let ty_cons: BTreeMap<Unique, TyConInfo> = [
         (
             b::ty_int().unique,

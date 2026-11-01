@@ -122,9 +122,7 @@ impl MetaArena {
                 }
                 MetaContent::Unbound(_) => ty.clone(),
             },
-            Type::Con(c, args) => {
-                Type::Con(c.clone(), args.iter().map(|a| self.zonk(a)).collect())
-            }
+            Type::Con(c, args) => Type::Con(c.clone(), args.iter().map(|a| self.zonk(a)).collect()),
             Type::Fun(params, ret) => Type::Fun(
                 params
                     .iter()

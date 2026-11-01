@@ -88,10 +88,7 @@ pub fn lower_to_core(
             }
             // A component emits as its manifest object.
             Decl::Component(cd) => {
-                let step = env
-                    .components
-                    .get(&cd.name.unique)
-                    .is_some_and(|s| s.step);
+                let step = env.components.get(&cd.name.unique).is_some_and(|s| s.step);
                 let mut slots: Vec<(String, Name)> = Vec::new();
                 if let Some((_, n)) = &cd.init {
                     slots.push(("init".to_string(), n.clone()));
@@ -217,12 +214,7 @@ impl Lower<'_> {
                 let scrut2 = self.expr(scrut);
                 let arms2: Vec<(Option<Core>, Core)> = arms
                     .iter()
-                    .map(|a| {
-                        (
-                            a.guard.as_ref().map(|g| self.expr(g)),
-                            self.expr(&a.body),
-                        )
-                    })
+                    .map(|a| (a.guard.as_ref().map(|g| self.expr(g)), self.expr(&a.body)))
                     .collect();
                 match self.trees.get(sp) {
                     Some(tree) => Core::Match(Box::new(scrut2), tree.clone(), arms2),
@@ -326,10 +318,7 @@ impl Lower<'_> {
         if let Expr::Var(_, n) = f {
             if let Some(i) = intrinsic_of(n) {
                 if args.len() == i.arity() {
-                    return Core::Intrinsic(
-                        i,
-                        args.iter().map(|a| self.expr(a.expr())).collect(),
-                    );
+                    return Core::Intrinsic(i, args.iter().map(|a| self.expr(a.expr())).collect());
                 }
             }
         }
@@ -470,27 +459,22 @@ impl Lower<'_> {
                 .collect();
             let params: Vec<Name> = remaining.iter().map(|p| self.param_name(p)).collect();
             let rest_ps = &ps[pos_args.len().min(ps.len())..];
-            let by_label: BTreeMap<&String, &Core> = lab_pairs
-                .iter()
-                .map(|(lbl, (_, v))| (*lbl, v))
-                .collect();
+            let by_label: BTreeMap<&String, &Core> =
+                lab_pairs.iter().map(|(lbl, (_, v))| (*lbl, v)).collect();
             let mut param_queue = params.iter();
             let fill: Vec<Core> = rest_ps
                 .iter()
-                .map(|p| {
-                    match p.label.as_ref().and_then(|l| by_label.get(&l)) {
-                        Some(v) => (*v).clone(),
-                        None => match param_queue.next() {
-                            Some(q) => Core::Var(q.clone()),
-                            None => {
-                                maxim_panic!("lower_to_core: labeled call ran out of parameters")
-                            }
-                        },
-                    }
+                .map(|p| match p.label.as_ref().and_then(|l| by_label.get(&l)) {
+                    Some(v) => (*v).clone(),
+                    None => match param_queue.next() {
+                        Some(q) => Core::Var(q.clone()),
+                        None => {
+                            maxim_panic!("lower_to_core: labeled call ran out of parameters")
+                        }
+                    },
                 })
                 .collect();
-            let mut app_args: Vec<Core> =
-                pos_pairs.iter().map(|(_, v)| v.clone()).collect();
+            let mut app_args: Vec<Core> = pos_pairs.iter().map(|(_, v)| v.clone()).collect();
             app_args.extend(fill);
             let inner = Core::App(Box::new(fv), app_args);
             let body = if params.is_empty() {
@@ -540,7 +524,11 @@ impl Lower<'_> {
             Core::Con(n.clone(), args2)
         } else if pos_args.is_empty()
             && !flds.is_empty()
-            && written.iter().map(|(l, _)| (*l).clone()).collect::<Vec<_>>() == flds
+            && written
+                .iter()
+                .map(|(l, _)| (*l).clone())
+                .collect::<Vec<_>>()
+                == flds
         {
             let args2: Vec<Core> = written.iter().map(|(_, e)| self.expr(e)).collect();
             Core::Con(n.clone(), args2)
@@ -583,12 +571,13 @@ impl Lower<'_> {
                 })
                 .collect();
             let params: Vec<Name> = remaining.iter().map(|r| self.fresh_named(r)).collect();
-            let by_label: BTreeMap<&String, &Core> = lab_pairs
+            let by_label: BTreeMap<&String, &Core> =
+                lab_pairs.iter().map(|(lbl, (_, v))| (*lbl, v)).collect();
+            let param_for: BTreeMap<&String, &Name> = remaining
                 .iter()
-                .map(|(lbl, (_, v))| (*lbl, v))
+                .zip(&params)
+                .map(|(r, p)| (*r, p))
                 .collect();
-            let param_for: BTreeMap<&String, &Name> =
-                remaining.iter().zip(&params).map(|(r, p)| (*r, p)).collect();
             let fill = |fld: &String| -> Core {
                 match by_label.get(&fld) {
                     Some(v) => (*v).clone(),
@@ -663,10 +652,7 @@ impl Lower<'_> {
         let ps: Vec<Name> = (0..i.arity()).map(|_| self.fresh_tmp()).collect();
         Core::Lam(
             ps.iter().cloned().map(Some).collect(),
-            Box::new(Core::Intrinsic(
-                i,
-                ps.into_iter().map(Core::Var).collect(),
-            )),
+            Box::new(Core::Intrinsic(i, ps.into_iter().map(Core::Var).collect())),
         )
     }
 }
@@ -851,9 +837,7 @@ fn go(
             JsxChild::Spread(_, _) => maxim_panic!("desugar_jsx: spread in a single position"),
         }
     };
-    let split = cs
-        .iter()
-        .position(|c| matches!(c, JsxChild::Spread(_, _)));
+    let split = cs.iter().position(|c| matches!(c, JsxChild::Spread(_, _)));
     match split {
         None => Expr::List(sp, cs.iter().map(single).collect(), None),
         Some(i) => {

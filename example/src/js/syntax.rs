@@ -95,10 +95,7 @@ pub fn render_js_module(m: &JsModule) -> String {
 fn render_decl(d: &JsDecl) -> Vec<String> {
     match d {
         JsDecl::ExportFn(name, params, body) => {
-            let mut out = vec![format!(
-                "export function {name}({}) {{",
-                params.join(", ")
-            )];
+            let mut out = vec![format!("export function {name}({}) {{", params.join(", "))];
             for s in body {
                 out.extend(stmt(1, s));
             }

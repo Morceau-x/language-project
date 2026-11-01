@@ -76,7 +76,13 @@ pub enum CstDecl {
     /// `type Name<a, b> = rhs`
     Type(Token, Token, Option<CstTyParams>, Token, CstTypeRhs),
     /// `fn name(params) -> Ret { … }`
-    Fn(Token, Token, ParamParens, Option<(Token, CstType)>, CstBlock),
+    Fn(
+        Token,
+        Token,
+        ParamParens,
+        Option<(Token, CstType)>,
+        CstBlock,
+    ),
     /// `let name: T = expr`
     Let(Token, Token, Option<(Token, CstType)>, Token, CstExpr),
     /// `cast (d: Float) -> Celsius { … }` — a conversion declaration:
