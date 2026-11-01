@@ -9,7 +9,7 @@
 //! expr    = term { ( "+" | "-" ) term } ;     sums of terms
 //! term    = unary { ( "*" | "/" ) unary } ;   products of factors
 //! unary   = "-" unary | primary ;
-//! primary = INT | "(" expr ")" ;
+//! primary = INT | IDENT | "(" expr ")" ;
 //! ```
 //!
 //! `{ ... }` means "zero or more times". Rules lower in the list bind
@@ -23,7 +23,7 @@ use std::ops::Deref;
 
 /// Parse a whole program. `tokens` must end with [`TokenKind::Eof`], as
 /// [`crate::lexer::lex`] guarantees.
-pub fn parse(tokens: &[Token]) -> Result<Expr, Diagnostic> {
+pub fn parse(tokens: &[Token<'_>]) -> Result<Expr, Diagnostic> {
     let mut parser = Parser::new(tokens);
     let expr = parser.expr()?;
     parser.expect(TokenKind::Eof)?;
@@ -32,24 +32,24 @@ pub fn parse(tokens: &[Token]) -> Result<Expr, Diagnostic> {
 
 /// Walks through the tokens one at a time.
 struct Parser<'t> {
-    tokens: &'t [Token],
+    tokens: &'t [Token<'t>],
     /// Index of the next token to read.
     pos: usize,
 }
 
 impl<'t> Parser<'t> {
-    fn new(tokens: &'t [Token]) -> Parser<'t> {
+    fn new(tokens: &'t [Token<'t>]) -> Parser<'t> {
         Parser { tokens, pos: 0 }
     }
 
     /// The next token, without consuming it.
-    fn peek(&self) -> Token {
+    fn peek(&self) -> Token<'t> {
         self.tokens[self.pos]
     }
 
     /// Consume the next token and return it. Never moves past `Eof`, so
     /// `peek` always has a token to return.
-    fn advance(&mut self) -> Token {
+    fn advance(&mut self) -> Token<'t> {
         let token = self.peek();
         if token.kind != TokenKind::Eof {
             self.pos += 1;
@@ -59,7 +59,7 @@ impl<'t> Parser<'t> {
 
     /// Consume the next token if it is a `kind`, or report what was found
     /// instead.
-    fn expect(&mut self, kind: TokenKind) -> Result<Token, Diagnostic> {
+    fn expect(&mut self, kind: TokenKind<'_>) -> Result<Token<'t>, Diagnostic> {
         let next = self.peek();
         if next.kind != kind {
             Err(Diagnostic {
@@ -111,7 +111,7 @@ impl<'t> Parser<'t> {
         self.primary()
     }
 
-    /// `primary = INT | "(" expr ")" ;`
+    /// `primary = INT | IDENT | "(" expr ")" ;`
     fn primary(&mut self) -> Result<Expr, Diagnostic> {
         let token = self.advance();
         match token.kind {
@@ -187,6 +187,13 @@ mod tests {
     }
 
     #[test]
+    fn primary_parses_an_input_name() {
+        assert_eq!(parse_with("width", |p| p.primary()), "width");
+        let expr = parse_str("  x").unwrap();
+        assert_eq!(expr, Expr::var("x", Span::new(2, 3)));
+    }
+
+    #[test]
     fn primary_rejects_what_cannot_start_an_expression() {
         assert_eq!(
             parse_with("*", |p| p.primary()),
@@ -255,6 +262,14 @@ mod tests {
     }
 
     #[test]
+    fn expr_with_inputs() {
+        assert_eq!(
+            parse_with("x * (2 + 3) + y * 0", |p| p.expr()),
+            "(+ (* x (+ 2 3)) (* y 0))"
+        );
+    }
+
+    #[test]
     fn parse_rejects_a_missing_closing_parenthesis() {
         assert_eq!(
             parse_str("(1 + 2"),
@@ -271,6 +286,17 @@ mod tests {
             parse_str("1 2"),
             Err(Diagnostic::new(
                 "expected end of input, found integer `2`",
+                Span::new(2, 3)
+            ))
+        );
+    }
+
+    #[test]
+    fn parse_rejects_two_names_in_a_row() {
+        assert_eq!(
+            parse_str("x y"),
+            Err(Diagnostic::new(
+                "expected end of input, found name `y`",
                 Span::new(2, 3)
             ))
         );

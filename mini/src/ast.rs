@@ -20,6 +20,9 @@ pub struct Expr {
 pub enum ExprKind {
     /// An integer literal: `42`.
     Int(i64),
+    /// An input: `x`. The tree owns its copy of the name, so it can
+    /// outlive the source text and the tokens.
+    Var(String),
     /// Negation: `-operand`.
     Neg(Box<Expr>),
     /// A binary operation: `lhs op rhs`.
@@ -30,8 +33,9 @@ pub enum ExprKind {
     },
 }
 
-/// The binary operators.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+/// The binary operators. `Hash` lets the optimizer use them in hash
+/// map keys (step 2, Part 6).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum BinOp {
     Add,
     Sub,
@@ -56,6 +60,14 @@ impl Expr {
     pub fn int(value: i64, span: Span) -> Expr {
         Expr {
             kind: ExprKind::Int(value),
+            span,
+        }
+    }
+
+    /// An input, read by name.
+    pub fn var(name: &str, span: Span) -> Expr {
+        Expr {
+            kind: ExprKind::Var(name.to_string()),
             span,
         }
     }
@@ -90,6 +102,7 @@ impl fmt::Display for Expr {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match &self.kind {
             ExprKind::Int(value) => write!(f, "{value}"),
+            ExprKind::Var(name) => todo!("Part 1b: print an input"),
             ExprKind::Neg(operand) => write!(f, "(neg {operand})"),
             ExprKind::Binary { op, lhs, rhs } => write!(f, "({} {lhs} {rhs})", op.symbol()),
         }
@@ -113,6 +126,13 @@ mod tests {
     fn display_int() {
         assert_eq!(int(42).to_string(), "42");
         assert_eq!(int(-7).to_string(), "-7");
+    }
+
+    #[test]
+    fn display_var() {
+        assert_eq!(Expr::var("width", Span::new(0, 5)).to_string(), "width");
+        let sum = Expr::binary(BinOp::Add, Expr::var("x", Span::new(0, 1)), int(1));
+        assert_eq!(sum.to_string(), "(+ x 1)");
     }
 
     #[test]

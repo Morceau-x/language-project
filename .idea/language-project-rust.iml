@@ -6,6 +6,7 @@
       <sourceFolder url="file://$MODULE_DIR$/example/tests" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/mini/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/mini/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/mini/examples" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />

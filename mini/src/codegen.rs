@@ -25,6 +25,7 @@ pub fn generate(expr: &Expr) -> String {
 fn emit_expr(expr: &Expr, out: &mut String) {
     match &expr.kind {
         ExprKind::Int(value) => out.push_str(&format!("{}", value)),
+        ExprKind::Var(name) => out.push_str(name),
         ExprKind::Neg(value) => {
             out.push_str("(-");
             emit_expr(value, out);

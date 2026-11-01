@@ -5,17 +5,23 @@ use std::fmt;
 use crate::span::Span;
 
 /// One token: what kind it is, and where it is in the source.
+///
+/// `'src` is the lifetime of the source text: an identifier token
+/// borrows its name from the source instead of copying it.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct Token {
-    pub kind: TokenKind,
+pub struct Token<'src> {
+    pub kind: TokenKind<'src>,
     pub span: Span,
 }
 
 /// Every kind of token Mini knows about.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum TokenKind {
+pub enum TokenKind<'src> {
     /// An integer literal such as `42`, with its value already parsed.
     Int(i64),
+    /// A name such as `x` or `width`: one of the program's inputs. The
+    /// `&str` points into the source text.
+    Ident(&'src str),
     /// `+`
     Plus,
     /// `-`
@@ -35,10 +41,11 @@ pub enum TokenKind {
 
 /// How a token kind is named in error messages: "expected `)`, found
 /// end of input".
-impl fmt::Display for TokenKind {
+impl fmt::Display for TokenKind<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             TokenKind::Int(value) => write!(f, "integer `{value}`"),
+            TokenKind::Ident(name) => write!(f, "name `{name}`"),
             TokenKind::Plus => f.write_str("`+`"),
             TokenKind::Minus => f.write_str("`-`"),
             TokenKind::Star => f.write_str("`*`"),

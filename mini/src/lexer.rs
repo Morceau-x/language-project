@@ -7,7 +7,7 @@ use crate::token::{Token, TokenKind};
 
 /// Split `source` into tokens. On success the last token is always
 /// [`TokenKind::Eof`].
-pub fn lex(source: &str) -> Result<Vec<Token>, Diagnostic> {
+pub fn lex(source: &str) -> Result<Vec<Token<'_>>, Diagnostic> {
     let mut lexer = Lexer::new(source);
     let mut tokens = Vec::new();
     loop {
@@ -57,7 +57,7 @@ impl<'src> Lexer<'src> {
     }
 
     /// Read the next token, or report a character that starts no token.
-    fn next_token(&mut self) -> Result<Token, Diagnostic> {
+    fn next_token(&mut self) -> Result<Token<'src>, Diagnostic> {
         self.skip_whitespace();
         let start = self.pos;
 
@@ -101,7 +101,7 @@ impl<'src> Lexer<'src> {
 
     /// Finish an integer literal that starts at `start` (its first digit
     /// is already consumed) and parse its value.
-    fn int(&mut self, start: usize) -> Result<TokenKind, Diagnostic> {
+    fn int(&mut self, start: usize) -> Result<TokenKind<'src>, Diagnostic> {
         while self.peek().is_some_and(|c| c.is_ascii_digit()) {
             self.bump();
         }
@@ -119,6 +119,12 @@ impl<'src> Lexer<'src> {
             |v| Ok(TokenKind::Int(v)),
         )
     }
+
+    /// Finish a name that starts at `start` (its first character is
+    /// already consumed): letters, digits and underscores.
+    fn ident(&mut self, start: usize) -> TokenKind<'src> {
+        todo!("Part 1a: Lexer::ident")
+    }
 }
 
 #[cfg(test)]
@@ -127,7 +133,7 @@ mod tests {
     use TokenKind::*;
 
     /// Just the token kinds, for tests that don't care about spans.
-    fn kinds(source: &str) -> Vec<TokenKind> {
+    fn kinds(source: &str) -> Vec<TokenKind<'_>> {
         lex(source)
             .unwrap()
             .into_iter()
@@ -223,6 +229,26 @@ mod tests {
     #[test]
     fn int_spans_cover_every_digit() {
         assert_eq!(lex("  123").unwrap()[0].span, Span::new(2, 5));
+    }
+
+    #[test]
+    fn ident_reads_a_whole_name() {
+        assert_eq!(kinds("x"), vec![Ident("x"), Eof]);
+        assert_eq!(kinds("width"), vec![Ident("width"), Eof]);
+        assert_eq!(kinds("a1_b2 _c"), vec![Ident("a1_b2"), Ident("_c"), Eof]);
+    }
+
+    #[test]
+    fn ident_stops_at_the_first_other_character() {
+        assert_eq!(
+            kinds("2*x+y1"),
+            vec![Int(2), Star, Ident("x"), Plus, Ident("y1"), Eof]
+        );
+    }
+
+    #[test]
+    fn ident_spans_cover_the_whole_name() {
+        assert_eq!(lex("1 + size").unwrap()[2].span, Span::new(4, 8));
     }
 
     #[test]

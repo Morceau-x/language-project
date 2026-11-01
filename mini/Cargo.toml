@@ -2,7 +2,21 @@
 name = "mini"
 version = "0.1.0"
 edition = "2024"
-description = "A small compiler from Mini to JavaScript, built step by step (see ../tutorial)"
+description = "A small compiler from Mini to JavaScript and native code, built step by step (see ../tutorial)"
 
-# No dependencies on purpose: every piece of the compiler is yours to write.
+# grmtools: a yacc-compatible parser generator for Rust (step 2, Part 3).
+# Pinned to the exact versions the reference compiler in ../example uses.
 [dependencies]
+cfgrammar = "=0.15.0"
+lrlex = "=0.15.0"
+lrpar = "=0.15.0"
+
+# build.rs runs grmtools at build time, so it needs it too.
+[build-dependencies]
+cfgrammar = "=0.15.0"
+lrlex = "=0.15.0"
+lrpar = "=0.15.0"
+
+# Only for tests: random program generation (step 2, Part 6).
+[dev-dependencies]
+proptest = "1"

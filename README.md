@@ -12,6 +12,8 @@ Rust compilers for the Maxim language family, in one Cargo workspace.
 
 1. [Set up RustRover](tutorial/00-setup/00-setup-rustrover.md)
 2. [Step 1 — A minimal compiler](tutorial/01-minimal-compiler/guide.md)
+3. [Step 2 — Compiler layers and tooling](tutorial/02-compiler-layers/guide.md)
+   (needs `bison` and `clang` installed)
 
 ## Commands
 
@@ -27,6 +29,14 @@ cargo test -p mini
 cargo run -q -p mini -- mini/programs/arithmetic.mini | node
 ```
 
+```bash
+cargo run -q -p mini -- run mini/programs/inputs.mini 4 100
+```
+
+```bash
+cargo run -q -p mini -- build -O mini/programs/inputs.mini -o target/inputs && ./target/inputs 4 100
+```
+
 ## Depends on `../language-project`
 
 `example/` reads the Maxim standard library, the example programs and
@@ -40,4 +50,6 @@ personal/
 └── language-project-rust/   this workspace
 ```
 
-`mini/` has no such dependency.
+`mini/` has no such dependency. It uses `node` to run the JavaScript it
+generates, and since step 2, `bison` (in Part 2) and `clang` (for
+native executables). Tests that need a missing tool skip that part.
