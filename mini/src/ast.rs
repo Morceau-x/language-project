@@ -5,9 +5,8 @@
 //! whitespace, and parentheses — the shape of the tree already says what
 //! groups with what.
 
-use std::fmt;
-
 use crate::span::Span;
+use std::fmt;
 
 /// An expression, with the span of source it was parsed from.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -102,7 +101,7 @@ impl fmt::Display for Expr {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match &self.kind {
             ExprKind::Int(value) => write!(f, "{value}"),
-            ExprKind::Var(name) => todo!("Part 1b: print an input"),
+            ExprKind::Var(name) => write!(f, "{name}"),
             ExprKind::Neg(operand) => write!(f, "(neg {operand})"),
             ExprKind::Binary { op, lhs, rhs } => write!(f, "({} {lhs} {rhs})", op.symbol()),
         }

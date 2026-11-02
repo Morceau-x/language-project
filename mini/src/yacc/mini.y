@@ -9,13 +9,25 @@
 
 %start Expr
 
-// Part 3b: %avoid_insert and the precedence declarations go here.
+%avoid_insert "INT" "IDENT"
+%left '+' '-'
+%left '*' '/'
+%nonassoc NEG
+%expect-unused 'NEG'
 
 %%
+
 Expr -> Cst<'input>:
-      'INT' { node(vec![token($lexer, $1)]) }
-    // Part 3b: the other alternatives go here.
+      Expr '+' Expr { node(vec![$1, token($lexer, $2), $3]) }
+    | Expr '-' Expr { node(vec![$1, token($lexer, $2), $3]) }
+    | Expr '*' Expr { node(vec![$1, token($lexer, $2), $3]) }
+    | Expr '/' Expr { node(vec![$1, token($lexer, $2), $3]) }
+    | '-' Expr %prec NEG { node(vec![token($lexer, $1), $2]) }
+    | '(' Expr ')' { node(vec![token($lexer, $1), $2, token($lexer, $3)]) }
+    | 'INT' { node(vec![token($lexer, $1)]) }
+    | 'IDENT' { node(vec![token($lexer, $1)]) }
     ;
+
 %%
 // Code here is in scope in the actions above. `node` and `token` are
 // defined in mod.rs.

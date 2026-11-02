@@ -11,7 +11,53 @@ use crate::diagnostic::Diagnostic;
 
 /// Prune a parse tree from `yacc/mini.y` into an AST.
 pub fn prune(tree: &Cst<'_>) -> Result<Expr, Diagnostic> {
-    todo!("Part 4: prune")
+    let Cst::Node { children, .. } = tree else {
+        unreachable!("a tree from the grammar is always a node")
+    };
+    match children.as_slice() {
+        [
+            Cst::Token {
+                kind: "IDENT",
+                text,
+                span,
+            },
+        ] => Ok(Expr::var(text, *span)),
+        [
+            Cst::Token {
+                kind: "INT",
+                text,
+                span,
+            },
+        ] => match text.parse::<i64>() {
+            Ok(value) => Ok(Expr::int(value, *span)),
+            Err(_) => Err(Diagnostic::new("integer literal is too large", *span)),
+        },
+        [
+            Cst::Token {
+                kind: "-", span, ..
+            },
+            operand,
+        ] => Ok(Expr::neg(*span, prune(operand)?)),
+        [
+            Cst::Token { kind: "(", .. },
+            inner,
+            Cst::Token { kind: ")", .. },
+        ] => Ok(Expr {
+            span: tree.span(),
+            ..prune(inner)?
+        }),
+        [lhs, Cst::Token { kind, .. }, rhs] => {
+            let op = match *kind {
+                "+" => BinOp::Add,
+                "-" => BinOp::Sub,
+                "*" => BinOp::Mul,
+                "/" => BinOp::Div,
+                other => unreachable!("not a binary operator: {other}"),
+            };
+            Ok(Expr::binary(op, prune(lhs)?, prune(rhs)?))
+        }
+        other => unreachable!("no grammar rule has these children: {other:?}"),
+    }
 }
 
 #[cfg(test)]

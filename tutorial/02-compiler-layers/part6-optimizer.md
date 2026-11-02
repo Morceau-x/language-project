@@ -456,7 +456,7 @@ pub fn run(&self, function: &mut Function, trace: &mut dyn FnMut(&str, &Function
 ## Watch it work
 
 ```bash
-mini --emit=ir -O --print-after-each mini/programs/repeated.mini
+cargo mini --emit=ir -O --print-after-each mini/programs/repeated.mini
 ```
 
 ```text
@@ -503,8 +503,8 @@ what was pruned.
 Try the other samples, and your own programs:
 
 ```bash
-mini --emit=ir -O mini/programs/inputs.mini
-mini --emit=ir -O mini/programs/arithmetic.mini
+cargo mini --emit=ir -O mini/programs/inputs.mini
+cargo mini --emit=ir -O mini/programs/arithmetic.mini
 ```
 
 ---

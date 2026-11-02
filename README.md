@@ -26,15 +26,18 @@ cargo test -p mini
 ```
 
 ```bash
-cargo run -q -p mini -- mini/programs/arithmetic.mini | node
+cargo mini mini/programs/arithmetic.mini | node
+```
+
+`cargo mini` is short for `cargo run -q -p mini --` (an alias defined
+in `.cargo/config.toml`).
+
+```bash
+cargo mini run mini/programs/inputs.mini 4 100
 ```
 
 ```bash
-cargo run -q -p mini -- run mini/programs/inputs.mini 4 100
-```
-
-```bash
-cargo run -q -p mini -- build -O mini/programs/inputs.mini -o target/inputs && ./target/inputs 4 100
+cargo mini build -O mini/programs/inputs.mini -o target/inputs && ./target/inputs 4 100
 ```
 
 ## Depends on `../language-project`

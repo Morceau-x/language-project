@@ -82,6 +82,13 @@ impl<'src> Lexer<'src> {
                         kind: t,
                         span: Span::new(start, end),
                     })
+                } else if c.is_ascii_alphabetic() || c == '_' {
+                    let t = self.ident(start);
+                    let end = self.pos;
+                    Ok(Token {
+                        kind: t,
+                        span: Span::new(start, end),
+                    })
                 } else {
                     let end = self.pos;
                     Err(Diagnostic::new(
@@ -123,7 +130,11 @@ impl<'src> Lexer<'src> {
     /// Finish a name that starts at `start` (its first character is
     /// already consumed): letters, digits and underscores.
     fn ident(&mut self, start: usize) -> TokenKind<'src> {
-        todo!("Part 1a: Lexer::ident")
+        while self.peek().is_some_and(|c| c.is_alphanumeric() || c == '_') {
+            self.bump();
+        }
+        let text = &self.source[start..self.pos];
+        TokenKind::Ident(text)
     }
 }
 

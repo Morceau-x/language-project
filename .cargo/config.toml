@@ -1,0 +1,6 @@
+# Cargo settings for this workspace.
+
+[alias]
+# `cargo mini ARGS...` runs the Mini compiler, rebuilding it first if its
+# code changed. Short for `cargo run -q -p mini -- ARGS...`.
+mini = "run -q -p mini --"

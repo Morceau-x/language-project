@@ -181,11 +181,11 @@ cargo test -p mini --lib -- lexer parser ast
 (Filters after `--` go to the test runner, which accepts several.)
 
 ```bash
-mini --emit=tokens mini/programs/inputs.mini
+cargo mini --emit=tokens mini/programs/inputs.mini
 ```
 
 ```bash
-mini --emit=ast mini/programs/inputs.mini
+cargo mini --emit=ast mini/programs/inputs.mini
 ```
 
 ```text
@@ -195,7 +195,7 @@ mini --emit=ast mini/programs/inputs.mini
 And an error message, using your token's `Display`:
 
 ```bash
-echo 'x y' > /tmp/two-names.mini && mini /tmp/two-names.mini
+echo 'x y' > /tmp/two-names.mini && cargo mini /tmp/two-names.mini
 ```
 
 ```text

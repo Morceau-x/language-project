@@ -126,8 +126,8 @@ Run it: `mini` prints JavaScript by default, and `node -` reads the
 program from its standard input, then takes the inputs:
 
 ```bash
-mini -O mini/programs/inputs.mini | node - 4 100
-mini mini/programs/division.mini | node - 10 0; echo "exit status: $?"
+cargo mini -O mini/programs/inputs.mini | node - 4 100
+cargo mini mini/programs/division.mini | node - 10 0; echo "exit status: $?"
 ```
 
 ```text
@@ -313,7 +313,7 @@ fn value(function: &Function, slots: &HashMap<Temp, usize>, value: Value) -> Str
 </details>
 
 ```bash
-mini --emit=llvm mini/programs/inputs.mini
+cargo mini --emit=llvm mini/programs/inputs.mini
 ```
 
 ---
@@ -338,7 +338,7 @@ look at the end of the `--emit=llvm` output):
   one (`getelementptr` computes the address of element `i`, `load`
   reads it), and calls `@mini_main` with them.
 
-`mini build` does the rest (`build_native` in `src/driver.rs`): it
+`cargo mini build` does the rest (`build_native` in `src/driver.rs`): it
 writes the `.ll` file and the runtime to a temporary folder, and runs
 
 ```bash
@@ -352,7 +352,7 @@ C library (for `printf` and `strtoll`) into one executable. The
 which processor it's for, and clang fills in yours.
 
 ```bash
-mini build -O mini/programs/division.mini -o target/division
+cargo mini build -O mini/programs/division.mini -o target/division
 ./target/division 10 3
 ./target/division -9223372036854775808 -1
 ./target/division 10 0; echo "exit status: $?"

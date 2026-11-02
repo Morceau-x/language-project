@@ -264,11 +264,11 @@ fn lower_expr(&mut self, expr: &Expr) -> Value {
 Now the IR layer works:
 
 ```bash
-mini --emit=ir mini/programs/inputs.mini
+cargo mini --emit=ir mini/programs/inputs.mini
 ```
 
 ```bash
-mini --emit=ir mini/programs/arithmetic.mini
+cargo mini --emit=ir mini/programs/arithmetic.mini
 ```
 
 ---
@@ -419,9 +419,9 @@ numbering.
 Mini programs run now:
 
 ```bash
-mini run mini/programs/inputs.mini 4 100
-mini run mini/programs/division.mini 10 3
-mini run mini/programs/division.mini 10 0
+cargo mini run mini/programs/inputs.mini 4 100
+cargo mini run mini/programs/division.mini 10 3
+cargo mini run mini/programs/division.mini 10 0
 ```
 
 ```text
@@ -436,7 +436,7 @@ error: division by zero
 
 The runtime error points at the source, thanks to the span carried by
 the instruction. A negative input works too, since everything after the
-file name is an input: `mini run mini/programs/division.mini -7 2`.
+file name is an input: `cargo mini run mini/programs/division.mini -7 2`.
 
 One property test checks lowering and the interpreter together,
 against a separate evaluator that works directly on the AST

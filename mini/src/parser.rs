@@ -113,13 +113,17 @@ impl<'t> Parser<'t> {
 
     /// `primary = INT | IDENT | "(" expr ")" ;`
     fn primary(&mut self) -> Result<Expr, Diagnostic> {
-        let token = self.advance();
+        let token = self.peek();
         match token.kind {
-            TokenKind::Int(value) => Ok(Expr {
-                kind: ExprKind::Int(value),
-                span: token.span,
-            }),
+            TokenKind::Int(value) => {
+                self.advance();
+                Ok(Expr {
+                    kind: ExprKind::Int(value),
+                    span: token.span,
+                })
+            }
             TokenKind::LParen => {
+                self.advance();
                 let inner = self.expr()?;
                 let close = self.expect(TokenKind::RParen)?;
                 Ok(Expr {
@@ -127,6 +131,17 @@ impl<'t> Parser<'t> {
                     ..inner
                 })
             }
+            _ => self.identifier(),
+        }
+    }
+
+    fn identifier(&mut self) -> Result<Expr, Diagnostic> {
+        let token = self.advance();
+        match token.kind {
+            TokenKind::Ident(value) => Ok(Expr {
+                kind: ExprKind::Var(value.to_string()),
+                span: token.span,
+            }),
             _ => Err(Diagnostic {
                 message: format!("expected an expression, found {}", token.kind),
                 span: token.span,

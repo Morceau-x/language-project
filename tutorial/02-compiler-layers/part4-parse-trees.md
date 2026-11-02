@@ -15,7 +15,7 @@ wants an AST. This part writes the layer in between: **pruning**.
 Put the two trees for `-(1 + x) * y` side by side:
 
 ```bash
-mini --emit=cst mini/programs/negated-sum.mini
+cargo mini --emit=cst mini/programs/negated-sum.mini
 ```
 
 ```text
@@ -199,8 +199,8 @@ is `Copy`, so `*span` copies it out.
 has two complete front ends:
 
 ```bash
-mini --emit=ast mini/programs/negated-sum.mini
-mini --emit=ast --parser=yacc mini/programs/negated-sum.mini
+cargo mini --emit=ast mini/programs/negated-sum.mini
+cargo mini --emit=ast --parser=yacc mini/programs/negated-sum.mini
 ```
 
 They must agree, spans included, on every program. Two tests check it.

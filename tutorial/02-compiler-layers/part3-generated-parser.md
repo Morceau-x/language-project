@@ -241,7 +241,7 @@ Expr -> Cst<'input>:
 Now look at a parse tree:
 
 ```bash
-mini --emit=cst mini/programs/inputs.mini
+cargo mini --emit=cst mini/programs/inputs.mini
 ```
 
 ```text
@@ -288,8 +288,8 @@ back.
 
 ```bash
 echo '1 +' > /tmp/e.mini
-mini --emit=ast /tmp/e.mini
-mini --emit=ast --parser=yacc /tmp/e.mini
+cargo mini --emit=ast /tmp/e.mini
+cargo mini --emit=ast --parser=yacc /tmp/e.mini
 ```
 
 (`--parser=yacc` needs Part 4 to finish the job, but syntax errors are

@@ -14,16 +14,16 @@ Commands write their files into `target/`, which git ignores.
 
 | Layer                      | Command                                                     |
 |----------------------------|-------------------------------------------------------------|
-| tokens                     | `mini --emit=tokens mini/programs/inputs.mini`              |
-| parse tree (generated)     | `mini --emit=cst mini/programs/inputs.mini`                 |
-| AST (hand-written parser)  | `mini --emit=ast mini/programs/inputs.mini`                 |
-| AST (generated parser)     | `mini --emit=ast --parser=yacc mini/programs/inputs.mini`   |
-| IR                         | `mini --emit=ir mini/programs/inputs.mini`                  |
-| optimized IR, step by step | `mini --emit=ir -O --print-after-each mini/programs/inputs.mini` |
-| JavaScript                 | `mini -O mini/programs/inputs.mini`                         |
-| LLVM IR                    | `mini --emit=llvm -O mini/programs/inputs.mini`             |
-| run (interpreter)          | `mini run mini/programs/inputs.mini 4 100`                  |
-| run (native)               | `mini build -O mini/programs/inputs.mini -o target/inputs && ./target/inputs 4 100` |
+| tokens                     | `cargo mini --emit=tokens mini/programs/inputs.mini`              |
+| parse tree (generated)     | `cargo mini --emit=cst mini/programs/inputs.mini`                 |
+| AST (hand-written parser)  | `cargo mini --emit=ast mini/programs/inputs.mini`                 |
+| AST (generated parser)     | `cargo mini --emit=ast --parser=yacc mini/programs/inputs.mini`   |
+| IR                         | `cargo mini --emit=ir mini/programs/inputs.mini`                  |
+| optimized IR, step by step | `cargo mini --emit=ir -O --print-after-each mini/programs/inputs.mini` |
+| JavaScript                 | `cargo mini -O mini/programs/inputs.mini`                         |
+| LLVM IR                    | `cargo mini --emit=llvm -O mini/programs/inputs.mini`             |
+| run (interpreter)          | `cargo mini run mini/programs/inputs.mini 4 100`                  |
+| run (native)               | `cargo mini build -O mini/programs/inputs.mini -o target/inputs && ./target/inputs 4 100` |
 
 Real compilers have the same switches, because their developers need to
 look at each layer as much as you do: `rustc -Zunpretty=ast-tree`,
@@ -38,7 +38,7 @@ Generate the LLVM IR **without** Mini's optimizer, and let LLVM's do
 the work instead:
 
 ```bash
-mini --emit=llvm mini/programs/inputs.mini > target/inputs.ll
+cargo mini --emit=llvm mini/programs/inputs.mini > target/inputs.ll
 clang -O2 -S -emit-llvm -Wno-override-module target/inputs.ll -o target/inputs.opt.ll
 ```
 
@@ -53,7 +53,7 @@ entry:
 }
 ```
 
-The same result as `mini -O`. Which LLVM pass did it? LLVM can print
+The same result as `cargo mini -O`. Which LLVM pass did it? LLVM can print
 the function after each pass that changed it, like your
 `--print-after-each`:
 
@@ -117,7 +117,7 @@ allocation and scheduling, down to bytes.
 Now a division:
 
 ```bash
-mini --emit=llvm mini/programs/division.mini > target/division.ll
+cargo mini --emit=llvm mini/programs/division.mini > target/division.ll
 clang -O2 -S -emit-llvm -Wno-override-module target/division.ll -o target/division.opt.ll
 clang -O2 -S -Wno-override-module target/division.ll -o target/division.s
 ```
@@ -150,7 +150,7 @@ Take a program whose division is unused, but must still fail:
 
 ```bash
 echo '0 * (x / y)' > target/ub.mini
-mini --emit=llvm target/ub.mini > target/ub.ll
+cargo mini --emit=llvm target/ub.mini > target/ub.ll
 ```
 
 Make a copy where the call to `@mini_div` is replaced by a plain `sdiv`,

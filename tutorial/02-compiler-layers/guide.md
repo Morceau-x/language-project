@@ -65,7 +65,7 @@ IDENT   = letter or "_", then letters, digits or "_"
 ```
 
 ```bash
-$ mini run mini/programs/division.mini 10 3       # total / count
+$ cargo mini run mini/programs/division.mini 10 3       # total / count
 3
 ```
 
@@ -243,8 +243,13 @@ expected and an actual value.
 
 ### The `mini` command
 
+The compiler you're building is a program called `mini`. To run it,
+use `cargo mini`, a shortcut defined in `.cargo/config.toml` at the
+workspace root: it rebuilds `mini` if its code changed, then runs it
+with your arguments. (It's short for `cargo run -q -p mini --`.)
+
 ```bash
-cargo run -q -p mini -- --help
+cargo mini --help
 ```
 
 ```text
@@ -264,14 +269,16 @@ Each layer starts working when you finish its part. Right now, only
 step 1's layers work, and only on programs without names:
 
 ```bash
-cargo run -q -p mini -- --emit=tokens mini/programs/arithmetic.mini
+cargo mini --emit=tokens mini/programs/arithmetic.mini
 ```
 
 ```bash
-cargo run -q -p mini -- --emit=ast mini/programs/arithmetic.mini
+cargo mini --emit=ast mini/programs/arithmetic.mini
 ```
 
-From here on, the guide writes `mini` for `cargo run -q -p mini --`.
+Run these from the workspace root, the folder with the top-level
+`Cargo.toml`: the file paths in the guide start from there. (If you'd
+rather type `mini`, add `alias mini='cargo mini'` to your `~/.zshrc`.)
 
 ### About the `#![allow(...)]` line in `lib.rs`
 

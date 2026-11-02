@@ -40,11 +40,31 @@ void yyerror(const char *message);
 
 /* Part 2d: precedence declarations go here. */
 
+%left '+' '-'
+%left '*' '/'
+%precedence NEG
+
 %%
 
 /* Part 2a: Mini's grammar goes here. For now, a program is one integer. */
 program:
-    INT                     { printf("%lld\n", $1); }
+    expr                     { printf("%lld\n", $1); }
+  ;
+
+expr:
+    expr '+' expr           { $$ = $1 + $3; }
+  | expr '-' expr           { $$ = $1 - $3; }
+  | expr '*' expr           { $$ = $1 * $3; }
+  | expr '/' expr           {
+                              if ($3 == 0) {
+                                  yyerror("division by zero");
+                                  YYABORT;
+                              }
+                              $$ = $1 / $3;
+                            }
+  | '-' expr %prec NEG      { $$ = -$2; }
+  | '(' expr ')'            { $$ = $2; }
+  | INT
   ;
 
 %%
