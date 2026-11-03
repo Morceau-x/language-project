@@ -1,0 +1,10 @@
+module Strings
+
+let plain = "Hello, world!"
+let escapes = "tab\there, newline\n, quote \", backslash \\, dollar \$, party \u{1F389}"
+let price = "costs $5"
+let greeting = "Hello, ${name}!"
+let summary = "${count} items, ${List.length(xs) * 2} halves, ${"nested ${inner} string"}"
+let empty = ""
+let unicode = "héllo, wörld, 日本"
+let braces = "${ { let a = 1 a } }"

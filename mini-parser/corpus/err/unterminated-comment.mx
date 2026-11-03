@@ -1,0 +1,4 @@
+module M
+
+/* never closed
+let x = 1

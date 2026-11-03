@@ -1,0 +1,50 @@
+module Matching
+
+import Geometry
+
+fn describe(n: Int) -> String {
+  match n {
+    0 -> "zero"
+    1 -> "one"
+    x if x > 100 -> "big"
+    _ -> "some"
+  }
+}
+
+fn head(xs: List<a>) -> Option<a> {
+  match xs {
+    [] -> None
+    [x, .._] -> Some(x)
+  }
+}
+
+fn sumPairs(xs: List<Int>) -> Int {
+  match xs {
+    [a, b, ..rest] -> a + b + sumPairs(rest)
+    [a] -> a
+    [] -> 0
+  }
+}
+
+fn area(s: Shape) -> Float {
+  match s {
+    Geometry.Circle(r) -> 3.14 * r * r
+    Geometry.Rect(w, h) -> w * h
+    Geometry.Empty -> 0.0
+  }
+}
+
+fn label(word: String, score: Float) -> String {
+  match word {
+    "hello" -> "greeting"
+    _ -> match score { 1.5 -> "exact" _ -> "other" }
+  }
+}
+
+fn nested(t: Tree<Int>) -> Int {
+  match t {
+    Node(Leaf, value, Node(_, right, _)) if value < right -> value
+    Node([first, ..others], _, _) -> first
+    _ -> 0
+  }
+}

@@ -1,0 +1,21 @@
+module Geometry
+
+type Shape =
+  | Circle(Float)
+  | Rect(Float, Float)
+
+type User = { name: String, age: Int }
+
+fn area(s: Shape) -> Float {
+  match s {
+    Circle(r) -> 3.14 * r * r
+    Rect(w, h) -> w * h
+  }
+}
+
+fn main() {
+  [Circle(1.0), Rect(2.0, 3.0)]
+  |> List.map(area)
+  |> List.sum
+  |> Debug.log
+}

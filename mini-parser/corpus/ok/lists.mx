@@ -1,0 +1,9 @@
+module Lists
+
+let empty = []
+let one = [1]
+let many = [1, 2, 3]
+let nested = [[1, 2], [], [3]]
+let spread = [0, ..many]
+let both = [x, y, ..rest |> List.reverse]
+let mixed = [fn(x) { x }, { 1 }, if a { b } else { c }]

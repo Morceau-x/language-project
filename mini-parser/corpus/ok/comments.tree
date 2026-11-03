@@ -1,0 +1,73 @@
+SOURCE_FILE@0..245
+  MODULE_HEADER@0..15
+    MODULE_KW@0..6 "module"
+    WHITESPACE@6..7 " "
+    NAME@7..15
+      UPPER_IDENT@7..15 "Comments"
+  WHITESPACE@15..17 "\n\n"
+  COMMENT@17..35 "// A line comment."
+  WHITESPACE@35..36 "\n"
+  COMMENT@36..74 "/* A block comment\n   on two lines. */"
+  WHITESPACE@74..75 "\n"
+  FN@75..158
+    FN_KW@75..77 "fn"
+    WHITESPACE@77..78 " "
+    NAME@78..79
+      LOWER_IDENT@78..79 "f"
+    PARAM_LIST@79..87
+      L_PAREN@79..80 "("
+      PARAM@80..86
+        NAME@80..81
+          LOWER_IDENT@80..81 "x"
+        COLON@81..82 ":"
+        WHITESPACE@82..83 " "
+        NAMED_TYPE@83..86
+          NAME_REF@83..86
+            UPPER_IDENT@83..86 "Int"
+      R_PAREN@86..87 ")"
+    WHITESPACE@87..88 " "
+    RET_TYPE@88..94
+      THIN_ARROW@88..90 "->"
+      WHITESPACE@90..91 " "
+      NAMED_TYPE@91..94
+        NAME_REF@91..94
+          UPPER_IDENT@91..94 "Int"
+    WHITESPACE@94..95 " "
+    BLOCK_EXPR@95..158
+      L_CURLY@95..96 "{"
+      WHITESPACE@96..97 " "
+      COMMENT@97..115 "// after the brace"
+      WHITESPACE@115..118 "\n  "
+      EXPR_STMT@118..136
+        BIN_EXPR@118..136
+          PATH_EXPR@118..119
+            NAME_REF@118..119
+              LOWER_IDENT@118..119 "x"
+          WHITESPACE@119..120 " "
+          COMMENT@120..132 "/* inline */"
+          WHITESPACE@132..133 " "
+          PLUS@133..134 "+"
+          WHITESPACE@134..135 " "
+          LITERAL@135..136
+            INT_NUMBER@135..136 "1"
+      WHITESPACE@136..137 " "
+      COMMENT@137..156 "// after the result"
+      WHITESPACE@156..157 "\n"
+      R_CURLY@157..158 "}"
+  WHITESPACE@158..159 " "
+  COMMENT@159..183 "/* after the function */"
+  WHITESPACE@183..185 "\n\n"
+  LET_DECL@185..217
+    LET_KW@185..188 "let"
+    WHITESPACE@188..189 " "
+    NAME@189..190
+      LOWER_IDENT@189..190 "y"
+    WHITESPACE@190..191 " "
+    EQ@191..192 "="
+    WHITESPACE@192..193 " "
+    COMMENT@193..215 "/* before the value */"
+    WHITESPACE@215..216 " "
+    LITERAL@216..217
+      INT_NUMBER@216..217 "2"
+  WHITESPACE@217..219 "\n\n"
+  COMMENT@219..245 "// At the end of the file."

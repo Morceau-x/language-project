@@ -1,0 +1,4 @@
+module M
+
+fn f() {
+  1 + 2

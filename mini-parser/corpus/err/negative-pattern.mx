@@ -1,0 +1,8 @@
+module M
+
+fn f(n: Int) -> Int {
+  match n {
+    -1 -> 0
+    _ -> 1
+  }
+}

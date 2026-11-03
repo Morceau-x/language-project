@@ -1,0 +1,217 @@
+SOURCE_FILE@0..218
+  MODULE_HEADER@0..12
+    MODULE_KW@0..6 "module"
+    WHITESPACE@6..7 " "
+    NAME@7..12
+      UPPER_IDENT@7..12 "Lists"
+  WHITESPACE@12..14 "\n\n"
+  LET_DECL@14..28
+    LET_KW@14..17 "let"
+    WHITESPACE@17..18 " "
+    NAME@18..23
+      LOWER_IDENT@18..23 "empty"
+    WHITESPACE@23..24 " "
+    EQ@24..25 "="
+    WHITESPACE@25..26 " "
+    LIST_EXPR@26..28
+      L_BRACK@26..27 "["
+      R_BRACK@27..28 "]"
+  WHITESPACE@28..29 "\n"
+  LET_DECL@29..42
+    LET_KW@29..32 "let"
+    WHITESPACE@32..33 " "
+    NAME@33..36
+      LOWER_IDENT@33..36 "one"
+    WHITESPACE@36..37 " "
+    EQ@37..38 "="
+    WHITESPACE@38..39 " "
+    LIST_EXPR@39..42
+      L_BRACK@39..40 "["
+      LITERAL@40..41
+        INT_NUMBER@40..41 "1"
+      R_BRACK@41..42 "]"
+  WHITESPACE@42..43 "\n"
+  LET_DECL@43..63
+    LET_KW@43..46 "let"
+    WHITESPACE@46..47 " "
+    NAME@47..51
+      LOWER_IDENT@47..51 "many"
+    WHITESPACE@51..52 " "
+    EQ@52..53 "="
+    WHITESPACE@53..54 " "
+    LIST_EXPR@54..63
+      L_BRACK@54..55 "["
+      LITERAL@55..56
+        INT_NUMBER@55..56 "1"
+      COMMA@56..57 ","
+      WHITESPACE@57..58 " "
+      LITERAL@58..59
+        INT_NUMBER@58..59 "2"
+      COMMA@59..60 ","
+      WHITESPACE@60..61 " "
+      LITERAL@61..62
+        INT_NUMBER@61..62 "3"
+      R_BRACK@62..63 "]"
+  WHITESPACE@63..64 "\n"
+  LET_DECL@64..94
+    LET_KW@64..67 "let"
+    WHITESPACE@67..68 " "
+    NAME@68..74
+      LOWER_IDENT@68..74 "nested"
+    WHITESPACE@74..75 " "
+    EQ@75..76 "="
+    WHITESPACE@76..77 " "
+    LIST_EXPR@77..94
+      L_BRACK@77..78 "["
+      LIST_EXPR@78..84
+        L_BRACK@78..79 "["
+        LITERAL@79..80
+          INT_NUMBER@79..80 "1"
+        COMMA@80..81 ","
+        WHITESPACE@81..82 " "
+        LITERAL@82..83
+          INT_NUMBER@82..83 "2"
+        R_BRACK@83..84 "]"
+      COMMA@84..85 ","
+      WHITESPACE@85..86 " "
+      LIST_EXPR@86..88
+        L_BRACK@86..87 "["
+        R_BRACK@87..88 "]"
+      COMMA@88..89 ","
+      WHITESPACE@89..90 " "
+      LIST_EXPR@90..93
+        L_BRACK@90..91 "["
+        LITERAL@91..92
+          INT_NUMBER@91..92 "3"
+        R_BRACK@92..93 "]"
+      R_BRACK@93..94 "]"
+  WHITESPACE@94..95 "\n"
+  LET_DECL@95..119
+    LET_KW@95..98 "let"
+    WHITESPACE@98..99 " "
+    NAME@99..105
+      LOWER_IDENT@99..105 "spread"
+    WHITESPACE@105..106 " "
+    EQ@106..107 "="
+    WHITESPACE@107..108 " "
+    LIST_EXPR@108..119
+      L_BRACK@108..109 "["
+      LITERAL@109..110
+        INT_NUMBER@109..110 "0"
+      COMMA@110..111 ","
+      WHITESPACE@111..112 " "
+      SPREAD@112..118
+        DOT2@112..114 ".."
+        PATH_EXPR@114..118
+          NAME_REF@114..118
+            LOWER_IDENT@114..118 "many"
+      R_BRACK@118..119 "]"
+  WHITESPACE@119..120 "\n"
+  LET_DECL@120..161
+    LET_KW@120..123 "let"
+    WHITESPACE@123..124 " "
+    NAME@124..128
+      LOWER_IDENT@124..128 "both"
+    WHITESPACE@128..129 " "
+    EQ@129..130 "="
+    WHITESPACE@130..131 " "
+    LIST_EXPR@131..161
+      L_BRACK@131..132 "["
+      PATH_EXPR@132..133
+        NAME_REF@132..133
+          LOWER_IDENT@132..133 "x"
+      COMMA@133..134 ","
+      WHITESPACE@134..135 " "
+      PATH_EXPR@135..136
+        NAME_REF@135..136
+          LOWER_IDENT@135..136 "y"
+      COMMA@136..137 ","
+      WHITESPACE@137..138 " "
+      SPREAD@138..160
+        DOT2@138..140 ".."
+        BIN_EXPR@140..160
+          PATH_EXPR@140..144
+            NAME_REF@140..144
+              LOWER_IDENT@140..144 "rest"
+          WHITESPACE@144..145 " "
+          PIPE_GT@145..147 "|>"
+          WHITESPACE@147..148 " "
+          FIELD_EXPR@148..160
+            PATH_EXPR@148..152
+              NAME_REF@148..152
+                UPPER_IDENT@148..152 "List"
+            DOT@152..153 "."
+            NAME_REF@153..160
+              LOWER_IDENT@153..160 "reverse"
+      R_BRACK@160..161 "]"
+  WHITESPACE@161..162 "\n"
+  LET_DECL@162..217
+    LET_KW@162..165 "let"
+    WHITESPACE@165..166 " "
+    NAME@166..171
+      LOWER_IDENT@166..171 "mixed"
+    WHITESPACE@171..172 " "
+    EQ@172..173 "="
+    WHITESPACE@173..174 " "
+    LIST_EXPR@174..217
+      L_BRACK@174..175 "["
+      LAMBDA_EXPR@175..186
+        FN_KW@175..177 "fn"
+        PARAM_LIST@177..180
+          L_PAREN@177..178 "("
+          PARAM@178..179
+            NAME@178..179
+              LOWER_IDENT@178..179 "x"
+          R_PAREN@179..180 ")"
+        WHITESPACE@180..181 " "
+        BLOCK_EXPR@181..186
+          L_CURLY@181..182 "{"
+          WHITESPACE@182..183 " "
+          EXPR_STMT@183..184
+            PATH_EXPR@183..184
+              NAME_REF@183..184
+                LOWER_IDENT@183..184 "x"
+          WHITESPACE@184..185 " "
+          R_CURLY@185..186 "}"
+      COMMA@186..187 ","
+      WHITESPACE@187..188 " "
+      BLOCK_EXPR@188..193
+        L_CURLY@188..189 "{"
+        WHITESPACE@189..190 " "
+        EXPR_STMT@190..191
+          LITERAL@190..191
+            INT_NUMBER@190..191 "1"
+        WHITESPACE@191..192 " "
+        R_CURLY@192..193 "}"
+      COMMA@193..194 ","
+      WHITESPACE@194..195 " "
+      IF_EXPR@195..216
+        IF_KW@195..197 "if"
+        WHITESPACE@197..198 " "
+        PATH_EXPR@198..199
+          NAME_REF@198..199
+            LOWER_IDENT@198..199 "a"
+        WHITESPACE@199..200 " "
+        BLOCK_EXPR@200..205
+          L_CURLY@200..201 "{"
+          WHITESPACE@201..202 " "
+          EXPR_STMT@202..203
+            PATH_EXPR@202..203
+              NAME_REF@202..203
+                LOWER_IDENT@202..203 "b"
+          WHITESPACE@203..204 " "
+          R_CURLY@204..205 "}"
+        WHITESPACE@205..206 " "
+        ELSE_KW@206..210 "else"
+        WHITESPACE@210..211 " "
+        BLOCK_EXPR@211..216
+          L_CURLY@211..212 "{"
+          WHITESPACE@212..213 " "
+          EXPR_STMT@213..214
+            PATH_EXPR@213..214
+              NAME_REF@213..214
+                LOWER_IDENT@213..214 "c"
+          WHITESPACE@214..215 " "
+          R_CURLY@215..216 "}"
+      R_BRACK@216..217 "]"
+  WHITESPACE@217..218 "\n"

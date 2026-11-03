@@ -1,0 +1,5 @@
+module M
+
+fn f(s: Geo.Shape) -> Int {
+  1
+}

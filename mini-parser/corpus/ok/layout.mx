@@ -1,0 +1,32 @@
+module Layout
+
+fn main() {
+  let total = 1 +
+    2
+  let more = total
+    - 1
+  log(total)
+  (more) |> log
+  [1, 2, 3]
+    |> List.map(double)
+    |> List.sum
+  user
+    .name
+    .length
+  result
+    ?
+}
+
+let pair = make(
+  1,
+  2
+)
+
+fn
+f
+(
+x
+)
+{
+x
+}

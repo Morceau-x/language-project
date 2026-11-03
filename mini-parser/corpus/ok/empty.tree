@@ -1,0 +1,7 @@
+SOURCE_FILE@0..13
+  MODULE_HEADER@0..12
+    MODULE_KW@0..6 "module"
+    WHITESPACE@6..7 " "
+    NAME@7..12
+      UPPER_IDENT@7..12 "Empty"
+  WHITESPACE@12..13 "\n"

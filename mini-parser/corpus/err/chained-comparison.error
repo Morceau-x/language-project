@@ -1,0 +1,1 @@
+error 25..26: comparisons can't be chained: write `a < b && b < c`

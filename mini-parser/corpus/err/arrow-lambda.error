@@ -1,0 +1,1 @@
+error 27..29: lambdas are written `fn(x) { … }` in Maxim

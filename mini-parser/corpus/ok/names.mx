@@ -1,0 +1,9 @@
+module Names
+
+let _private = 1
+let snake_case = 2
+let camelCase = 3
+let x2 = 4
+let a_ = _private + snake_case + camelCase + x2
+let modules = Html.Attributes.class
+let fnord = iffy + matches + letter + typed + elsewhere

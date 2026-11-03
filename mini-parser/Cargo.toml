@@ -1,0 +1,16 @@
+[package]
+name = "mini-parser"
+version = "0.1.0"
+edition = "2024"
+description = "A lexer and parser for Maxim, built like rust-analyzer's (step 3 of ../tutorial)"
+
+# No dependencies: every part of the lexer and the parser is yours.
+
+[dev-dependencies]
+# Snapshot tests, the way rust-analyzer writes them (it's their crate).
+expect-test = "1.5"
+# Random inputs: the parser must never panic and never lose text.
+proptest = "1"
+# The reference Maxim compiler: its parser decides what's valid Maxim,
+# and the differential tests check that yours agrees.
+maxim-compiler = { path = "../example" }

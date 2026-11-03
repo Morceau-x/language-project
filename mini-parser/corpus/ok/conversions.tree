@@ -1,0 +1,390 @@
+SOURCE_FILE@0..493
+  MODULE_HEADER@0..18
+    MODULE_KW@0..6 "module"
+    WHITESPACE@6..7 " "
+    NAME@7..18
+      UPPER_IDENT@7..18 "Conversions"
+  WHITESPACE@18..20 "\n\n"
+  CAST@20..72
+    CAST_KW@20..24 "cast"
+    WHITESPACE@24..25 " "
+    PARAM_LIST@25..35
+      L_PAREN@25..26 "("
+      PARAM@26..34
+        NAME@26..27
+          LOWER_IDENT@26..27 "d"
+        COLON@27..28 ":"
+        WHITESPACE@28..29 " "
+        NAMED_TYPE@29..34
+          NAME_REF@29..34
+            UPPER_IDENT@29..34 "Float"
+      R_PAREN@34..35 ")"
+    WHITESPACE@35..36 " "
+    RET_TYPE@36..46
+      THIN_ARROW@36..38 "->"
+      WHITESPACE@38..39 " "
+      NAMED_TYPE@39..46
+        NAME_REF@39..46
+          UPPER_IDENT@39..46 "Celsius"
+    WHITESPACE@46..47 " "
+    BLOCK_EXPR@47..72
+      L_CURLY@47..48 "{"
+      WHITESPACE@48..51 "\n  "
+      EXPR_STMT@51..70
+        CALL_EXPR@51..70
+          PATH_EXPR@51..58
+            NAME_REF@51..58
+              UPPER_IDENT@51..58 "Celsius"
+          ARG_LIST@58..70
+            L_PAREN@58..59 "("
+            LABELED_ARG@59..69
+              NAME_REF@59..66
+                LOWER_IDENT@59..66 "degrees"
+              COLON@66..67 ":"
+              WHITESPACE@67..68 " "
+              PATH_EXPR@68..69
+                NAME_REF@68..69
+                  LOWER_IDENT@68..69 "d"
+            R_PAREN@69..70 ")"
+      WHITESPACE@70..71 "\n"
+      R_CURLY@71..72 "}"
+  WHITESPACE@72..74 "\n\n"
+  CAST@74..161
+    CAST_KW@74..78 "cast"
+    WHITESPACE@78..79 " "
+    PARAM_LIST@79..91
+      L_PAREN@79..80 "("
+      PARAM@80..90
+        NAME@80..81
+          LOWER_IDENT@80..81 "c"
+        COLON@81..82 ":"
+        WHITESPACE@82..83 " "
+        NAMED_TYPE@83..90
+          NAME_REF@83..90
+            UPPER_IDENT@83..90 "Celsius"
+      R_PAREN@90..91 ")"
+    WHITESPACE@91..92 " "
+    RET_TYPE@92..105
+      THIN_ARROW@92..94 "->"
+      WHITESPACE@94..95 " "
+      NAMED_TYPE@95..105
+        NAME_REF@95..105
+          UPPER_IDENT@95..105 "Fahrenheit"
+    WHITESPACE@105..106 " "
+    BLOCK_EXPR@106..161
+      L_CURLY@106..107 "{"
+      WHITESPACE@107..110 "\n  "
+      EXPR_STMT@110..159
+        CALL_EXPR@110..159
+          PATH_EXPR@110..120
+            NAME_REF@110..120
+              UPPER_IDENT@110..120 "Fahrenheit"
+          ARG_LIST@120..159
+            L_PAREN@120..121 "("
+            LABELED_ARG@121..158
+              NAME_REF@121..128
+                LOWER_IDENT@121..128 "degrees"
+              COLON@128..129 ":"
+              WHITESPACE@129..130 " "
+              BIN_EXPR@130..158
+                BIN_EXPR@130..151
+                  BIN_EXPR@130..145
+                    FIELD_EXPR@130..139
+                      PATH_EXPR@130..131
+                        NAME_REF@130..131
+                          LOWER_IDENT@130..131 "c"
+                      DOT@131..132 "."
+                      NAME_REF@132..139
+                        LOWER_IDENT@132..139 "degrees"
+                    WHITESPACE@139..140 " "
+                    STAR@140..141 "*"
+                    WHITESPACE@141..142 " "
+                    LITERAL@142..145
+                      FLOAT_NUMBER@142..145 "9.0"
+                  WHITESPACE@145..146 " "
+                  SLASH@146..147 "/"
+                  WHITESPACE@147..148 " "
+                  LITERAL@148..151
+                    FLOAT_NUMBER@148..151 "5.0"
+                WHITESPACE@151..152 " "
+                PLUS@152..153 "+"
+                WHITESPACE@153..154 " "
+                LITERAL@154..158
+                  FLOAT_NUMBER@154..158 "32.0"
+            R_PAREN@158..159 ")"
+      WHITESPACE@159..160 "\n"
+      R_CURLY@160..161 "}"
+  WHITESPACE@161..163 "\n\n"
+  FN@163..277
+    FN_KW@163..165 "fn"
+    WHITESPACE@165..166 " "
+    NAME@166..171
+      LOWER_IDENT@166..171 "parse"
+    PARAM_LIST@171..185
+      L_PAREN@171..172 "("
+      PARAM@172..184
+        NAME@172..176
+          LOWER_IDENT@172..176 "text"
+        COLON@176..177 ":"
+        WHITESPACE@177..178 " "
+        NAMED_TYPE@178..184
+          NAME_REF@178..184
+            UPPER_IDENT@178..184 "String"
+      R_PAREN@184..185 ")"
+    WHITESPACE@185..186 " "
+    RET_TYPE@186..208
+      THIN_ARROW@186..188 "->"
+      WHITESPACE@188..189 " "
+      NAMED_TYPE@189..208
+        NAME_REF@189..195
+          UPPER_IDENT@189..195 "Result"
+        TYPE_ARG_LIST@195..208
+          L_ANGLE@195..196 "<"
+          NAMED_TYPE@196..199
+            NAME_REF@196..199
+              UPPER_IDENT@196..199 "Int"
+          COMMA@199..200 ","
+          WHITESPACE@200..201 " "
+          NAMED_TYPE@201..207
+            NAME_REF@201..207
+              UPPER_IDENT@201..207 "String"
+          R_ANGLE@207..208 ">"
+    WHITESPACE@208..209 " "
+    BLOCK_EXPR@209..277
+      L_CURLY@209..210 "{"
+      WHITESPACE@210..213 "\n  "
+      LET_STMT@213..237
+        LET_KW@213..216 "let"
+        WHITESPACE@216..217 " "
+        NAME@217..218
+          LOWER_IDENT@217..218 "n"
+        WHITESPACE@218..219 " "
+        EQ@219..220 "="
+        WHITESPACE@220..221 " "
+        TRY_EXPR@221..237
+          CALL_EXPR@221..236
+            FIELD_EXPR@221..230
+              PATH_EXPR@221..224
+                NAME_REF@221..224
+                  UPPER_IDENT@221..224 "Int"
+              DOT@224..225 "."
+              NAME_REF@225..230
+                LOWER_IDENT@225..230 "parse"
+            ARG_LIST@230..236
+              L_PAREN@230..231 "("
+              PATH_EXPR@231..235
+                NAME_REF@231..235
+                  LOWER_IDENT@231..235 "text"
+              R_PAREN@235..236 ")"
+          QUESTION@236..237 "?"
+      WHITESPACE@237..240 "\n  "
+      LET_STMT@240..263
+        LET_KW@240..243 "let"
+        WHITESPACE@243..244 " "
+        NAME@244..245
+          LOWER_IDENT@244..245 "m"
+        WHITESPACE@245..246 " "
+        EQ@246..247 "="
+        WHITESPACE@247..248 " "
+        TRY_EXPR@248..263
+          CALL_EXPR@248..262
+            FIELD_EXPR@248..257
+              PATH_EXPR@248..251
+                NAME_REF@248..251
+                  UPPER_IDENT@248..251 "Int"
+              DOT@251..252 "."
+              NAME_REF@252..257
+                LOWER_IDENT@252..257 "parse"
+            ARG_LIST@257..262
+              L_PAREN@257..258 "("
+              LITERAL@258..261
+                STRING@258..261 "\"2\""
+              R_PAREN@261..262 ")"
+          QUESTION@262..263 "?"
+      WHITESPACE@263..266 "\n  "
+      EXPR_STMT@266..275
+        CALL_EXPR@266..275
+          PATH_EXPR@266..268
+            NAME_REF@266..268
+              UPPER_IDENT@266..268 "Ok"
+          ARG_LIST@268..275
+            L_PAREN@268..269 "("
+            BIN_EXPR@269..274
+              PATH_EXPR@269..270
+                NAME_REF@269..270
+                  LOWER_IDENT@269..270 "n"
+              WHITESPACE@270..271 " "
+              PLUS@271..272 "+"
+              WHITESPACE@272..273 " "
+              PATH_EXPR@273..274
+                NAME_REF@273..274
+                  LOWER_IDENT@273..274 "m"
+            R_PAREN@274..275 ")"
+      WHITESPACE@275..276 "\n"
+      R_CURLY@276..277 "}"
+  WHITESPACE@277..279 "\n\n"
+  FN@279..350
+    FN_KW@279..281 "fn"
+    WHITESPACE@281..282 " "
+    NAME@282..286
+      LOWER_IDENT@282..286 "warm"
+    PARAM_LIST@286..288
+      L_PAREN@286..287 "("
+      R_PAREN@287..288 ")"
+    WHITESPACE@288..289 " "
+    RET_TYPE@289..302
+      THIN_ARROW@289..291 "->"
+      WHITESPACE@291..292 " "
+      NAMED_TYPE@292..302
+        NAME_REF@292..302
+          UPPER_IDENT@292..302 "Fahrenheit"
+    WHITESPACE@302..303 " "
+    BLOCK_EXPR@303..350
+      L_CURLY@303..304 "{"
+      WHITESPACE@304..307 "\n  "
+      LET_STMT@307..330
+        LET_KW@307..310 "let"
+        WHITESPACE@310..311 " "
+        NAME@311..312
+          LOWER_IDENT@311..312 "t"
+        WHITESPACE@312..313 " "
+        EQ@313..314 "="
+        WHITESPACE@314..315 " "
+        CAST_EXPR@315..330
+          LITERAL@315..319
+            FLOAT_NUMBER@315..319 "21.5"
+          WHITESPACE@319..320 " "
+          COLON2@320..322 "::"
+          WHITESPACE@322..323 " "
+          NAME_REF@323..330
+            UPPER_IDENT@323..330 "Celsius"
+      WHITESPACE@330..333 "\n  "
+      EXPR_STMT@333..348
+        CAST_EXPR@333..348
+          PATH_EXPR@333..334
+            NAME_REF@333..334
+              LOWER_IDENT@333..334 "t"
+          WHITESPACE@334..335 " "
+          COLON2@335..337 "::"
+          WHITESPACE@337..338 " "
+          NAME_REF@338..348
+            UPPER_IDENT@338..348 "Fahrenheit"
+      WHITESPACE@348..349 "\n"
+      R_CURLY@349..350 "}"
+  WHITESPACE@350..352 "\n\n"
+  FN@352..432
+    FN_KW@352..354 "fn"
+    WHITESPACE@354..355 " "
+    NAME@355..363
+      LOWER_IDENT@355..363 "userName"
+    PARAM_LIST@363..388
+      L_PAREN@363..364 "("
+      PARAM@364..387
+        NAME@364..365
+          LOWER_IDENT@364..365 "r"
+        COLON@365..366 ":"
+        WHITESPACE@366..367 " "
+        NAMED_TYPE@367..387
+          NAME_REF@367..373
+            UPPER_IDENT@367..373 "Result"
+          TYPE_ARG_LIST@373..387
+            L_ANGLE@373..374 "<"
+            NAMED_TYPE@374..378
+              NAME_REF@374..378
+                UPPER_IDENT@374..378 "User"
+            COMMA@378..379 ","
+            WHITESPACE@379..380 " "
+            NAMED_TYPE@380..386
+              NAME_REF@380..386
+                UPPER_IDENT@380..386 "String"
+            R_ANGLE@386..387 ">"
+      R_PAREN@387..388 ")"
+    WHITESPACE@388..389 " "
+    RET_TYPE@389..414
+      THIN_ARROW@389..391 "->"
+      WHITESPACE@391..392 " "
+      NAMED_TYPE@392..414
+        NAME_REF@392..398
+          UPPER_IDENT@392..398 "Result"
+        TYPE_ARG_LIST@398..414
+          L_ANGLE@398..399 "<"
+          NAMED_TYPE@399..405
+            NAME_REF@399..405
+              UPPER_IDENT@399..405 "String"
+          COMMA@405..406 ","
+          WHITESPACE@406..407 " "
+          NAMED_TYPE@407..413
+            NAME_REF@407..413
+              UPPER_IDENT@407..413 "String"
+          R_ANGLE@413..414 ">"
+    WHITESPACE@414..415 " "
+    BLOCK_EXPR@415..432
+      L_CURLY@415..416 "{"
+      WHITESPACE@416..419 "\n  "
+      EXPR_STMT@419..430
+        CALL_EXPR@419..430
+          PATH_EXPR@419..421
+            NAME_REF@419..421
+              UPPER_IDENT@419..421 "Ok"
+          ARG_LIST@421..430
+            L_PAREN@421..422 "("
+            FIELD_EXPR@422..429
+              TRY_EXPR@422..424
+                PATH_EXPR@422..423
+                  NAME_REF@422..423
+                    LOWER_IDENT@422..423 "r"
+                QUESTION@423..424 "?"
+              DOT@424..425 "."
+              NAME_REF@425..429
+                LOWER_IDENT@425..429 "name"
+            R_PAREN@429..430 ")"
+      WHITESPACE@430..431 "\n"
+      R_CURLY@431..432 "}"
+  WHITESPACE@432..434 "\n\n"
+  FN@434..492
+    FN_KW@434..436 "fn"
+    WHITESPACE@436..437 " "
+    NAME@437..444
+      LOWER_IDENT@437..444 "convert"
+    PARAM_LIST@444..454
+      L_PAREN@444..445 "("
+      PARAM@445..453
+        NAME@445..446
+          LOWER_IDENT@445..446 "x"
+        COLON@446..447 ":"
+        WHITESPACE@447..448 " "
+        NAMED_TYPE@448..453
+          NAME_REF@448..453
+            UPPER_IDENT@448..453 "Float"
+      R_PAREN@453..454 ")"
+    WHITESPACE@454..455 " "
+    RET_TYPE@455..463
+      THIN_ARROW@455..457 "->"
+      WHITESPACE@457..458 " "
+      NAMED_TYPE@458..463
+        NAME_REF@458..463
+          UPPER_IDENT@458..463 "Float"
+    WHITESPACE@463..464 " "
+    BLOCK_EXPR@464..492
+      L_CURLY@464..465 "{"
+      WHITESPACE@465..468 "\n  "
+      EXPR_STMT@468..490
+        FIELD_EXPR@468..490
+          PAREN_EXPR@468..482
+            L_PAREN@468..469 "("
+            CAST_EXPR@469..481
+              PATH_EXPR@469..470
+                NAME_REF@469..470
+                  LOWER_IDENT@469..470 "x"
+              WHITESPACE@470..471 " "
+              COLON2@471..473 "::"
+              WHITESPACE@473..474 " "
+              NAME_REF@474..481
+                UPPER_IDENT@474..481 "Celsius"
+            R_PAREN@481..482 ")"
+          DOT@482..483 "."
+          NAME_REF@483..490
+            LOWER_IDENT@483..490 "degrees"
+      WHITESPACE@490..491 "\n"
+      R_CURLY@491..492 "}"
+  WHITESPACE@492..493 "\n"

@@ -1,0 +1,259 @@
+SOURCE_FILE@0..309
+  MODULE_HEADER@0..15
+    MODULE_KW@0..6 "module"
+    WHITESPACE@6..7 " "
+    NAME@7..15
+      UPPER_IDENT@7..15 "Geometry"
+  WHITESPACE@15..17 "\n\n"
+  TYPE_DECL@17..70
+    TYPE_KW@17..21 "type"
+    WHITESPACE@21..22 " "
+    NAME@22..27
+      UPPER_IDENT@22..27 "Shape"
+    WHITESPACE@27..28 " "
+    EQ@28..29 "="
+    WHITESPACE@29..32 "\n  "
+    VARIANT_LIST@32..70
+      PIPE@32..33 "|"
+      WHITESPACE@33..34 " "
+      VARIANT@34..47
+        NAME@34..40
+          UPPER_IDENT@34..40 "Circle"
+        TUPLE_FIELD_LIST@40..47
+          L_PAREN@40..41 "("
+          NAMED_TYPE@41..46
+            NAME_REF@41..46
+              UPPER_IDENT@41..46 "Float"
+          R_PAREN@46..47 ")"
+      WHITESPACE@47..50 "\n  "
+      PIPE@50..51 "|"
+      WHITESPACE@51..52 " "
+      VARIANT@52..70
+        NAME@52..56
+          UPPER_IDENT@52..56 "Rect"
+        TUPLE_FIELD_LIST@56..70
+          L_PAREN@56..57 "("
+          NAMED_TYPE@57..62
+            NAME_REF@57..62
+              UPPER_IDENT@57..62 "Float"
+          COMMA@62..63 ","
+          WHITESPACE@63..64 " "
+          NAMED_TYPE@64..69
+            NAME_REF@64..69
+              UPPER_IDENT@64..69 "Float"
+          R_PAREN@69..70 ")"
+  WHITESPACE@70..72 "\n\n"
+  TYPE_DECL@72..110
+    TYPE_KW@72..76 "type"
+    WHITESPACE@76..77 " "
+    NAME@77..81
+      UPPER_IDENT@77..81 "User"
+    WHITESPACE@81..82 " "
+    EQ@82..83 "="
+    WHITESPACE@83..84 " "
+    RECORD_FIELD_LIST@84..110
+      L_CURLY@84..85 "{"
+      WHITESPACE@85..86 " "
+      RECORD_FIELD@86..98
+        NAME@86..90
+          LOWER_IDENT@86..90 "name"
+        COLON@90..91 ":"
+        WHITESPACE@91..92 " "
+        NAMED_TYPE@92..98
+          NAME_REF@92..98
+            UPPER_IDENT@92..98 "String"
+      COMMA@98..99 ","
+      WHITESPACE@99..100 " "
+      RECORD_FIELD@100..108
+        NAME@100..103
+          LOWER_IDENT@100..103 "age"
+        COLON@103..104 ":"
+        WHITESPACE@104..105 " "
+        NAMED_TYPE@105..108
+          NAME_REF@105..108
+            UPPER_IDENT@105..108 "Int"
+      WHITESPACE@108..109 " "
+      R_CURLY@109..110 "}"
+  WHITESPACE@110..112 "\n\n"
+  FN@112..212
+    FN_KW@112..114 "fn"
+    WHITESPACE@114..115 " "
+    NAME@115..119
+      LOWER_IDENT@115..119 "area"
+    PARAM_LIST@119..129
+      L_PAREN@119..120 "("
+      PARAM@120..128
+        NAME@120..121
+          LOWER_IDENT@120..121 "s"
+        COLON@121..122 ":"
+        WHITESPACE@122..123 " "
+        NAMED_TYPE@123..128
+          NAME_REF@123..128
+            UPPER_IDENT@123..128 "Shape"
+      R_PAREN@128..129 ")"
+    WHITESPACE@129..130 " "
+    RET_TYPE@130..138
+      THIN_ARROW@130..132 "->"
+      WHITESPACE@132..133 " "
+      NAMED_TYPE@133..138
+        NAME_REF@133..138
+          UPPER_IDENT@133..138 "Float"
+    WHITESPACE@138..139 " "
+    BLOCK_EXPR@139..212
+      L_CURLY@139..140 "{"
+      WHITESPACE@140..143 "\n  "
+      EXPR_STMT@143..210
+        MATCH_EXPR@143..210
+          MATCH_KW@143..148 "match"
+          WHITESPACE@148..149 " "
+          PATH_EXPR@149..150
+            NAME_REF@149..150
+              LOWER_IDENT@149..150 "s"
+          WHITESPACE@150..151 " "
+          MATCH_ARM_LIST@151..210
+            L_CURLY@151..152 "{"
+            WHITESPACE@152..157 "\n    "
+            MATCH_ARM@157..182
+              CTOR_PAT@157..166
+                NAME_REF@157..163
+                  UPPER_IDENT@157..163 "Circle"
+                L_PAREN@163..164 "("
+                IDENT_PAT@164..165
+                  NAME@164..165
+                    LOWER_IDENT@164..165 "r"
+                R_PAREN@165..166 ")"
+              WHITESPACE@166..167 " "
+              THIN_ARROW@167..169 "->"
+              WHITESPACE@169..170 " "
+              BIN_EXPR@170..182
+                BIN_EXPR@170..178
+                  LITERAL@170..174
+                    FLOAT_NUMBER@170..174 "3.14"
+                  WHITESPACE@174..175 " "
+                  STAR@175..176 "*"
+                  WHITESPACE@176..177 " "
+                  PATH_EXPR@177..178
+                    NAME_REF@177..178
+                      LOWER_IDENT@177..178 "r"
+                WHITESPACE@178..179 " "
+                STAR@179..180 "*"
+                WHITESPACE@180..181 " "
+                PATH_EXPR@181..182
+                  NAME_REF@181..182
+                    LOWER_IDENT@181..182 "r"
+            WHITESPACE@182..187 "\n    "
+            MATCH_ARM@187..206
+              CTOR_PAT@187..197
+                NAME_REF@187..191
+                  UPPER_IDENT@187..191 "Rect"
+                L_PAREN@191..192 "("
+                IDENT_PAT@192..193
+                  NAME@192..193
+                    LOWER_IDENT@192..193 "w"
+                COMMA@193..194 ","
+                WHITESPACE@194..195 " "
+                IDENT_PAT@195..196
+                  NAME@195..196
+                    LOWER_IDENT@195..196 "h"
+                R_PAREN@196..197 ")"
+              WHITESPACE@197..198 " "
+              THIN_ARROW@198..200 "->"
+              WHITESPACE@200..201 " "
+              BIN_EXPR@201..206
+                PATH_EXPR@201..202
+                  NAME_REF@201..202
+                    LOWER_IDENT@201..202 "w"
+                WHITESPACE@202..203 " "
+                STAR@203..204 "*"
+                WHITESPACE@204..205 " "
+                PATH_EXPR@205..206
+                  NAME_REF@205..206
+                    LOWER_IDENT@205..206 "h"
+            WHITESPACE@206..209 "\n  "
+            R_CURLY@209..210 "}"
+      WHITESPACE@210..211 "\n"
+      R_CURLY@211..212 "}"
+  WHITESPACE@212..214 "\n\n"
+  FN@214..308
+    FN_KW@214..216 "fn"
+    WHITESPACE@216..217 " "
+    NAME@217..221
+      LOWER_IDENT@217..221 "main"
+    PARAM_LIST@221..223
+      L_PAREN@221..222 "("
+      R_PAREN@222..223 ")"
+    WHITESPACE@223..224 " "
+    BLOCK_EXPR@224..308
+      L_CURLY@224..225 "{"
+      WHITESPACE@225..228 "\n  "
+      EXPR_STMT@228..306
+        BIN_EXPR@228..306
+          BIN_EXPR@228..291
+            BIN_EXPR@228..277
+              LIST_EXPR@228..257
+                L_BRACK@228..229 "["
+                CALL_EXPR@229..240
+                  PATH_EXPR@229..235
+                    NAME_REF@229..235
+                      UPPER_IDENT@229..235 "Circle"
+                  ARG_LIST@235..240
+                    L_PAREN@235..236 "("
+                    LITERAL@236..239
+                      FLOAT_NUMBER@236..239 "1.0"
+                    R_PAREN@239..240 ")"
+                COMMA@240..241 ","
+                WHITESPACE@241..242 " "
+                CALL_EXPR@242..256
+                  PATH_EXPR@242..246
+                    NAME_REF@242..246
+                      UPPER_IDENT@242..246 "Rect"
+                  ARG_LIST@246..256
+                    L_PAREN@246..247 "("
+                    LITERAL@247..250
+                      FLOAT_NUMBER@247..250 "2.0"
+                    COMMA@250..251 ","
+                    WHITESPACE@251..252 " "
+                    LITERAL@252..255
+                      FLOAT_NUMBER@252..255 "3.0"
+                    R_PAREN@255..256 ")"
+                R_BRACK@256..257 "]"
+              WHITESPACE@257..260 "\n  "
+              PIPE_GT@260..262 "|>"
+              WHITESPACE@262..263 " "
+              CALL_EXPR@263..277
+                FIELD_EXPR@263..271
+                  PATH_EXPR@263..267
+                    NAME_REF@263..267
+                      UPPER_IDENT@263..267 "List"
+                  DOT@267..268 "."
+                  NAME_REF@268..271
+                    LOWER_IDENT@268..271 "map"
+                ARG_LIST@271..277
+                  L_PAREN@271..272 "("
+                  PATH_EXPR@272..276
+                    NAME_REF@272..276
+                      LOWER_IDENT@272..276 "area"
+                  R_PAREN@276..277 ")"
+            WHITESPACE@277..280 "\n  "
+            PIPE_GT@280..282 "|>"
+            WHITESPACE@282..283 " "
+            FIELD_EXPR@283..291
+              PATH_EXPR@283..287
+                NAME_REF@283..287
+                  UPPER_IDENT@283..287 "List"
+              DOT@287..288 "."
+              NAME_REF@288..291
+                LOWER_IDENT@288..291 "sum"
+          WHITESPACE@291..294 "\n  "
+          PIPE_GT@294..296 "|>"
+          WHITESPACE@296..297 " "
+          FIELD_EXPR@297..306
+            PATH_EXPR@297..302
+              NAME_REF@297..302
+                UPPER_IDENT@297..302 "Debug"
+            DOT@302..303 "."
+            NAME_REF@303..306
+              LOWER_IDENT@303..306 "log"
+      WHITESPACE@306..307 "\n"
+      R_CURLY@307..308 "}"
+  WHITESPACE@308..309 "\n"

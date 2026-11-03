@@ -1,0 +1,11 @@
+module Card
+
+import Html
+
+component Card(title: String, urgent: Bool)
+
+component Empty()
+
+fn view(title: String) -> Html<msg> {
+  Html.text(title)
+}

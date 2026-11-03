@@ -7,6 +7,9 @@
       <sourceFolder url="file://$MODULE_DIR$/mini/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/mini/tests" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/mini/examples" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/mini-parser/check-grammar/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/mini-parser/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/mini-parser/tests" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />

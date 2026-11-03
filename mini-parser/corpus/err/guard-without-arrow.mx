@@ -1,0 +1,7 @@
+module M
+
+fn f(n: Int) -> Int {
+  match n {
+    x if x > 0 x
+  }
+}

@@ -1,0 +1,1 @@
+error 12..13: expected the function's name: a lambda can't stand alone at the top level

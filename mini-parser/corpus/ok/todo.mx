@@ -1,0 +1,75 @@
+module Todo
+
+import List
+import String
+
+type Priority = Low | Medium | High
+
+type Task = {
+  title: String,
+  done: Bool,
+  priority: Priority,
+  tags: List<String>
+}
+
+type Msg =
+  | Add(String)
+  | Toggle(Int)
+  | Remove(Int)
+  | Clear
+
+let initial: List<Task> = []
+
+fn priorityLabel(p: Priority) -> String {
+  match p {
+    Low -> "low"
+    Medium -> "medium"
+    High -> "high!"
+  }
+}
+
+fn update(msg: Msg, tasks: List<Task>) -> List<Task> {
+  match msg {
+    Add(title) if String.isEmpty(title) -> tasks
+    Add(title) -> [Task(title: title, done: False, priority: Medium, tags: []), ..tasks]
+    Toggle(index) ->
+      List.indexedMap(tasks, fn(i, task) {
+        if i == index { Task(..task, done: !task.done) } else { task }
+      })
+    Remove(index) -> List.removeAt(tasks, index)
+    Clear -> tasks |> List.filter(fn(t) { !t.done })
+  }
+}
+
+fn summary(tasks: List<Task>) -> String {
+  let open = tasks |> List.filter(fn(t) { !t.done }) |> List.length
+  let total = List.length(tasks)
+  "${open} of ${total} tasks left (${total - open} done)"
+}
+
+fn percentDone(tasks: List<Task>) -> Int {
+  let total = List.length(tasks)
+  if total == 0 {
+    100
+  } else {
+    let done = tasks |> List.filter(fn(t) { t.done }) |> List.length
+    done * 100 ~/ total
+  }
+}
+
+fn tagged(tasks: List<Task>, tag: String) -> List<String> {
+  tasks
+    |> List.filter(fn(t) { List.member(tag, t.tags) })
+    |> List.map(fn(t) { t.title })
+}
+
+fn firstUrgent(tasks: List<Task>) -> Option<Task> {
+  match tasks {
+    [] -> None
+    [task, ..rest] ->
+      match task.priority {
+        High -> Some(task)
+        _ -> firstUrgent(rest)
+      }
+  }
+}

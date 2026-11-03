@@ -1,0 +1,37 @@
+module Types
+
+import List
+
+type Option<a> = Some(a) | None
+
+type Result<a, e> =
+  | Ok(a)
+  | Err(e)
+
+type Point = { x: Float, y: Float }
+
+type Tree<a> =
+  | Leaf
+  | Node(Tree<a>, a, Tree<a>)
+
+type Button<msg> = { label: String, onClick: (Int) -> msg }
+
+fn map(xs: List<a>, f: (a) -> b) -> List<b> {
+  List.map(xs, f)
+}
+
+fn compose(f: (b) -> c, g: (a) -> b) -> (a) -> c {
+  fn(x) { f(g(x)) }
+}
+
+fn fold(xs: List<a>, init: b, step: (acc: b, item: a) -> b) -> b {
+  List.foldl(xs, init, step)
+}
+
+fn constant() -> () -> Int {
+  fn() { 42 }
+}
+
+fn nested(table: Dict<String, List<Option<Int>>>) -> Int {
+  0
+}

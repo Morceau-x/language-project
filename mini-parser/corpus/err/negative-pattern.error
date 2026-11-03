@@ -1,0 +1,1 @@
+error 48..49: expected a match arm: negative numbers can't be patterns

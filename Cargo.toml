@@ -5,4 +5,6 @@ resolver = "3"
 members = [
     "example", # the full Maxim compiler, kept as a reference
     "mini",    # the compiler you build step by step (see tutorial/)
+    "mini-parser",               # step 3: a Maxim parser built like rust-analyzer
+    "mini-parser/check-grammar", # step 3: the tool that checks your grammar spec
 ]

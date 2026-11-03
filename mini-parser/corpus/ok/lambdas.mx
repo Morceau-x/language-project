@@ -1,0 +1,13 @@
+module Lambdas
+
+let inc = fn(x: Int) -> Int { x + 1 }
+let first = fn(x, _) { x }
+let zero = fn() { 0 }
+let add3 = add(1, _, 3)
+let user = User(name: "Alice", age: 30)
+let older = User(..user, age: user.age + 1)
+let copy = Geo.Point(..p)
+let piped = xs |> List.filter(fn(x) { x > 0 }) |> List.map(_, inc)
+let applied = fn(x) { x * 2 }(21)
+let curried = fn(a) { fn(b) { a + b } }
+let annotated = fn(_: Int, label: String) -> String { label }

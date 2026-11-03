@@ -1,0 +1,100 @@
+SOURCE_FILE@0..149
+  MODULE_HEADER@0..11
+    MODULE_KW@0..6 "module"
+    WHITESPACE@6..7 " "
+    NAME@7..11
+      UPPER_IDENT@7..11 "Card"
+  WHITESPACE@11..13 "\n\n"
+  IMPORT@13..24
+    IMPORT_KW@13..19 "import"
+    WHITESPACE@19..20 " "
+    NAME_REF@20..24
+      UPPER_IDENT@20..24 "Html"
+  WHITESPACE@24..26 "\n\n"
+  COMPONENT@26..69
+    COMPONENT_KW@26..35 "component"
+    WHITESPACE@35..36 " "
+    NAME@36..40
+      UPPER_IDENT@36..40 "Card"
+    PARAM_LIST@40..69
+      L_PAREN@40..41 "("
+      PARAM@41..54
+        NAME@41..46
+          LOWER_IDENT@41..46 "title"
+        COLON@46..47 ":"
+        WHITESPACE@47..48 " "
+        NAMED_TYPE@48..54
+          NAME_REF@48..54
+            UPPER_IDENT@48..54 "String"
+      COMMA@54..55 ","
+      WHITESPACE@55..56 " "
+      PARAM@56..68
+        NAME@56..62
+          LOWER_IDENT@56..62 "urgent"
+        COLON@62..63 ":"
+        WHITESPACE@63..64 " "
+        NAMED_TYPE@64..68
+          NAME_REF@64..68
+            UPPER_IDENT@64..68 "Bool"
+      R_PAREN@68..69 ")"
+  WHITESPACE@69..71 "\n\n"
+  COMPONENT@71..88
+    COMPONENT_KW@71..80 "component"
+    WHITESPACE@80..81 " "
+    NAME@81..86
+      UPPER_IDENT@81..86 "Empty"
+    PARAM_LIST@86..88
+      L_PAREN@86..87 "("
+      R_PAREN@87..88 ")"
+  WHITESPACE@88..90 "\n\n"
+  FN@90..148
+    FN_KW@90..92 "fn"
+    WHITESPACE@92..93 " "
+    NAME@93..97
+      LOWER_IDENT@93..97 "view"
+    PARAM_LIST@97..112
+      L_PAREN@97..98 "("
+      PARAM@98..111
+        NAME@98..103
+          LOWER_IDENT@98..103 "title"
+        COLON@103..104 ":"
+        WHITESPACE@104..105 " "
+        NAMED_TYPE@105..111
+          NAME_REF@105..111
+            UPPER_IDENT@105..111 "String"
+      R_PAREN@111..112 ")"
+    WHITESPACE@112..113 " "
+    RET_TYPE@113..125
+      THIN_ARROW@113..115 "->"
+      WHITESPACE@115..116 " "
+      NAMED_TYPE@116..125
+        NAME_REF@116..120
+          UPPER_IDENT@116..120 "Html"
+        TYPE_ARG_LIST@120..125
+          L_ANGLE@120..121 "<"
+          NAMED_TYPE@121..124
+            NAME_REF@121..124
+              LOWER_IDENT@121..124 "msg"
+          R_ANGLE@124..125 ">"
+    WHITESPACE@125..126 " "
+    BLOCK_EXPR@126..148
+      L_CURLY@126..127 "{"
+      WHITESPACE@127..130 "\n  "
+      EXPR_STMT@130..146
+        CALL_EXPR@130..146
+          FIELD_EXPR@130..139
+            PATH_EXPR@130..134
+              NAME_REF@130..134
+                UPPER_IDENT@130..134 "Html"
+            DOT@134..135 "."
+            NAME_REF@135..139
+              LOWER_IDENT@135..139 "text"
+          ARG_LIST@139..146
+            L_PAREN@139..140 "("
+            PATH_EXPR@140..145
+              NAME_REF@140..145
+                LOWER_IDENT@140..145 "title"
+            R_PAREN@145..146 ")"
+      WHITESPACE@146..147 "\n"
+      R_CURLY@147..148 "}"
+  WHITESPACE@148..149 "\n"

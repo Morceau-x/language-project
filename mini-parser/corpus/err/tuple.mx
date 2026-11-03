@@ -1,0 +1,3 @@
+module M
+
+let pair = (1, 2)

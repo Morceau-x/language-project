@@ -1,0 +1,28 @@
+module Conversions
+
+cast (d: Float) -> Celsius {
+  Celsius(degrees: d)
+}
+
+cast (c: Celsius) -> Fahrenheit {
+  Fahrenheit(degrees: c.degrees * 9.0 / 5.0 + 32.0)
+}
+
+fn parse(text: String) -> Result<Int, String> {
+  let n = Int.parse(text)?
+  let m = Int.parse("2")?
+  Ok(n + m)
+}
+
+fn warm() -> Fahrenheit {
+  let t = 21.5 :: Celsius
+  t :: Fahrenheit
+}
+
+fn userName(r: Result<User, String>) -> Result<String, String> {
+  Ok(r?.name)
+}
+
+fn convert(x: Float) -> Float {
+  (x :: Celsius).degrees
+}

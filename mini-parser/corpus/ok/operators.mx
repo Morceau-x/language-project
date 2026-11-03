@@ -1,0 +1,15 @@
+module Operators
+
+let a = 1 + 2 * 3 - 4 / 2
+let b = (1 + 2) * 3
+let c = 2 ** 3 ** 2
+let d = -x ** 2
+let e = 7 ~/ 2 + 7 % 2
+let f = a < b && b <= c || !(c == d)
+let g = x != y
+let h = 1_000_000 + 3.141_592
+let i = xs |> List.map(double) |> List.sum
+let j = a >= b == (c > d)
+let k = -a * -b - -c
+let l = x ** -y
+let m = "a" ++ "b" ++ "c"

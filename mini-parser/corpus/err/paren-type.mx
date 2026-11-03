@@ -1,0 +1,5 @@
+module M
+
+fn f(g: (Int)) -> Int {
+  1
+}

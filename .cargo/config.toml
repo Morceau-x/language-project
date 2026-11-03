@@ -4,3 +4,8 @@
 # `cargo mini ARGS...` runs the Mini compiler, rebuilding it first if its
 # code changed. Short for `cargo run -q -p mini -- ARGS...`.
 mini = "run -q -p mini --"
+
+# Step 3: `cargo parse [--emit=…] FILE` runs your Maxim parser,
+# `cargo check-grammar [SECTION…]` checks your grammar spec.
+parse = "run -q -p mini-parser --"
+check-grammar = "run -q -p check-grammar --"

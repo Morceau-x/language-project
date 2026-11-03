@@ -1,0 +1,1 @@
+error 21..23: Maxim has no `()` value: a function without parameters is `fn() { … }`

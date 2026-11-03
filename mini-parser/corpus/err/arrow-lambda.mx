@@ -1,0 +1,3 @@
+module M
+
+let double = (x) => x * 2

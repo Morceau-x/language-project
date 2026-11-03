@@ -1,0 +1,3 @@
+module M
+
+fn(x) { x }

@@ -1,0 +1,154 @@
+SOURCE_FILE@0..370
+  MODULE_HEADER@0..14
+    MODULE_KW@0..6 "module"
+    WHITESPACE@6..7 " "
+    NAME@7..14
+      UPPER_IDENT@7..14 "Strings"
+  WHITESPACE@14..16 "\n\n"
+  LET_DECL@16..43
+    LET_KW@16..19 "let"
+    WHITESPACE@19..20 " "
+    NAME@20..25
+      LOWER_IDENT@20..25 "plain"
+    WHITESPACE@25..26 " "
+    EQ@26..27 "="
+    WHITESPACE@27..28 " "
+    LITERAL@28..43
+      STRING@28..43 "\"Hello, world!\""
+  WHITESPACE@43..44 "\n"
+  LET_DECL@44..132
+    LET_KW@44..47 "let"
+    WHITESPACE@47..48 " "
+    NAME@48..55
+      LOWER_IDENT@48..55 "escapes"
+    WHITESPACE@55..56 " "
+    EQ@56..57 "="
+    WHITESPACE@57..58 " "
+    LITERAL@58..132
+      STRING@58..132 "\"tab\\there, newline\\n, quote \\\", backslash \\\\, dollar \\$, party \\u{1F389}\""
+  WHITESPACE@132..133 "\n"
+  LET_DECL@133..155
+    LET_KW@133..136 "let"
+    WHITESPACE@136..137 " "
+    NAME@137..142
+      LOWER_IDENT@137..142 "price"
+    WHITESPACE@142..143 " "
+    EQ@143..144 "="
+    WHITESPACE@144..145 " "
+    LITERAL@145..155
+      STRING@145..155 "\"costs $5\""
+  WHITESPACE@155..156 "\n"
+  LET_DECL@156..188
+    LET_KW@156..159 "let"
+    WHITESPACE@159..160 " "
+    NAME@160..168
+      LOWER_IDENT@160..168 "greeting"
+    WHITESPACE@168..169 " "
+    EQ@169..170 "="
+    WHITESPACE@170..171 " "
+    INTERPOLATED_STRING@171..188
+      STRING_START@171..181 "\"Hello, ${"
+      PATH_EXPR@181..185
+        NAME_REF@181..185
+          LOWER_IDENT@181..185 "name"
+      STRING_END@185..188 "}!\""
+  WHITESPACE@188..189 "\n"
+  LET_DECL@189..279
+    LET_KW@189..192 "let"
+    WHITESPACE@192..193 " "
+    NAME@193..200
+      LOWER_IDENT@193..200 "summary"
+    WHITESPACE@200..201 " "
+    EQ@201..202 "="
+    WHITESPACE@202..203 " "
+    INTERPOLATED_STRING@203..279
+      STRING_START@203..206 "\"${"
+      PATH_EXPR@206..211
+        NAME_REF@206..211
+          LOWER_IDENT@206..211 "count"
+      STRING_MIDDLE@211..222 "} items, ${"
+      BIN_EXPR@222..241
+        CALL_EXPR@222..237
+          FIELD_EXPR@222..233
+            PATH_EXPR@222..226
+              NAME_REF@222..226
+                UPPER_IDENT@222..226 "List"
+            DOT@226..227 "."
+            NAME_REF@227..233
+              LOWER_IDENT@227..233 "length"
+          ARG_LIST@233..237
+            L_PAREN@233..234 "("
+            PATH_EXPR@234..236
+              NAME_REF@234..236
+                LOWER_IDENT@234..236 "xs"
+            R_PAREN@236..237 ")"
+        WHITESPACE@237..238 " "
+        STAR@238..239 "*"
+        WHITESPACE@239..240 " "
+        LITERAL@240..241
+          INT_NUMBER@240..241 "2"
+      STRING_MIDDLE@241..253 "} halves, ${"
+      INTERPOLATED_STRING@253..277
+        STRING_START@253..263 "\"nested ${"
+        PATH_EXPR@263..268
+          NAME_REF@263..268
+            LOWER_IDENT@263..268 "inner"
+        STRING_END@268..277 "} string\""
+      STRING_END@277..279 "}\""
+  WHITESPACE@279..280 "\n"
+  LET_DECL@280..294
+    LET_KW@280..283 "let"
+    WHITESPACE@283..284 " "
+    NAME@284..289
+      LOWER_IDENT@284..289 "empty"
+    WHITESPACE@289..290 " "
+    EQ@290..291 "="
+    WHITESPACE@291..292 " "
+    LITERAL@292..294
+      STRING@292..294 "\"\""
+  WHITESPACE@294..295 "\n"
+  LET_DECL@295..333
+    LET_KW@295..298 "let"
+    WHITESPACE@298..299 " "
+    NAME@299..306
+      LOWER_IDENT@299..306 "unicode"
+    WHITESPACE@306..307 " "
+    EQ@307..308 "="
+    WHITESPACE@308..309 " "
+    LITERAL@309..333
+      STRING@309..333 "\"héllo, wörld, 日本\""
+  WHITESPACE@333..334 "\n"
+  LET_DECL@334..369
+    LET_KW@334..337 "let"
+    WHITESPACE@337..338 " "
+    NAME@338..344
+      LOWER_IDENT@338..344 "braces"
+    WHITESPACE@344..345 " "
+    EQ@345..346 "="
+    WHITESPACE@346..347 " "
+    INTERPOLATED_STRING@347..369
+      STRING_START@347..350 "\"${"
+      WHITESPACE@350..351 " "
+      BLOCK_EXPR@351..366
+        L_CURLY@351..352 "{"
+        WHITESPACE@352..353 " "
+        LET_STMT@353..362
+          LET_KW@353..356 "let"
+          WHITESPACE@356..357 " "
+          NAME@357..358
+            LOWER_IDENT@357..358 "a"
+          WHITESPACE@358..359 " "
+          EQ@359..360 "="
+          WHITESPACE@360..361 " "
+          LITERAL@361..362
+            INT_NUMBER@361..362 "1"
+        WHITESPACE@362..363 " "
+        EXPR_STMT@363..364
+          PATH_EXPR@363..364
+            NAME_REF@363..364
+              LOWER_IDENT@363..364 "a"
+        WHITESPACE@364..365 " "
+        R_CURLY@365..366 "}"
+      WHITESPACE@366..367 " "
+      STRING_END@367..369 "}\""
+  WHITESPACE@369..370 "\n"

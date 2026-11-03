@@ -1,0 +1,1 @@
+error 0..2: a file starts with `module` and the module's name

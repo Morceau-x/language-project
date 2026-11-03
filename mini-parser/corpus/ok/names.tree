@@ -1,0 +1,144 @@
+SOURCE_FILE@0..219
+  MODULE_HEADER@0..12
+    MODULE_KW@0..6 "module"
+    WHITESPACE@6..7 " "
+    NAME@7..12
+      UPPER_IDENT@7..12 "Names"
+  WHITESPACE@12..14 "\n\n"
+  LET_DECL@14..30
+    LET_KW@14..17 "let"
+    WHITESPACE@17..18 " "
+    NAME@18..26
+      LOWER_IDENT@18..26 "_private"
+    WHITESPACE@26..27 " "
+    EQ@27..28 "="
+    WHITESPACE@28..29 " "
+    LITERAL@29..30
+      INT_NUMBER@29..30 "1"
+  WHITESPACE@30..31 "\n"
+  LET_DECL@31..49
+    LET_KW@31..34 "let"
+    WHITESPACE@34..35 " "
+    NAME@35..45
+      LOWER_IDENT@35..45 "snake_case"
+    WHITESPACE@45..46 " "
+    EQ@46..47 "="
+    WHITESPACE@47..48 " "
+    LITERAL@48..49
+      INT_NUMBER@48..49 "2"
+  WHITESPACE@49..50 "\n"
+  LET_DECL@50..67
+    LET_KW@50..53 "let"
+    WHITESPACE@53..54 " "
+    NAME@54..63
+      LOWER_IDENT@54..63 "camelCase"
+    WHITESPACE@63..64 " "
+    EQ@64..65 "="
+    WHITESPACE@65..66 " "
+    LITERAL@66..67
+      INT_NUMBER@66..67 "3"
+  WHITESPACE@67..68 "\n"
+  LET_DECL@68..78
+    LET_KW@68..71 "let"
+    WHITESPACE@71..72 " "
+    NAME@72..74
+      LOWER_IDENT@72..74 "x2"
+    WHITESPACE@74..75 " "
+    EQ@75..76 "="
+    WHITESPACE@76..77 " "
+    LITERAL@77..78
+      INT_NUMBER@77..78 "4"
+  WHITESPACE@78..79 "\n"
+  LET_DECL@79..126
+    LET_KW@79..82 "let"
+    WHITESPACE@82..83 " "
+    NAME@83..85
+      LOWER_IDENT@83..85 "a_"
+    WHITESPACE@85..86 " "
+    EQ@86..87 "="
+    WHITESPACE@87..88 " "
+    BIN_EXPR@88..126
+      BIN_EXPR@88..121
+        BIN_EXPR@88..109
+          PATH_EXPR@88..96
+            NAME_REF@88..96
+              LOWER_IDENT@88..96 "_private"
+          WHITESPACE@96..97 " "
+          PLUS@97..98 "+"
+          WHITESPACE@98..99 " "
+          PATH_EXPR@99..109
+            NAME_REF@99..109
+              LOWER_IDENT@99..109 "snake_case"
+        WHITESPACE@109..110 " "
+        PLUS@110..111 "+"
+        WHITESPACE@111..112 " "
+        PATH_EXPR@112..121
+          NAME_REF@112..121
+            LOWER_IDENT@112..121 "camelCase"
+      WHITESPACE@121..122 " "
+      PLUS@122..123 "+"
+      WHITESPACE@123..124 " "
+      PATH_EXPR@124..126
+        NAME_REF@124..126
+          LOWER_IDENT@124..126 "x2"
+  WHITESPACE@126..127 "\n"
+  LET_DECL@127..162
+    LET_KW@127..130 "let"
+    WHITESPACE@130..131 " "
+    NAME@131..138
+      LOWER_IDENT@131..138 "modules"
+    WHITESPACE@138..139 " "
+    EQ@139..140 "="
+    WHITESPACE@140..141 " "
+    FIELD_EXPR@141..162
+      FIELD_EXPR@141..156
+        PATH_EXPR@141..145
+          NAME_REF@141..145
+            UPPER_IDENT@141..145 "Html"
+        DOT@145..146 "."
+        NAME_REF@146..156
+          UPPER_IDENT@146..156 "Attributes"
+      DOT@156..157 "."
+      NAME_REF@157..162
+        LOWER_IDENT@157..162 "class"
+  WHITESPACE@162..163 "\n"
+  LET_DECL@163..218
+    LET_KW@163..166 "let"
+    WHITESPACE@166..167 " "
+    NAME@167..172
+      LOWER_IDENT@167..172 "fnord"
+    WHITESPACE@172..173 " "
+    EQ@173..174 "="
+    WHITESPACE@174..175 " "
+    BIN_EXPR@175..218
+      BIN_EXPR@175..206
+        BIN_EXPR@175..198
+          BIN_EXPR@175..189
+            PATH_EXPR@175..179
+              NAME_REF@175..179
+                LOWER_IDENT@175..179 "iffy"
+            WHITESPACE@179..180 " "
+            PLUS@180..181 "+"
+            WHITESPACE@181..182 " "
+            PATH_EXPR@182..189
+              NAME_REF@182..189
+                LOWER_IDENT@182..189 "matches"
+          WHITESPACE@189..190 " "
+          PLUS@190..191 "+"
+          WHITESPACE@191..192 " "
+          PATH_EXPR@192..198
+            NAME_REF@192..198
+              LOWER_IDENT@192..198 "letter"
+        WHITESPACE@198..199 " "
+        PLUS@199..200 "+"
+        WHITESPACE@200..201 " "
+        PATH_EXPR@201..206
+          NAME_REF@201..206
+            LOWER_IDENT@201..206 "typed"
+      WHITESPACE@206..207 " "
+      PLUS@207..208 "+"
+      WHITESPACE@208..209 " "
+      PATH_EXPR@209..218
+        NAME_REF@209..218
+          LOWER_IDENT@209..218 "elsewhere"
+  WHITESPACE@218..219 "\n"

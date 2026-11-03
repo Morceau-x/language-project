@@ -1,0 +1,33 @@
+module Blocks
+
+fn main() {
+  let x = 1
+  let y: Int = {
+    let a = 2
+    a * x
+  }
+  Debug.log(x + y)
+  let f = fn(n) { n + 1 }
+  (f)(y)
+}
+
+fn sign(x: Int) -> Int {
+  if x > 0 { 1 } else if x == 0 { 0 } else { -1 }
+}
+
+fn clamp(x: Int, lo: Int, hi: Int) -> Int {
+  let low = if x < lo { lo } else { x }
+  if low > hi {
+    hi
+  } else {
+    low
+  }
+}
+
+fn empty() {
+}
+
+fn onlyLets() {
+  let a = 1
+  let b = 2
+}
