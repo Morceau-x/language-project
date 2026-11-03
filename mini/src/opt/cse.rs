@@ -21,7 +21,17 @@ impl Pass for Cse {
     }
 
     fn run(&self, function: &mut Function) -> bool {
-        todo!("Part 6c: Cse::run")
+        let mut seen: HashMap<Op, Temp> = HashMap::new();
+        replace_uses(function, |inst| {
+            let key = canonical(inst.op);
+            match seen.get(&key) {
+                Some(&earlier) => Some(Value::Temp(earlier)),
+                None => {
+                    seen.insert(key, inst.dest);
+                    None
+                }
+            }
+        })
     }
 }
 
@@ -29,9 +39,11 @@ impl Pass for Cse {
 /// `add %y, %x` look the same: the operands of `add` and `mul` (whose
 /// order doesn't matter) are sorted.
 fn canonical(op: Op) -> Op {
-    todo!("Part 6c: canonical")
+    match op {
+        Op::Binary(op @ (BinOp::Add | BinOp::Mul), a, b) if b < a => Op::Binary(op, b, a),
+        _ => op,
+    }
 }
-
 #[cfg(test)]
 mod tests {
     use super::*;

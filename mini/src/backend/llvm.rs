@@ -74,7 +74,39 @@ divide:
 /// our temporaries have gaps once dead code is gone. So each temporary
 /// gets the next free number, its *slot*, when its instruction is written.
 fn emit_main(function: &Function, out: &mut String) -> fmt::Result {
-    todo!("Part 7b: llvm::emit_main")
+    let params: Vec<String> = function
+        .inputs
+        .iter()
+        .map(|name| format!("i64 %{name}"))
+        .collect();
+    writeln!(out, "define i64 @mini_main({}) {{", params.join(", "))?;
+    writeln!(out, "entry:")?;
+    let mut slots: HashMap<Temp, usize> = HashMap::new();
+    for inst in &function.body {
+        let slot = slots.len();
+        let instruction = match inst.op {
+            Op::Neg(a) => format!("sub i64 0, {}", value(function, &slots, a)),
+            Op::Binary(BinOp::Div, a, b) => format!(
+                "call i64 @mini_div(i64 {}, i64 {})",
+                value(function, &slots, a),
+                value(function, &slots, b)
+            ),
+            Op::Binary(op, a, b) => format!(
+                "{} i64 {}, {}",
+                instruction_name(op),
+                value(function, &slots, a),
+                value(function, &slots, b)
+            ),
+        };
+        writeln!(out, "  %{slot} = {instruction}")?;
+        slots.insert(inst.dest, slot);
+    }
+    writeln!(
+        out,
+        "  ret i64 {}",
+        value(function, &slots, function.result)
+    )?;
+    writeln!(out, "}}")
 }
 
 /// The LLVM instruction for `add`, `sub` and `mul`. They wrap on overflow,
@@ -92,7 +124,11 @@ fn instruction_name(op: BinOp) -> &'static str {
 /// How an operand is written in LLVM IR: `5`, `%x`, or `%` and the
 /// temporary's slot.
 fn value(function: &Function, slots: &HashMap<Temp, usize>, value: Value) -> String {
-    todo!("Part 7b: llvm::value")
+    match value {
+        Value::Const(c) => c.to_string(),
+        Value::Input(i) => format!("%{}", function.inputs[i]),
+        Value::Temp(t) => format!("%{}", slots[&t]),
+    }
 }
 
 /// What the runtime needs to call the program: how many inputs it takes,

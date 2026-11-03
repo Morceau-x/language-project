@@ -12,7 +12,22 @@ use crate::ir::{Function, Op, Temp, Value, eval_binary};
 /// `function.inputs`. A division by zero is an error that points at the
 /// division in the source.
 pub fn run(function: &Function, inputs: &[i64]) -> Result<i64, Diagnostic> {
-    todo!("Part 5d: run")
+    assert_eq!(inputs.len(), function.inputs.len(), "one value per input");
+    let mut machine = Machine {
+        inputs,
+        temps: HashMap::new(),
+    };
+    for inst in &function.body {
+        let result = match inst.op {
+            Op::Neg(a) => machine.value(a).wrapping_neg(),
+            Op::Binary(op, a, b) => match eval_binary(op, machine.value(a), machine.value(b)) {
+                Some(result) => result,
+                None => return Err(Diagnostic::new("division by zero", inst.span)),
+            },
+        };
+        machine.temps.insert(inst.dest, result);
+    }
+    Ok(machine.value(function.result))
 }
 
 /// The interpreter's state while it runs a function.
@@ -25,7 +40,11 @@ struct Machine<'a> {
 impl Machine<'_> {
     /// The current value of an operand.
     fn value(&self, value: Value) -> i64 {
-        todo!("Part 5d: Machine::value")
+        match value {
+            Value::Const(c) => c,
+            Value::Input(i) => self.inputs[i],
+            Value::Temp(t) => self.temps[&t],
+        }
     }
 }
 

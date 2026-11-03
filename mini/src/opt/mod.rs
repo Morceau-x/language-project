@@ -5,9 +5,8 @@
 //! The pass manager runs them in a loop until a whole round changes
 //! nothing, because one pass often creates work for another.
 
-use std::collections::HashMap;
-
 use crate::ir::{Function, Inst, Temp, Value};
+use std::collections::HashMap;
 
 mod cse;
 mod dce;
@@ -55,7 +54,18 @@ impl PassManager {
     /// nothing (or `MAX_ROUNDS` is reached). After each pass that changed
     /// the function, call `trace` with the pass's name and the function.
     pub fn run(&self, function: &mut Function, trace: &mut dyn FnMut(&str, &Function)) {
-        todo!("Part 6e: PassManager::run")
+        for _ in 0..MAX_ROUNDS {
+            let mut changed = false;
+            for pass in &self.passes {
+                if pass.run(function) {
+                    changed = true;
+                    trace(pass.name(), function);
+                }
+            }
+            if !changed {
+                return;
+            }
+        }
     }
 }
 

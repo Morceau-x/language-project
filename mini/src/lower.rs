@@ -28,7 +28,19 @@ pub fn lower(expr: &Expr) -> Function {
 /// they first appear in the source, without duplicates. That order is the
 /// order the program takes its inputs on the command line.
 fn collect_inputs(expr: &Expr, names: &mut Vec<String>) {
-    todo!("Part 5b: collect_inputs")
+    match &expr.kind {
+        ExprKind::Int(_) => (),
+        ExprKind::Neg(operand) => collect_inputs(operand, names),
+        ExprKind::Var(name) => {
+            if !names.contains(name) {
+                names.push(name.clone());
+            }
+        }
+        ExprKind::Binary { lhs, rhs, .. } => {
+            collect_inputs(lhs, names);
+            collect_inputs(rhs, names);
+        }
+    }
 }
 
 /// The function being built.
@@ -61,7 +73,19 @@ impl Lowerer {
     /// Emit the instructions that compute `expr`, and return the operand
     /// that holds its value.
     fn lower_expr(&mut self, expr: &Expr) -> Value {
-        todo!("Part 5b: Lowerer::lower_expr")
+        match &expr.kind {
+            ExprKind::Int(value) => Value::Const(*value),
+            ExprKind::Var(name) => self.input(name),
+            ExprKind::Neg(operand) => {
+                let operand = self.lower_expr(operand);
+                self.emit(Op::Neg(operand), expr.span)
+            }
+            ExprKind::Binary { op, lhs, rhs } => {
+                let lhs = self.lower_expr(lhs);
+                let rhs = self.lower_expr(rhs);
+                self.emit(Op::Binary(*op, lhs, rhs), expr.span)
+            }
+        }
     }
 }
 

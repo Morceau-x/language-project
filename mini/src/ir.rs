@@ -93,7 +93,13 @@ pub fn mnemonic(op: BinOp) -> &'static str {
 /// zero; `i64::MIN / -1` wraps to `i64::MIN`. Division by zero has no
 /// result: `None`.
 pub fn eval_binary(op: BinOp, a: i64, b: i64) -> Option<i64> {
-    todo!("Part 5c: eval_binary")
+    match op {
+        BinOp::Add => Some(a.wrapping_add(b)),
+        BinOp::Sub => Some(a.wrapping_sub(b)),
+        BinOp::Mul => Some(a.wrapping_mul(b)),
+        BinOp::Div if b == 0 => None,
+        BinOp::Div => Some(a.wrapping_div(b)),
+    }
 }
 
 impl Op {
@@ -120,14 +126,22 @@ impl Op {
     /// divisor is zero. Such an instruction must run even if nothing
     /// uses its result: removing it would remove the error.
     pub fn can_trap(self) -> bool {
-        todo!("Part 6b: Op::can_trap")
+        match self {
+            Op::Binary(BinOp::Div, _, Value::Const(divisor)) => divisor == 0,
+            Op::Binary(BinOp::Div, _, _) => true,
+            _ => false,
+        }
     }
 }
 
 impl Function {
     /// How `value` is written in the IR: `42`, `%x` or `%3`.
     pub fn show(&self, value: Value) -> String {
-        todo!("Part 5a: Function::show")
+        match value {
+            Value::Const(i) => format!("{}", i),
+            Value::Input(i) => format!("%{}", self.inputs[i]),
+            Value::Temp(i) => format!("{}", i),
+        }
     }
 }
 
@@ -143,7 +157,23 @@ impl Function {
 /// ```
 impl fmt::Display for Function {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        todo!("Part 5a: print a function")
+        let inputs: Vec<String> = self.inputs.iter().map(|name| format!("%{name}")).collect();
+        writeln!(f, "fn main({}) {{", inputs.join(", "))?;
+        for inst in &self.body {
+            match inst.op {
+                Op::Neg(a) => writeln!(f, "  {} = neg {}", inst.dest, self.show(a))?,
+                Op::Binary(op, a, b) => writeln!(
+                    f,
+                    "  {} = {} {}, {}",
+                    inst.dest,
+                    mnemonic(op),
+                    self.show(a),
+                    self.show(b)
+                )?,
+            }
+        }
+        writeln!(f, "  ret {}", self.show(self.result))?;
+        writeln!(f, "}}")
     }
 }
 

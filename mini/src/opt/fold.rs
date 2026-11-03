@@ -3,10 +3,9 @@
 //! `add 2, 3` is `5`, whatever the inputs: compute it now, once, instead
 //! of every time the program runs. And `mul %x, 1` is just `%x`.
 
+use super::{Pass, replace_uses};
 use crate::ast::BinOp;
 use crate::ir::{Function, Op, Value, eval_binary};
-
-use super::{Pass, replace_uses};
 
 /// Replaces every instruction that `simplify` can simplify.
 pub struct Fold;
@@ -29,9 +28,25 @@ impl Pass for Fold {
 /// removes an instruction that can fail. So the value returned for a
 /// division only has to be right when the division succeeds.
 pub fn simplify(op: Op) -> Option<Value> {
-    todo!("Part 6a: simplify")
+    use BinOp::{Add, Div, Mul, Sub};
+    use Value::Const;
+    match op {
+        // Constant folding, with the same arithmetic as the interpreter.
+        Op::Neg(Const(a)) => Some(Const(a.wrapping_neg())),
+        Op::Binary(op, Const(a), Const(b)) => eval_binary(op, a, b).map(Const),
+        // Algebraic identities.
+        Op::Binary(Add, x, Const(0)) | Op::Binary(Add, Const(0), x) => Some(x),
+        Op::Binary(Sub, x, Const(0)) => Some(x),
+        Op::Binary(Sub, x, y) if x == y => Some(Const(0)),
+        Op::Binary(Mul, x, Const(1)) | Op::Binary(Mul, Const(1), x) => Some(x),
+        Op::Binary(Mul, _, Const(0)) | Op::Binary(Mul, Const(0), _) => Some(Const(0)),
+        Op::Binary(Div, x, Const(1)) => Some(x),
+        // Only right when the division succeeds, which is all we need.
+        Op::Binary(Div, x, y) if x == y => Some(Const(1)),
+        Op::Binary(Div, Const(0), _) => Some(Const(0)),
+        _ => None,
+    }
 }
-
 #[cfg(test)]
 mod tests {
     use super::*;

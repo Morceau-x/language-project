@@ -71,12 +71,35 @@ fn emit_main(function: &Function, out: &mut String) -> fmt::Result {
 
 /// One instruction, as a `const` declaration.
 fn emit_inst(function: &Function, inst: &Inst, out: &mut String) -> fmt::Result {
-    todo!("Part 7a: js::emit_inst")
+    let dest = format!("${}", inst.dest.0);
+    match inst.op {
+        Op::Neg(a) => writeln!(out, "  const {dest} = wrap(-{});", value(function, a)),
+        Op::Binary(BinOp::Div, a, b) => writeln!(
+            out,
+            "  const {dest} = div({}, {});",
+            value(function, a),
+            value(function, b)
+        ),
+        Op::Binary(op, a, b) => writeln!(
+            out,
+            "  const {dest} = wrap({} {} {});",
+            value(function, a),
+            op.symbol(),
+            value(function, b)
+        ),
+    }
 }
 
 /// How an operand is written in JavaScript: `5n`, `(-5n)`, `$x` or `$3`.
 fn value(function: &Function, value: Value) -> String {
-    todo!("Part 7a: js::value")
+    match value {
+        // Negative constants get parentheses, so that `-` followed by
+        // one can never print as `--`, JavaScript's decrement operator.
+        Value::Const(c) if c < 0 => format!("({c}n)"),
+        Value::Const(c) => format!("{c}n"),
+        Value::Input(i) => format!("${}", function.inputs[i]),
+        Value::Temp(t) => format!("${}", t.0),
+    }
 }
 
 /// Read the inputs from the command line, run `main`, print the result.

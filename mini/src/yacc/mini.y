@@ -1,6 +1,6 @@
 %grmtools{yacckind: Grmtools}
 // Mini's grammar in yacc syntax, for grmtools. At build time it becomes
-// an LALR(1) parser (see build.rs), driven by the lexer from mini.l.
+// an LR(1) parser (see build.rs), driven by the lexer from mini.l.
 //
 // Each alternative has an *action* in braces: Rust code that computes the
 // value of the rule from the values of its parts, `$1`, `$2`, `$3`. Here

@@ -17,9 +17,7 @@
 
 use crate::ast::{BinOp, Expr, ExprKind};
 use crate::diagnostic::Diagnostic;
-use crate::span::Span;
 use crate::token::{Token, TokenKind};
-use std::ops::Deref;
 
 /// Parse a whole program. `tokens` must end with [`TokenKind::Eof`], as
 /// [`crate::lexer::lex`] guarantees.

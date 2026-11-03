@@ -305,10 +305,12 @@ Optional, roughly from easiest to hardest. Test first, as always.
 7. **The AST, straight from the grammar.** Write a second grammar whose
    actions build `Expr` directly (`Expr '+' Expr { Ok(Expr::binary(BinOp::Add, $1?, $3?)) }`),
    with no CST. Which version would you rather maintain?
-8. **Pratt parsing.** Replace `expr` and `term` in the hand-written
-   parser with one loop driven by a table of operator precedences, the
-   hand-written equivalent of `%left`. The differential tests will tell
-   you whether you got it right.
+8. **Pratt parsing.** In the hand-written parser (`src/parser.rs`, not
+   Bison: Pratt parsing is a top-down technique), replace `expr` and
+   `term` with one loop driven by a table of operator precedences, the
+   hand-written equivalent of Bison's `%left`. The differential tests
+   will tell you whether you got it right. (One unit test calls `term`
+   directly: what's `term` in terms of precedence?)
 
 ---
 

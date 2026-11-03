@@ -19,7 +19,6 @@
 // use looks unused to the compiler, and Clippy misreads a few
 // signatures. This line hides those warnings. Delete it when you finish
 // step 2 (Part 8 of the guide).
-#![allow(dead_code, unused_imports, unused_variables, clippy::ptr_arg)]
 
 // Front ends.
 pub mod ast;
@@ -38,7 +37,6 @@ pub mod opt;
 
 // Back ends.
 pub mod backend;
-pub mod codegen;
 
 // Shared.
 pub mod diagnostic;

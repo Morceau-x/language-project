@@ -4,9 +4,12 @@
 
 Now the same idea inside Mini. **grmtools** is a family of Rust crates
 that does what Bison and flex do: `lrlex` generates a lexer from
-regular expressions, `lrpar` generates an LALR(1) parser from a grammar
-in yacc syntax. The reference compiler in `example/` uses it too
-(`example/src/maxim.y`).
+regular expressions, `lrpar` generates an LR parser from a grammar in
+yacc syntax. The reference compiler in `example/` uses it too
+(`example/src/maxim.y`). (Unlike Bison's default LALR(1), grmtools
+builds its tables with Pager's algorithm, which has the full power of
+canonical LR(1) with tables as small as LALR's: a few grammars that
+Bison rejects with conflicts, grmtools accepts.)
 
 You'll write Mini's lexer and grammar for it. Mini then has **two front
 ends**: your hand-written one, and the generated one. In Part 4 they

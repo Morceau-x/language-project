@@ -1,7 +1,7 @@
 //! Build script: Cargo runs it before compiling the crate.
 //!
 //! It feeds the lexer and grammar in `src/yacc/` to grmtools, which
-//! generates the Rust code of a lexer and an LALR parser into Cargo's
+//! generates the Rust code of a lexer and an LR(1) parser into Cargo's
 //! `OUT_DIR`. `src/yacc/mod.rs` then includes that generated code with
 //! `lrlex_mod!` and `lrpar_mod!`. Any error in the grammar, such as a
 //! shift/reduce conflict, stops the build right here.

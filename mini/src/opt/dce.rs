@@ -19,7 +19,25 @@ impl Pass for Dce {
     }
 
     fn run(&self, function: &mut Function) -> bool {
-        todo!("Part 6d: Dce::run")
+        // Walk backwards from the result: an instruction is live if a live
+        // instruction (or the result) uses it, or if it can fail.
+        let mut live = HashSet::new();
+        if let Value::Temp(temp) = function.result {
+            live.insert(temp);
+        }
+        for inst in function.body.iter().rev() {
+            if live.contains(&inst.dest) || inst.op.can_trap() {
+                live.insert(inst.dest);
+                for operand in inst.op.operands() {
+                    if let Value::Temp(temp) = operand {
+                        live.insert(temp);
+                    }
+                }
+            }
+        }
+        let before = function.body.len();
+        function.body.retain(|inst| live.contains(&inst.dest));
+        function.body.len() != before
     }
 }
 

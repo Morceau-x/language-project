@@ -1,5 +1,5 @@
 //! The generated front end. At build time, grmtools turns `mini.l` into
-//! a lexer and `mini.y` into an LALR(1) parser (see `build.rs`). This
+//! a lexer and `mini.y` into an LR(1) parser (see `build.rs`). This
 //! file connects them to the rest of the compiler:
 //!
 //! ```text
