@@ -1,32 +1,56 @@
 module Layout
 
+type Shape =
+  | Circle(Float)
+  | Rect(Float, Float)
+
+fn area(s: Shape)
+  -> Float {
+  0.0
+}
+
 fn main() {
+  // An operator at the end of a line continues the expression.
   let total = 1 +
     2
-  let more = total
-    - 1
-  log(total)
-  (more) |> log
-  [1, 2, 3]
-    |> List.map(double)
-    |> List.sum
+  // So does one that can't start a statement, at the start of a line.
+  let names = users
+    |> List.map(name)
+    |> List.sort
   user
     .name
     .length
   result
     ?
+  // `-` and `(` can start a statement: these are new statements.
+  let more = total
+  -more
+  log(total)
+  (more) |> log
+  // In parentheses and brackets, line breaks are just whitespace.
+  let pair = make(
+    1,
+    2
+  )
+  let list = [
+    1,
+    2
+  ]
+  if total > 2 {
+    1
+  }
+  else {
+    2
+  }
 }
 
-let pair = make(
-  1,
-  2
-)
-
-fn
-f
-(
-x
-)
-{
-x
+fn arms(x: Int) -> Int {
+  match x {
+    0 -> { 0 } 1 -> { 1 }
+    2 ->
+      2
+    _ -> fn(y) {
+      y
+    }(x)
+  }
 }

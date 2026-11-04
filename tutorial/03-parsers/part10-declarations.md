@@ -16,6 +16,13 @@ one error for the whole run, not one per token. That's the coarsest
 recovery, at the top level, and it's what makes the rest of a file
 parse after a mistake anywhere.
 
+`decl` returns whether it parsed a declaration, for `source_file`, in
+`grammar/mod.rs`: your spec's `Module ::= "module" UPPER ( NEWLINE
+Decl )*`. Before each declaration, it checks for the `NEWLINE`, and
+reports `expected a line break: each declaration starts on its own
+line` if it's missing, the way your blocks do for statements. After a
+run of junk, it doesn't: the junk's error says enough.
+
 `import` is done too.
 
 ---
@@ -36,6 +43,10 @@ Write `type_decl` and the five functions it uses. After `=`, a `{`
 means a record; anything else, variants (and `variant` reports a
 missing name). A type with variants needs at least one, a record at
 least one field, and a variant's parentheses at least one type.
+
+A variant's `(` stays on its line, like a constructor pattern's. A
+line break inside a type declaration is otherwise fine where the
+lexer's rule makes it whitespace: after `=` or `,`, before `|` or `}`.
 
 ```bash
 cargo test -p mini-parser --lib items::tests
@@ -94,7 +105,7 @@ fn variant_list(p: &mut Parser<'_>) {
 fn variant(p: &mut Parser<'_>) {
     let m = p.start();
     name(p, UPPER_IDENT);
-    if p.at(T!['(']) {
+    if p.at(T!['(']) && !p.at_newline() {
         let fields = p.start();
         p.bump(T!['(']);
         types::type_(p);
@@ -154,6 +165,11 @@ a declaration should be. Rather than `expected a lowercase name`,
 report `expected the function's name: a lambda can't stand alone at
 the top level` when a `(` follows `fn`, and go on parsing it as a
 function without a name.
+
+A function's `{` on the next line, `fn f() -> Int` newline `{`, is
+already handled: `block` reports it with `not_on_new_line` (Part 9).
+Read the tests `one_declaration_per_line` and
+`a_brace_on_the_next_line_is_reported` in `items.rs`.
 
 ```bash
 cargo test -p mini-parser --lib grammar

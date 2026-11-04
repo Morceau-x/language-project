@@ -12,8 +12,9 @@ pub(super) const DECL_FIRST: TokenSet = TokenSet::new(&[
     T![let],
 ]);
 
-/// `Decl ::= Import | TypeDecl | Fn | Cast | Component | LetDecl`
-pub(super) fn decl(p: &mut Parser<'_>) {
+/// `Decl ::= Import | TypeDecl | Fn | Cast | Component | LetDecl`.
+/// Returns `false` if there was no declaration, only junk to skip.
+pub(super) fn decl(p: &mut Parser<'_>) -> bool {
     match p.current() {
         T![import] => import(p),
         T![type] => type_decl(p),
@@ -24,7 +25,7 @@ pub(super) fn decl(p: &mut Parser<'_>) {
         _ => {
             // Skip to the next declaration, in one ERROR node.
             let m = p.start();
-            if p.at(T!['(']) && p.at_line_start() {
+            if p.at(T!['(']) && p.at_newline() {
                 p.error(
                     "expected a declaration: a call's `(` must be on the same line as the function",
                 );
@@ -37,8 +38,10 @@ pub(super) fn decl(p: &mut Parser<'_>) {
                 p.bump_any();
             }
             m.complete(p, ERROR);
+            return false;
         }
     }
+    true
 }
 
 /// `Import ::= "import" UPPER`
@@ -489,6 +492,105 @@ mod tests {
                   R_CURLY@10..11 "}"
             error 2..3: expected the function's name: a lambda can't stand alone at the top level
         "#]],
+        );
+    }
+
+    #[test]
+    fn one_declaration_per_line() {
+        check_file(
+            "module M\nimport A import B",
+            expect![[r#"
+            SOURCE_FILE@0..26
+              MODULE_HEADER@0..8
+                MODULE_KW@0..6 "module"
+                WHITESPACE@6..7 " "
+                NAME@7..8
+                  UPPER_IDENT@7..8 "M"
+              WHITESPACE@8..9 "\n"
+              IMPORT@9..17
+                IMPORT_KW@9..15 "import"
+                WHITESPACE@15..16 " "
+                NAME_REF@16..17
+                  UPPER_IDENT@16..17 "A"
+              WHITESPACE@17..18 " "
+              IMPORT@18..26
+                IMPORT_KW@18..24 "import"
+                WHITESPACE@24..25 " "
+                NAME_REF@25..26
+                  UPPER_IDENT@25..26 "B"
+            error 18..24: expected a line break: each declaration starts on its own line
+        "#]],
+        );
+    }
+
+    #[test]
+    fn a_brace_on_the_next_line_is_reported() {
+        check_file(
+            "module M\nfn f() -> Int\n{ 1 }\nlet x = match y\n{ _ -> 0 }",
+            expect![[r#"
+                SOURCE_FILE@0..55
+                  MODULE_HEADER@0..8
+                    MODULE_KW@0..6 "module"
+                    WHITESPACE@6..7 " "
+                    NAME@7..8
+                      UPPER_IDENT@7..8 "M"
+                  WHITESPACE@8..9 "\n"
+                  FN@9..28
+                    FN_KW@9..11 "fn"
+                    WHITESPACE@11..12 " "
+                    NAME@12..13
+                      LOWER_IDENT@12..13 "f"
+                    PARAM_LIST@13..15
+                      L_PAREN@13..14 "("
+                      R_PAREN@14..15 ")"
+                    WHITESPACE@15..16 " "
+                    RET_TYPE@16..22
+                      THIN_ARROW@16..18 "->"
+                      WHITESPACE@18..19 " "
+                      NAMED_TYPE@19..22
+                        NAME_REF@19..22
+                          UPPER_IDENT@19..22 "Int"
+                    WHITESPACE@22..23 "\n"
+                    BLOCK_EXPR@23..28
+                      L_CURLY@23..24 "{"
+                      WHITESPACE@24..25 " "
+                      EXPR_STMT@25..26
+                        LITERAL@25..26
+                          INT_NUMBER@25..26 "1"
+                      WHITESPACE@26..27 " "
+                      R_CURLY@27..28 "}"
+                  WHITESPACE@28..29 "\n"
+                  LET_DECL@29..55
+                    LET_KW@29..32 "let"
+                    WHITESPACE@32..33 " "
+                    NAME@33..34
+                      LOWER_IDENT@33..34 "x"
+                    WHITESPACE@34..35 " "
+                    EQ@35..36 "="
+                    WHITESPACE@36..37 " "
+                    MATCH_EXPR@37..55
+                      MATCH_KW@37..42 "match"
+                      WHITESPACE@42..43 " "
+                      PATH_EXPR@43..44
+                        NAME_REF@43..44
+                          LOWER_IDENT@43..44 "y"
+                      WHITESPACE@44..45 "\n"
+                      MATCH_ARM_LIST@45..55
+                        L_CURLY@45..46 "{"
+                        WHITESPACE@46..47 " "
+                        MATCH_ARM@47..53
+                          WILDCARD_PAT@47..48
+                            UNDERSCORE@47..48 "_"
+                          WHITESPACE@48..49 " "
+                          THIN_ARROW@49..51 "->"
+                          WHITESPACE@51..52 " "
+                          LITERAL@52..53
+                            INT_NUMBER@52..53 "0"
+                        WHITESPACE@53..54 " "
+                        R_CURLY@54..55 "}"
+                error 23..24: a line break here ends the statement: put this `{` at the end of the line before
+                error 45..46: a line break here ends the statement: put this `{` at the end of the line before
+            "#]],
         );
     }
 

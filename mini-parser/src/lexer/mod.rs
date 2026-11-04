@@ -265,8 +265,9 @@ fn ident_kind(text: &str) -> SyntaxKind {
 }
 
 /// Can an expression end with a token of this kind? After one that
-/// can't, an expression can start.
-fn can_end_expr(kind: SyntaxKind) -> bool {
+/// can't, an expression can start. The parser uses it too, for line
+/// breaks.
+pub(crate) fn can_end_expr(kind: SyntaxKind) -> bool {
     todo!("Part 5d: can_end_expr")
 }
 

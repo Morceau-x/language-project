@@ -1,39 +1,30 @@
-//! Differential tests: your parser against the reference Maxim parser
-//! (the one in `../example`, generated from a yacc grammar). For every
-//! program, both must agree on one thing: is it valid Maxim? Error
-//! messages and trees may differ; the verdict may not.
+//! Differential tests: your parser against your spec. The spec checker
+//! runs the grammar of `spec/maxim.md` with its Earley parser, which
+//! accepts any grammar: two implementations of the same language, one
+//! written as rules, one as code. For every program, both must agree on
+//! one thing: is it valid Maxim? Error messages and trees may differ;
+//! the verdict may not.
 //!
-//! Programs with HTML elements are skipped: HTML is outside this step.
+//! Two kinds of programs are skipped: those with HTML, which is outside
+//! this step, and those with `(_)`, the one rule of the spec that its
+//! grammar can't express (section 3.6): validation checks it, and its
+//! own tests check validation.
 
 use std::path::Path;
+use std::sync::OnceLock;
 
-use maxim_compiler::lexer::lex_tokens;
-use maxim_compiler::lexer::token::TokenKind;
-use maxim_compiler::parser::parse_module;
-use maxim_compiler::span::FileId;
+use check_grammar::Oracle;
 use proptest::prelude::*;
 
-/// Is `text` valid Maxim, according to the reference parser? `None` if
-/// it has HTML in it.
-fn reference_verdict(text: &str) -> Option<bool> {
-    if let Ok(tokens) = lex_tokens(FileId(0), text) {
-        let html = tokens.iter().any(|token| {
-            matches!(
-                token.kind,
-                TokenKind::JsxTagStart(_)
-                    | TokenKind::JsxClose(_)
-                    | TokenKind::JsxTagEnd
-                    | TokenKind::JsxSelfClose
-                    | TokenKind::JsxAttrName(_)
-                    | TokenKind::JsxText(_)
-                    | TokenKind::DollarBrace
-            )
-        });
-        if html {
-            return None;
-        }
-    }
-    Some(parse_module(FileId(0), text).is_ok())
+/// Your spec, loaded once for all the tests.
+fn spec() -> &'static Oracle {
+    static SPEC: OnceLock<Oracle> = OnceLock::new();
+    SPEC.get_or_init(|| {
+        let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("spec/maxim.md");
+        Oracle::from_spec(&path).unwrap_or_else(|error| {
+            panic!("the differential tests need a complete spec (Parts 2 and 3): {error}")
+        })
+    })
 }
 
 /// Is `text` valid Maxim, according to your parser?
@@ -42,13 +33,17 @@ fn our_verdict(text: &str) -> bool {
 }
 
 fn check_agreement(text: &str) {
-    if let Some(reference) = reference_verdict(text) {
+    let squeezed: String = text.chars().filter(|c| !c.is_whitespace()).collect();
+    if squeezed.contains("(_)") {
+        return;
+    }
+    if let Some(spec) = spec().is_valid(text) {
         let ours = our_verdict(text);
         assert_eq!(
             ours,
-            reference,
-            "the reference parser says this program is {}, yours says {}:\n{text}\nyour errors: {:#?}",
-            if reference { "valid" } else { "invalid" },
+            spec,
+            "your spec says this program is {}, your parser says {}:\n{text}\nyour parser's errors: {:#?}",
+            if spec { "valid" } else { "invalid" },
             if ours { "valid" } else { "invalid" },
             mini_parser::parse(text).errors(),
         );
@@ -73,12 +68,12 @@ fn corpus(dir: &str) -> Vec<(String, String)> {
 }
 
 #[test]
-fn the_valid_corpus_is_valid_for_both_parsers() {
+fn the_valid_corpus_is_valid_for_both() {
     for (name, text) in corpus("ok") {
         assert_eq!(
-            reference_verdict(&text),
+            spec().is_valid(&text),
             Some(true),
-            "{name}: the reference rejects it"
+            "{name}: your spec rejects it"
         );
         assert!(
             our_verdict(&text),
@@ -89,12 +84,12 @@ fn the_valid_corpus_is_valid_for_both_parsers() {
 }
 
 #[test]
-fn the_invalid_corpus_is_invalid_for_both_parsers() {
+fn the_invalid_corpus_is_invalid_for_both() {
     for (name, text) in corpus("err") {
         assert_ne!(
-            reference_verdict(&text),
+            spec().is_valid(&text),
             Some(true),
-            "{name}: the reference accepts it"
+            "{name}: your spec accepts it"
         );
         assert!(!our_verdict(&text), "{name}: your parser accepts it");
     }
@@ -229,7 +224,7 @@ proptest! {
     /// Small edits to valid programs: right at the border between valid
     /// and invalid, where parsers disagree when one of them is wrong.
     #[test]
-    fn both_parsers_agree_on_edited_programs(
+    fn your_parser_and_your_spec_agree_on_edited_programs(
         file in 0usize..100,
         edits in proptest::collection::vec(edit(), 1..4),
     ) {
@@ -241,11 +236,12 @@ proptest! {
     /// Random token soup after a module header: mostly invalid, and full
     /// of combinations nobody would write.
     #[test]
-    fn both_parsers_agree_on_token_soup(
+    fn your_parser_and_your_spec_agree_on_token_soup(
         tokens in proptest::collection::vec(proptest::sample::select(VOCABULARY), 0..30),
     ) {
         check_agreement(&format!("module M\n\nlet v = {}", tokens.join(" ")));
         check_agreement(&format!("module M\n\nfn f() {{\n  {}\n}}", tokens.join(" ")));
+        check_agreement(&format!("module M\n\nlet v = match x {{\n  {}\n}}", tokens.join(" ")));
         check_agreement(&format!("module M\n\n{}", tokens.join(" ")));
     }
 }

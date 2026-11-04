@@ -4,7 +4,7 @@
 
 A parser for people makes good errors, and a parser for tools never
 fails. This part finishes both, then tests your parser the hard way:
-against the reference, on tens of thousands of programs.
+against your spec, on tens of thousands of programs.
 
 **Rust you'll use:** [slice patterns](../02-compiler-layers/rust-concepts.md#4-slice-patterns-and-more-patterns),
 [property testing](../02-compiler-layers/rust-concepts.md#16-property-based-testing-with-proptest),
@@ -34,6 +34,7 @@ the inventory:
 | loops                        | every iteration consumes a token or stops; the step limit enforces it                  | 7–10 |
 | `block_expr`                 | stops at a declaration: a missing `}` costs one error, not the rest of the file        | 9    |
 | `decl`                       | skips junk up to the next declaration keyword, in one `ERROR` node                     | 10   |
+| separators                   | a missing line break, or a `{` or `(` on the next line, is reported, and the parse goes on as if it were right | 9, 10 |
 | `parse`                      | keeps one error per position: the first, usually the cause                            | 7    |
 
 matklad's [Resilient LL Parsing Tutorial](https://matklad.github.io/2023/05/21/resilient-ll-parsing-tutorial.html)
@@ -96,8 +97,8 @@ fn validate_paren(paren: &ast::ParenExpr, errors: &mut Vec<SyntaxError>) {
 }
 ```
 
-`(_)` is your spec's disambiguation rule 3, the one the grammar couldn't
-express. Validation is where such rules go.
+`(_)` is the rule of your spec's section 3.6, the one the grammar
+couldn't express. Validation is where such rules go.
 
 </details>
 
@@ -165,11 +166,18 @@ two correct parsers stop at the same place.)
 
 ## Differential testing
 
-Open `tests/differential.rs`. Two parsers of the same language must
-agree on one thing: **is this program valid?** The reference parser in
-`example/` is generated from a grammar and has years of use; when yours
-disagrees with it, one of them is wrong, and the test shows you the
-program.
+Open `tests/differential.rs`. Two implementations of the same language
+must agree on one thing: **is this program valid?** You have two: your
+parser, and your spec. The spec runs too: the checker's Earley parser
+accepts any grammar, so it can judge a program with your rules exactly
+as written. One is written as rules, the other as code, with
+recovery, lookahead and binding powers; when they disagree, one of
+them is wrong, and the test shows you the program.
+
+(The checker cuts the program into tokens with its own lexer, which
+follows section 2 of the finished spec; `cargo check-grammar lexical`
+compared yours with it on samples. Your syntactic grammar does the
+rest.)
 
 ```bash
 cargo test -p mini-parser --test differential
@@ -182,37 +190,50 @@ It checks three things:
 2. **Edited programs**: proptest picks a valid program, and makes one
    to three small edits at random places, deleting a token, doubling
    one, inserting or replacing one from a vocabulary of every Maxim
-   token. The result sits right at the border between valid and
-   invalid, where parsers disagree when one of them is wrong.
+   token, plus line breaks in the places that matter: before `-`,
+   `|>`, `.`, `{` and `}`. The result sits right at the border between
+   valid and invalid, where implementations disagree when one of them
+   is wrong.
 3. **Token soup**: random sequences of tokens after a module header.
    Mostly invalid, and full of combinations nobody would write.
 
-Programs with HTML are skipped: the reference accepts them, and yours
-doesn't, by design.
+Two kinds of programs are skipped: those with HTML, which this step
+leaves out, and those with `(_)`, the rule your grammar can't express
+(validation checks it, and its own tests check validation).
 
 ### When it fails
 
-proptest shrinks the failing program, then prints it:
+proptest shrinks the failing program, then prints it. Here, the
+`not_on_new_line` of Part 9 was made to report nothing:
 
 ```text
-the reference parser says this program is invalid, yours says valid:
-module M
-
-let v = a < b > c
+your spec says this program is invalid, your parser says valid:
+module Main
+fn main() /*
+ */ {
+  Debug.log("Hello, world!")
+}
+your parser's errors: []
 ```
 
-Then find out who's right. Your spec says what Maxim is; the
-reference's grammar is `example/src/maxim.y`; and the two layout rules
-explain most surprises. If yours is wrong, fix it, and add the program
-to a unit test. If you're sure the reference is wrong, note it: you've
-found a bug in a real compiler.
+A block comment that spans lines is a line break: the `{` is on the
+next line, which the spec forbids and the parser let through. Nobody
+would think of writing that test; the random edits did, in seconds.
 
-This isn't hypothetical. While this step was being written, the
-differential tests caught a mistake in the corpus itself: a program
-meant to be invalid, `a b` alone on a line of a block, which both
-parsers accept. It's two statements, `a` then `b`, without a separator:
-valid Maxim. They also caught a deliberately planted bug, a trailing
-comma accepted in lists, in a few seconds.
+Then find out who's right. If it's your parser, fix it, and add the
+program to a unit test. If it's your spec, fix the spec, and run
+`cargo check-grammar`: its samples check the spec on their own.
+
+### What it can't see
+
+The verdict is all the differential tests compare. Make `expr_bp`
+ignore `NEWLINE`s, and `a` newline `- 1` in a block becomes one
+statement, `a - 1`, instead of two: wrong, but still valid, so the
+differential tests pass. The unit tests catch it
+(`line_breaks_end_statements`): they compare trees. Each kind of test
+covers what the other can't: unit tests check the shape on the cases
+someone thought of, differential tests check the verdict on the cases
+nobody did.
 
 ### How many cases?
 

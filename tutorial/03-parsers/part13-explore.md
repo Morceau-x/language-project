@@ -30,10 +30,12 @@ fix it: its suggestions are usually good Rust.
    each declaration, and read `cargo parse --emit=tree`. Where do the
    `ERROR` nodes go? Is the rest of each declaration where you'd
    expect?
-2. **Two parsers, one file.** `corpus/ok/todo.mx` goes through both
-   parsers in the differential tests. Read `example/src/cst.rs`: the
-   reference's tree is typed from the start, and has no place for an
-   error. Compare with your two layers.
+2. **Two parsers, two dialects.** Read the reference compiler's parser
+   in `example/`: `src/cst.rs`, its tree, is typed from the start and
+   has no place for an error; compare with your two layers. Then its
+   lexer's `LParenBOL`, and the top of `src/maxim.y`: how it handles
+   the `-` and `(` that your `NEWLINE` settled. Which design would you
+   rather explain to a newcomer?
 3. **The checker.** `mini-parser/check-grammar/src/earley.rs` is an
    Earley parser in about 550 lines, and `ll1.rs` computes FIRST and
    FOLLOW sets in about 170. Read them with Part 3 in mind.
@@ -80,21 +82,24 @@ fix it: its suggestions are usually good Rust.
    of lines of AST in sync.
 7. **Generate programs from your spec.** A random walk through the
    grammar of `spec/maxim.md` (pick an alternative, a number of
-   repetitions…) produces random valid programs, at least for the
-   parts the disambiguation rules don't touch. Feed them to both
-   parsers. The checker's EBNF reader in `check-grammar/src/ebnf.rs`
-   can be reused.
+   repetitions…) produces random valid token sequences. Turn them back
+   into text: a `NEWLINE` is a line break, and the other tokens need a
+   space between them only where they'd stick together. Feed them to
+   your parser: every one must be valid, except those with `(_)`. The
+   checker's EBNF reader in `check-grammar/src/ebnf.rs` can be reused.
 8. **Fuzzing.** `cargo install cargo-fuzz`, and fuzz `parse` with
    arbitrary bytes, and the differential test with arbitrary strings.
    A fuzzer finds what proptest's vocabulary can't express.
-9. **How fast?** Generate a 100 000-line Maxim file and time both
-   parsers. Where does yours spend its time (`cargo flamegraph`)? Try
+9. **How fast?** Generate a 100 000-line Maxim file and time your
+   parser on it. Where does it spend its time (`cargo flamegraph`)? Try
    interning the green tokens, as rowan does, so that every `WHITESPACE
    " "` is one shared allocation.
 10. **Tree-sitter.** Editors highlight code with
     [tree-sitter](https://tree-sitter.github.io/), a generalized LR
     parser generator that also never fails. Write a tree-sitter grammar
-    for Maxim from your spec. How does it handle the two layout rules?
+    for Maxim from your spec. Its lexer can't decide `NEWLINE` alone:
+    grammars like Python's and Ruby's add an "external scanner", a bit
+    of C that decides, like your `from_lexed`.
 
 ---
 

@@ -14,9 +14,7 @@ the document: each task's check needs the rules of the ones before.
 
 ## 3a. Types
 
-Define `Type` in section 3.1, and `LParen`: a `(`, whether or not it
-starts a line. Most `(` in Maxim can start a line; only a call's
-can't, and calls come in 3c.
+Define `Type` in section 3.1.
 
 From the tour: a type is a capitalized name with optional arguments in
 angle brackets (`Dict<String, List<a>>`), a lowercase name (a type
@@ -42,15 +40,13 @@ more" is that, optional: `( X ( "," X )* )?`.
 ```ebnf
 Type      ::= UPPER TypeArgs? | LOWER | FnType
 TypeArgs  ::= "<" Type ( "," Type )* ">"
-FnType    ::= LParen ( ParamType ( "," ParamType )* )? ")" "->" Type
+FnType    ::= "(" ( ParamType ( "," ParamType )* )? ")" "->" Type
 ParamType ::= ( LOWER ":" )? Type
-LParen    ::= "(" | BOL_LPAREN
 ```
 
 ```markdown
 A `LOWER` type is a type variable: `List<a>`. A function type's
-parameters can have labels: `(acc: b, item: a) -> b`. `LParen` is any
-`(`: everywhere except in calls, a `(` can start a line (see 2.6).
+parameters can have labels: `(acc: b, item: a) -> b`.
 
 Lists never end with a comma: `(a, b,) -> c` is an error, and so is
 `f(a, b,)`.
@@ -80,13 +76,13 @@ cargo check-grammar patterns
 
 ```ebnf
 Pattern     ::= "_" | LOWER | INT | FLOAT | STRING | CtorPattern | ListPattern
-CtorPattern ::= ( UPPER "." )? UPPER ( LParen Pattern ( "," Pattern )* ")" )?
+CtorPattern ::= ( UPPER "." )? UPPER ( "(" Pattern ( "," Pattern )* ")" )?
 ListPattern ::= "[" ( Pattern ( "," Pattern )* ( "," ".." ( LOWER | "_" ) )? )? "]"
 ```
 
 ```markdown
 There are no negative number patterns: a match arm can't start with
-`-` (see 3.6).
+`-`.
 ```
 
 </details>
@@ -139,9 +135,13 @@ can start with a `-`. Write the two levels so that both work.
 
 **Postfix operators** bind tightest: `.field`, a call `(…)`, `?`, and
 a cast `:: Type` (only a capitalized name: `x :: Celsius`). They can
-follow each other: `user.name.length`, `f(x)?.y`. A call's `(` is
-`"("`, never `BOL_LPAREN`: that's the layout rule. Call arguments are
+follow each other: `user.name.length`, `f(x)?.y`. Call arguments are
 expressions, labeled expressions (`age: 30`) or spreads (`..u`).
+
+Where do line breaks go? Nowhere: no rule of this section mentions
+`NEWLINE`, so an expression can't contain one. In `f` newline `(x)`,
+the line break is a `NEWLINE` (2.6), so it's not a call. In `a +`
+newline `b`, it's whitespace, so the grammar never sees it.
 
 You can't check this task alone: expressions contain blocks, lambdas,
 matches…, the rules of 3d. Write both, then check.
@@ -185,7 +185,8 @@ And `a ** b ** c` groups to the right, because that `Unary` can be a
 <details>
 <summary>Solution</summary>
 
-The table of Hint 1, then:
+The line "Operators, from loosest to tightest:", the table of Hint 1,
+then:
 
 ```markdown
 `**` binds tighter than a prefix `-` on its left: `-x ** 2` is
@@ -250,7 +251,12 @@ inside them. From the tour:
   guard (`if` and an expression), `->`, an expression.
 
 A block holds statements: `let` bindings (with an optional type) and
-expressions. Statements have no separator, nor do match arms.
+expressions, separated by `NEWLINE`s. It can be empty, `{}`.
+
+Match arms are separated by `NEWLINE`s too, with one exception: after
+an arm whose result is a block, the next arm can follow on the same
+line, `match x { A -> { 1 } B -> { 2 } }`. Rust has the same rule for
+its commas: `A => { 1 } B => { 2 }` needs none.
 
 ```bash
 cargo check-grammar expressions
@@ -260,23 +266,44 @@ The checker tests how expressions group: `a + b * c` must group as
 `⟨a + ⟨b * c⟩⟩`. If yours doesn't, it shows how it grouped it.
 
 <details>
+<summary>Hint 1: separators</summary>
+
+"Zero or more `X` separated by `S`" is `( X ( S X )* )?`, the comma
+lists' shape.
+
+</details>
+
+<details>
+<summary>Hint 2: the arms</summary>
+
+Whether the next arm needs a `NEWLINE` depends on the arm before it, so
+there are two kinds of arm: `Arm`, any arm, and `BlockArm`, an arm
+whose result is a `Block`. Then write the list of arms recursively:
+`Arms` is an arm, then either nothing or a `NEWLINE` and more arms; or
+a `BlockArm`, then more arms directly.
+
+</details>
+
+<details>
 <summary>Solution</summary>
 
 ```ebnf
 Atom          ::= LOWER | UPPER | INT | FLOAT | STRING | "_"
                 | Interpolation | Group | List | Block | Lambda | If | Match
 Interpolation ::= STRING_START Expr ( STRING_MIDDLE Expr )* STRING_END
-Group         ::= LParen Expr ")"
+Group         ::= "(" Expr ")"
 List          ::= "[" ( Expr ( "," Expr )* ( "," ".." Expr )? )? "]"
-Block         ::= "{" Stmt* "}"
+Block         ::= "{" ( Stmt ( NEWLINE Stmt )* )? "}"
 Stmt          ::= "let" LOWER ( ":" Type )? "=" Expr | Expr
 Lambda        ::= "fn" Params ReturnType? Block
-Params        ::= LParen ( Param ( "," Param )* )? ")"
+Params        ::= "(" ( Param ( "," Param )* )? ")"
 Param         ::= ( LOWER | "_" ) ( ":" Type )?
 ReturnType    ::= "->" Type
 If            ::= "if" Expr Block "else" ( Block | If )
-Match         ::= "match" Expr "{" Arm+ "}"
+Match         ::= "match" Expr "{" Arms "}"
+Arms          ::= Arm ( NEWLINE Arms )? | BlockArm Arms
 Arm           ::= Pattern ( "if" Expr )? "->" Expr
+BlockArm      ::= Pattern ( "if" Expr )? "->" Block
 ```
 
 ```markdown
@@ -284,9 +311,15 @@ Arm           ::= Pattern ( "if" Expr )? "->" Expr
 `add(1, _)` is a function that takes the missing one. A block's value is
 its last statement's.
 
-Statements and match arms have no separator: no `;`, and a line break
-is just whitespace. One ends where the next one starts.
+Statements are separated by line breaks, one per line: there's no `;`.
+Match arms too, except that an arm whose result is a block can be
+followed by another on the same line: `match x { A -> { 1 } B -> { 2 } }`.
 ```
+
+`A -> { 1 }` newline `B -> 2` is an `Arm` then a `NEWLINE`: the
+`BlockArm` path is only needed without the line break. And
+`A -> { 1 } + 2 B -> 3` is an error: that result isn't a block, only
+starts with one.
 
 </details>
 
@@ -298,7 +331,7 @@ Section 3.5: `Module`, a header and declarations, and the six
 declarations of the tour: `import`, `type` (with variants or a record,
 and optional type parameters `<a, b>`), `fn`, `cast`, `component` and
 `let`. Variants' arguments are types in parentheses: `Rect(Float,
-Float)`.
+Float)`. Declarations are separated by `NEWLINE`s, one per line.
 
 ```bash
 cargo check-grammar programs
@@ -312,14 +345,14 @@ rejects them first).
 <summary>Solution</summary>
 
 ```ebnf
-Module     ::= "module" UPPER Decl*
+Module     ::= "module" UPPER ( NEWLINE Decl )*
 Decl       ::= Import | TypeDecl | Fn | Cast | Component | LetDecl
 Import     ::= "import" UPPER
 TypeDecl   ::= "type" UPPER TypeParams? "=" TypeBody
 TypeParams ::= "<" LOWER ( "," LOWER )* ">"
 TypeBody   ::= "|"? Variant ( "|" Variant )*
              | "{" Field ( "," Field )* "}"
-Variant    ::= UPPER ( LParen Type ( "," Type )* ")" )?
+Variant    ::= UPPER ( "(" Type ( "," Type )* ")" )?
 Field      ::= LOWER ":" Type
 Fn         ::= "fn" LOWER Params ReturnType? Block
 Cast       ::= "cast" Params ReturnType? Block
@@ -327,8 +360,24 @@ Component  ::= "component" UPPER Params
 LetDecl    ::= "let" LOWER ( ":" Type )? "=" Expr
 ```
 
-With a line before the code block: "A file is a module: a header, then
-declarations."
+With a line before the code block:
+
+```markdown
+A file is a module: a header, then declarations, one per line.
+```
+
+and one after it:
+
+```markdown
+A `NEWLINE` can't come in the middle of a declaration: in `fn f() ->
+Int` newline `{`, the line break before `{` is a `NEWLINE`, so the
+function has no body. As in Go, a `{` goes at the end of the line.
+```
+
+A line break inside a declaration is fine wherever 2.6 makes it
+whitespace: `type Shape =` newline `| Circle(Float)` (after `=`, and
+before `|`), or a record's fields on several lines (after `{` and `,`,
+before `}`).
 
 </details>
 
@@ -336,7 +385,8 @@ declarations."
 
 ## 3f. Ambiguity, and what the grammar can't say
 
-Your grammar is complete, and it's **ambiguous**. Take this block:
+Without `NEWLINE`, this grammar would be **ambiguous**. Take this
+block:
 
 ```text
 {
@@ -345,35 +395,34 @@ Your grammar is complete, and it's **ambiguous**. Take this block:
 }
 ```
 
-`Stmt*` allows two readings: one statement `a - 1`, or two statements
-`a` and `-1`. Same with `{ f (x) }`: a call, or `f` then a
-parenthesized `x`? (Not with a `BOL_LPAREN`: that's what it's for.)
-These are the layout rules of the tour. The checker's samples avoid
-them, but a parser must decide.
+With `Block ::= "{" Stmt* "}"`, there are two readings: one statement
+`a - 1`, or two statements, `a` and `-1`. Same with `{ f (x) }`: a
+call, or `f` then a parenthesized `x`? The reference compiler's grammar
+is like that, and its spec settles it with **disambiguation rules** in
+prose: "an expression goes as far as it can", "a `(` on a new line
+starts a new statement". Grammars of real languages are ambiguous in
+places, and C's dangling `else` is the classic.
 
-Grammars of real languages are ambiguous in places; C's dangling
-`else` is the classic. Specs settle them with **disambiguation rules**,
-in prose. Write section 3.6: the two layout rules, and one more thing
-the grammar allows but Maxim doesn't, `(_)`, which the checker can't
-see either.
+Yours isn't, there: the line break before `- 1` is a `NEWLINE`, and no
+rule allows a `NEWLINE` inside an expression, so it's two statements;
+`{ a - 1 }` on one line has no `NEWLINE`, so it's one. Rule 2 of 2.6
+did the disambiguating, in the lexer, where one token of context on
+each side is enough.
+
+One thing remains that the grammar allows but Maxim doesn't: `(_)`.
+`_` is an `Atom` (for `add(1, _)`), so `"(" Expr ")"` accepts `(_)`.
+The checker can't see that either. Write section 3.6: what `NEWLINE`
+settles, and that rule.
 
 <details>
 <summary>Solution</summary>
 
 ```markdown
-The grammar above is ambiguous in a few places, where these rules
-decide.
+Thanks to `NEWLINE`, the grammar says where every statement ends: `a`
+newline `- 1` is two statements, `a - 1` on one line is one, and `f`
+newline `(x)` is two. One rule remains that the grammar can't express:
 
-1. **An expression goes as far as it can.** A statement, a match arm's
-   result or a `let`'s value ends only where no operator can continue
-   it. In `{ a` newline `- 1 }`, the `- 1` continues `a`: one statement,
-   `a - 1`, not two. That's why there are no negative number patterns:
-   in `match n { 0 -> a -1 -> b }`, `-1` would continue `a`.
-2. **A `(` on the same line is a call.** After an expression, a `"("`
-   always starts a call, never a new statement. A `BOL_LPAREN` never
-   starts a call (`PostfixOp` only accepts `"("`), so a line that starts
-   with `(` always starts something new.
-3. **`(_)` is not an expression.** A `Group` can't contain `_` alone.
+1. **`(_)` is not an expression.** A `Group` can't contain `_` alone.
 ```
 
 Then a last section, to say what the grammar doesn't decide:
@@ -387,9 +436,10 @@ and positional arguments can't be mixed, the `++` operator was removed
 in favor of interpolation, and so on.
 ```
 
-Rule 1 is how an LR parser like the reference's behaves by default:
-on a shift/reduce conflict (shift `-` into the expression, or reduce
-the statement), it shifts. Your Pratt parser will too, without trying.
+The reference's LR parser settles `a` newline `- 1` the other way: on
+a shift/reduce conflict (shift `-` into the expression, or reduce the
+statement), it shifts, so the expression goes on. Your Pratt parser
+will stop at the `NEWLINE` instead (Part 9).
 
 </details>
 
@@ -403,12 +453,11 @@ cargo check-grammar ll1
 
 ```text
 Lookahead: where one token isn't enough to choose (LL(1))
-  ! `AddExpr`: at `( ( "+" | "-" ) MulExpr )*`, `"-"` can start the repeated or optional part, and also what comes after it
-  ! `Postfix`: at `PostfixOp*`, `"("` can start the repeated or optional part, and also what comes after it
   ! `Arg`: `LOWER` can start more than one of its alternatives
+  ! `Arms`: `UPPER`, `LOWER`, `INT`, `FLOAT`, `STRING`, `"_"`, `"["` can start more than one of its alternatives
+  ! `ParamType`: at `( LOWER ":" )?`, `LOWER` can start the repeated or optional part, and also what comes after it
   ! `ListPattern`: at `( "," Pattern )*`, `","` can start the repeated or optional part, and also what comes after it
   ! `CtorPattern`: at `( UPPER "." )?`, `UPPER` can start the repeated or optional part, and also what comes after it
-  ! `ParamType`: at `( LOWER ":" )?`, `LOWER` can start the repeated or optional part, and also what comes after it
   ! `List`: at `( "," Expr )*`, `","` can start the repeated or optional part, and also what comes after it
 ```
 
@@ -441,23 +490,34 @@ in one of three ways:
    first `UPPER`, but `UPPER ( "." UPPER )?`, the same language, can:
    that's **left factoring**. The parser writes `CtorPattern` that way.
    The lists too: after a `","`, decide between `".."` and a pattern.
-3. **Follow a disambiguation rule.** The `"-"` in `AddExpr`, and the
-   `"("` in `Postfix`: after an expression, they could continue it or
-   start the next statement. These are your two layout rules: continue
-   the expression, and treat a `"("` on the same line as a call. A
-   `BOL_LPAREN` is a different token, which is why it causes no `!`.
+3. **Parse first, decide after.** In `Arms`, an `Arm` and a
+   `BlockArm` start the same way, and differ only at the end: whether
+   the result is a block. No amount of lookahead helps, a block can be
+   any length. The parser parses an arm, then looks at what its result
+   was: if a block, the next arm can follow without a `NEWLINE`. It's
+   left factoring again, with the parser remembering what it parsed.
 
-The reference compiler's grammar has a comment saying exactly that
-(`example/src/maxim.y`, near the top): its conflicts are on `-` and
-`(`, and it resolves them with precedence declarations.
+What's missing is as telling. Without `NEWLINE`, a `"-"` in `AddExpr`
+and a `"("` in `Postfix` would get a `!` each: after an expression,
+they could continue it or start the next statement. The reference
+compiler's grammar has exactly these two conflicts, and a comment near
+the top of `example/src/maxim.y` says how it resolves them: with a
+precedence declaration for `-`, and with a lexer that tells a `(` at
+the start of a line apart from the others. Your `NEWLINE` settles both
+before the parser sees them.
 
 ### Try it
 
 1. Write `CtorPattern` left-factored, as in point 2. Its `!`
    disappears.
-2. Change `PostfixOp`'s `"("` to `LParen`. The checker now accepts
-   `f` newline `(x)`, and finds an ambiguity. Put it back.
-3. Make `AddExpr` left-recursive, `AddExpr ::= AddExpr ( "+" | "-" )
+2. Make the statement separators optional, `Block ::= "{" ( Stmt
+   NEWLINE? )* "}"`. The checker now accepts `{ a b }`, and the two
+   `!` of the reference grammar are back, on `"-"` and `"("`. Put it
+   back.
+3. Remove the `BlockArm` alternative from `Arms`. The checker rejects
+   `match x { A -> { 1 } B -> { 2 } }`, and two programs of the corpus.
+   Put it back.
+4. Make `AddExpr` left-recursive, `AddExpr ::= AddExpr ( "+" | "-" )
    MulExpr | MulExpr`: the checker still accepts it (Earley parsing
    doesn't mind), and the LL(1) section warns that recursive descent
    would loop. Put it back.

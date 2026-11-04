@@ -37,7 +37,7 @@ fn area(s: Shape) -> Float {
 fn label(word: String, score: Float) -> String {
   match word {
     "hello" -> "greeting"
-    _ -> match score { 1.5 -> "exact" _ -> "other" }
+    _ -> match score { 1.5 -> { "exact" } _ -> { "other" } }
   }
 }
 

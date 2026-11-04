@@ -9,21 +9,15 @@
 //! lexer, so the syntactic grammar can be checked before you write your
 //! own lexer.
 
-mod earley;
-mod ebnf;
-mod lexical;
-mod ll1;
-mod samples;
-mod tokens;
-
 use std::collections::{BTreeSet, HashMap, HashSet};
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
-use earley::{Bnf, grouping, recognize};
-use ebnf::{ExprKind, Grammar};
-use samples::SyntaxSamples;
-use tokens::NoTokens;
+use check_grammar::earley::{Bnf, grouping, recognize};
+use check_grammar::ebnf::{self, ExprKind, Grammar};
+use check_grammar::samples::{self, SyntaxSamples};
+use check_grammar::tokens::{self, NoTokens};
+use check_grammar::{TOKENS, bnf_for, lexical, ll1};
 
 const USAGE: &str = "\
 usage: check-grammar [--spec FILE] [SECTION...]
@@ -31,19 +25,6 @@ usage: check-grammar [--spec FILE] [SECTION...]
 Check the grammar in mini-parser/spec/maxim.md (or FILE).
 SECTION is one or more of: lexical, types, patterns, expressions,
 programs, ll1. Without one, everything is checked.";
-
-/// The token kinds the syntactic grammar can use by name.
-const TOKENS: &[&str] = &[
-    "LOWER",
-    "UPPER",
-    "INT",
-    "FLOAT",
-    "STRING",
-    "STRING_START",
-    "STRING_MIDDLE",
-    "STRING_END",
-    "BOL_LPAREN",
-];
 
 /// The lexical rules the spec must define.
 const LEXICAL_RULES: &[&str] = &[
@@ -304,11 +285,13 @@ fn check_rules(grammar: &Grammar, report: &mut Report) {
             ));
         }
     }
-    // Lexical rules can't refer to themselves: they're regular.
+    // A lexical rule may refer to itself (nested comments do), but only
+    // after reading a character: otherwise matching it would loop.
     for rule in grammar.rules.iter().filter(|r| is_lexical(&r.name)) {
-        if refers_to(grammar, &rule.name, &rule.name) {
+        if starts_with_itself(grammar, &rule.expr, &rule.name, &mut HashSet::new()) {
             report.fail(&format!(
-                "line {}: `{}` refers to itself: lexical rules can't be recursive",
+                "line {}: `{}` can refer to itself before reading a character: \
+                 lexical rules can't be left-recursive",
                 rule.line, rule.name
             ));
         }
@@ -323,26 +306,66 @@ fn check_rules(grammar: &Grammar, report: &mut Report) {
     }
 }
 
-/// Does rule `from` use rule `target`, directly or not?
-fn refers_to(grammar: &Grammar, from: &str, target: &str) -> bool {
-    let mut seen = HashSet::new();
-    let mut todo = vec![from.to_string()];
-    while let Some(name) = todo.pop() {
-        let Some(rule) = grammar.rules.iter().find(|r| r.name == name) else {
-            continue;
-        };
-        let mut refs = Vec::new();
-        rule.expr.refs(&mut refs);
-        for (next, _) in refs {
-            if next == target {
-                return true;
+/// Can `expr` reach the rule `target` before reading a character?
+fn starts_with_itself(
+    grammar: &Grammar,
+    expr: &ebnf::Expr,
+    target: &str,
+    seen: &mut HashSet<String>,
+) -> bool {
+    match &expr.kind {
+        ExprKind::Lit(_) | ExprKind::Class(_) => false,
+        ExprKind::Ref(name) if name == target => true,
+        ExprKind::Ref(name) => {
+            seen.insert(name.clone())
+                && grammar
+                    .rules
+                    .iter()
+                    .find(|r| &r.name == name)
+                    .is_some_and(|rule| starts_with_itself(grammar, &rule.expr, target, seen))
+        }
+        ExprKind::Seq(items) => {
+            for item in items {
+                if starts_with_itself(grammar, item, target, seen) {
+                    return true;
+                }
+                if !can_be_empty(grammar, item, &mut HashSet::new()) {
+                    return false;
+                }
             }
-            if seen.insert(next.clone()) {
-                todo.push(next);
-            }
+            false
+        }
+        ExprKind::Alt(items) => items
+            .iter()
+            .any(|item| starts_with_itself(grammar, item, target, seen)),
+        ExprKind::Opt(inner) | ExprKind::Star(inner) | ExprKind::Plus(inner) => {
+            starts_with_itself(grammar, inner, target, seen)
+        }
+        ExprKind::Diff(a, b) => {
+            starts_with_itself(grammar, a, target, seen)
+                || starts_with_itself(grammar, b, target, seen)
         }
     }
-    false
+}
+
+/// Can `expr` match the empty text?
+fn can_be_empty(grammar: &Grammar, expr: &ebnf::Expr, seen: &mut HashSet<String>) -> bool {
+    match &expr.kind {
+        ExprKind::Lit(_) | ExprKind::Class(_) => false,
+        ExprKind::Ref(name) => {
+            seen.insert(name.clone())
+                && grammar
+                    .rules
+                    .iter()
+                    .find(|r| &r.name == name)
+                    .is_some_and(|rule| can_be_empty(grammar, &rule.expr, seen))
+        }
+        ExprKind::Seq(items) => items.iter().all(|item| can_be_empty(grammar, item, seen)),
+        ExprKind::Alt(items) => items.iter().any(|item| can_be_empty(grammar, item, seen)),
+        ExprKind::Opt(_) | ExprKind::Star(_) => true,
+        ExprKind::Plus(inner) => can_be_empty(grammar, inner, seen),
+        ExprKind::Diff(a, _) => can_be_empty(grammar, a, seen),
+    }
 }
 
 fn check_lexical(grammar: &Grammar, report: &mut Report) {
@@ -376,28 +399,6 @@ fn check_lexical(grammar: &Grammar, report: &mut Report) {
             ));
         }
     }
-}
-
-/// The rules used from `start`, if they're all defined; or the first
-/// that isn't.
-fn bnf_for(grammar: &Grammar, start: &str) -> Result<Bnf, String> {
-    if !grammar.rules.iter().any(|r| r.name == start) {
-        return Err(format!("`{start}` is not defined yet"));
-    }
-    let mut seen = HashSet::new();
-    let mut todo = vec![start.to_string()];
-    while let Some(name) = todo.pop() {
-        if !seen.insert(name.clone()) || TOKENS.contains(&name.as_str()) {
-            continue;
-        }
-        let Some(rule) = grammar.rules.iter().find(|r| r.name == name) else {
-            return Err(format!("`{name}` is not defined yet"));
-        };
-        let mut refs = Vec::new();
-        rule.expr.refs(&mut refs);
-        todo.extend(refs.into_iter().map(|(name, _)| name));
-    }
-    Ok(Bnf::new(grammar, &[start], TOKENS))
 }
 
 /// What the grammar makes of `text`, from `start`.

@@ -52,11 +52,12 @@ Open `src/parser/mod.rs`.
 
 **`Input`** is what the parser reads: the tokens that aren't trivia,
 and one bit per token, `newline_before`. That bit is your spec's
-`BOL_LPAREN`: rather than a token kind of its own, a fact about where a
-token is. The tree keeps the real kind, `L_PAREN`, and the places that
-accept any `(` don't have to list two kinds. (rust-analyzer keeps a bit
-per token too, for the same kind of reason: whether two tokens touch,
-so that `>` `>` can be read as `>>`.)
+`NEWLINE`: rather than a token of its own, a fact about the token after
+it. A real `NEWLINE` token would break losslessness: either it has no
+text, or it takes the `\n` away from the whitespace. As a bit, the line
+break stays in the whitespace where it was, and the parser still sees
+the separator. (rust-analyzer keeps a bit per token too, for another
+reason: whether two tokens touch, so that `>` `>` can be read as `>>`.)
 
 **`Parser`** has a position in the input, the events emitted so far,
 and `steps`. Read `nth`: every look at a token counts a step, and
@@ -72,7 +73,7 @@ Then the API, which Parts 8 to 10 use everywhere:
 |----------------------------|--------------------------------------------------------------------------|
 | `current()`, `nth(n)`      | the kind of the current token, of the token `n` ahead (`EOF` past the end) |
 | `at(kind)`, `nth_at(n, kind)`, `at_ts(set)` | is the current (or `n`th) token of that kind, or in that set? |
-| `at_line_start()`          | is there a line break before the current token?                          |
+| `at_newline()`             | is there a `NEWLINE` before the current token?                           |
 | `bump(kind)`               | consume the current token, which must be a `kind` (it panics otherwise)  |
 | `bump_any()`               | consume the current token, whatever it is                                |
 | `eat(kind)`                | consume the current token if it's a `kind`; say whether it did           |
@@ -92,11 +93,43 @@ cargo test -p mini-parser --lib parser::
 Write `Input::from_lexed`: go through the lexer's tokens **including
 the final `EOF`** (`0..=lexed.len()`); skip trivia, but remember
 whether any of it contains `\n`; push every other token's kind, with
-that bit, and reset it.
+its `newline_before` bit, and forget the line break.
+
+The bit is your spec's rule 2 of section 2.6, Scala's rule: a line
+break, and the token before can end a statement, and this one can
+start one, and the innermost open bracket isn't a `(` or a `[`. You
+have:
+
+- `can_end_expr(kind)`, from Part 5, for the token before: the last
+  kind pushed;
+- `grammar::LINE_START`, the tokens that can start a statement, a
+  match arm or a declaration. Read it at the top of
+  `src/parser/grammar/mod.rs`: it's the union of three sets of the
+  grammar;
+- a stack of the brackets open so far: push `(`, `[` and `{`, pop at
+  `)`, `]` and `}`.
+
+One more case: an `ERROR` token, a character the lexer couldn't read,
+could have been anything. Count it as able to end and to start a
+statement; otherwise one bad character on a line causes a second
+error next to it, "expected a line break".
 
 ```bash
 cargo test -p mini-parser --lib parser::tests::the_input
+cargo test -p mini-parser --lib parser::tests::a_line_break_needs
+cargo test -p mini-parser --lib parser::tests::line_breaks_dont_count
 ```
+
+<details>
+<summary>Hint: the brackets</summary>
+
+A `Vec<SyntaxKind>` is the stack. `brackets.last()` is the innermost
+open bracket, an `Option<&SyntaxKind>`; `matches!` can look inside:
+`matches!(brackets.last(), Some(&T!['(']) | Some(&T!['[']))`. A `)`
+without its `(` pops nothing: `Vec::pop` returns `None`, and that's
+fine.
+
+</details>
 
 <details>
 <summary>Solution</summary>
@@ -107,15 +140,36 @@ pub(crate) fn from_lexed(lexed: &Lexed<'_>) -> Input {
         kind: Vec::new(),
         newline_before: Vec::new(),
     };
-    let mut newline = false;
+    // The brackets open so far, innermost last: inside `(…)` and
+    // `[…]`, line breaks are just whitespace.
+    let mut brackets = Vec::new();
+    let mut line_break = false;
     for i in 0..=lexed.len() {
         let kind = lexed.kind(i);
         if kind.is_trivia() {
-            newline |= lexed.text(i).contains('\n');
-        } else {
-            input.kind.push(kind);
-            input.newline_before.push(newline);
-            newline = false;
+            line_break |= lexed.text(i).contains('\n');
+            continue;
+        }
+        // Scala's rule: a line break ends a statement if what comes
+        // before can end one, what comes after can start one, and
+        // it isn't inside parentheses or brackets. A character the
+        // lexer couldn't read could be anything: it can do both.
+        let newline = line_break
+            && input
+                .kind
+                .last()
+                .is_some_and(|&last| can_end_expr(last) || last == ERROR)
+            && (grammar::LINE_START.contains(kind) || kind == ERROR)
+            && !matches!(brackets.last(), Some(&T!['(']) | Some(&T!['[']));
+        input.kind.push(kind);
+        input.newline_before.push(newline);
+        line_break = false;
+        match kind {
+            T!['('] | T!['['] | T!['{'] => brackets.push(kind),
+            T![')'] | T![']'] | T!['}'] => {
+                brackets.pop();
+            }
+            _ => {}
         }
     }
     input
@@ -123,7 +177,15 @@ pub(crate) fn from_lexed(lexed: &Lexed<'_>) -> Input {
 ```
 
 A block comment that spans lines counts as a line break: its text
-contains `\n`.
+contains `\n`. And several line breaks in a row make one bit: it's a
+`bool`, not a count.
+
+Where does this rule run in other languages? Go's lexer inserts real
+`;` tokens, since Go's trees don't need to be lossless. Scala's lexer
+inserts `NEWLINE` tokens, with a stack of "regions" like your
+brackets. Kotlin's parser looks back at the whitespace when it needs
+to. Yours is in between: decided once, before parsing, and kept as a
+bit.
 
 </details>
 
@@ -131,17 +193,17 @@ contains `\n`.
 
 ## 7b. Reading tokens
 
-Write `eat`, `expect` and `at_line_start`.
+Write `eat`, `expect` and `at_newline`.
 
 - `eat(kind)`: if the current token is a `kind`, consume it with
   `do_bump` (which emits the `Token` event) and return `true`.
 - `expect(kind)`: `eat`, or report the error `expected {…}`, using
   `kind.describe()`: "expected `)`", "expected a lowercase name".
-- `at_line_start()`: the bit of the current token.
+- `at_newline()`: the bit of the current token.
 
 ```bash
 cargo test -p mini-parser --lib parser::tests::looking_ahead
-cargo test -p mini-parser --lib parser::tests::at_line_start
+cargo test -p mini-parser --lib parser::tests::at_newline
 ```
 
 <details>
@@ -168,7 +230,7 @@ pub(crate) fn expect(&mut self, kind: SyntaxKind) -> bool {
 ```
 
 ```rust
-pub(crate) fn at_line_start(&self) -> bool {
+pub(crate) fn at_newline(&self) -> bool {
     self.input.newline_before(self.pos)
 }
 ```
@@ -189,7 +251,9 @@ A **marker** is a node being built. `p.start()` pushes a placeholder
 index. Then:
 
 - `m.complete(p, kind)` fills the placeholder in with the kind, pushes
-  `Finish`, and returns a `CompletedMarker`;
+  `Finish`, and returns a `CompletedMarker`, which remembers the kind
+  too: `kind()` lets a grammar function ask what it just parsed (Part 9
+  needs it for match arms);
 - `m.abandon(p)` gives up: the placeholder stays a tombstone, and
   everything since the start goes to the parent. If nothing was emitted
   since the start, it can even pop the placeholder;
@@ -253,7 +317,10 @@ pub(crate) fn complete(mut self, p: &mut Parser<'_>, kind: SyntaxKind) -> Comple
         _ => unreachable!("a marker points at a Start event"),
     }
     p.events.push(Event::Finish);
-    CompletedMarker { pos: self.pos }
+    CompletedMarker {
+        pos: self.pos,
+        kind,
+    }
 }
 ```
 

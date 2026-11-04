@@ -16,12 +16,25 @@ use super::{Parser, TokenSet};
 use crate::SyntaxKind::{self, *};
 use crate::T;
 
-/// `SourceFile ::= ModuleHeader Decl*`
+/// The tokens that can start a statement, a match arm or a declaration:
+/// a line break before one of them can end what came before.
+pub(crate) const LINE_START: TokenSet = expressions::EXPR_FIRST
+    .union(patterns::PAT_FIRST)
+    .union(items::DECL_FIRST);
+
+/// `Module ::= "module" UPPER ( NEWLINE Decl )*`
 pub(crate) fn source_file(p: &mut Parser<'_>) {
     let m = p.start();
     module_header(p);
+    // After junk that `decl` skipped, a missing line break isn't news.
+    let mut needs_newline = true;
     while !p.at(EOF) {
-        items::decl(p);
+        // Only a declaration can be on the wrong line: anything else is
+        // `decl`'s error to report.
+        if needs_newline && !p.at_newline() && p.at_ts(items::DECL_FIRST) {
+            p.error("expected a line break: each declaration starts on its own line");
+        }
+        needs_newline = items::decl(p);
     }
     m.complete(p, SOURCE_FILE);
 }
@@ -91,17 +104,30 @@ fn opt_ret_type(p: &mut Parser<'_>) {
 /// A block, which must be there: a function's body, an `if`'s branch…
 fn block(p: &mut Parser<'_>) {
     if p.at(T!['{']) {
+        not_on_new_line(p);
         atoms::block_expr(p);
     } else {
         p.error("expected a block `{ … }`");
     }
 }
 
+/// The current token, a `(` or a `{`, belongs to what's before it. If a
+/// line break ends the statement before it, say so, and parse on as if it
+/// didn't: `fn f()` then `{` on the next line.
+fn not_on_new_line(p: &mut Parser<'_>) {
+    if p.at_newline() {
+        p.error(format!(
+            "a line break here ends the statement: put this {} at the end of the line before",
+            p.current().describe()
+        ));
+    }
+}
+
 /// Parse `text` with one grammar function, in a root node: the tests of
 /// each grammar file use it.
 #[cfg(test)]
-fn parse_with(
-    entry: impl FnOnce(&mut Parser<'_>),
+fn parse_with<R>(
+    entry: impl FnOnce(&mut Parser<'_>) -> R,
     text: &str,
 ) -> (crate::SyntaxNode, Vec<crate::SyntaxError>) {
     let lexed = crate::lexer::lex(text);
@@ -125,7 +151,7 @@ fn parse_with(
 
 /// Parse `text` with one grammar function, and dump the tree.
 #[cfg(test)]
-fn check(entry: impl FnOnce(&mut Parser<'_>), text: &str, expect: expect_test::Expect) {
+fn check<R>(entry: impl FnOnce(&mut Parser<'_>) -> R, text: &str, expect: expect_test::Expect) {
     let (root, errors) = parse_with(entry, text);
     let mut out = root.debug_dump();
     for error in errors {

@@ -1,4 +1,4 @@
-SOURCE_FILE@0..370
+SOURCE_FILE@0..372
   MODULE_HEADER@0..14
     MODULE_KW@0..6 "module"
     WHITESPACE@6..7 " "
@@ -118,7 +118,7 @@ SOURCE_FILE@0..370
     LITERAL@309..333
       STRING@309..333 "\"héllo, wörld, 日本\""
   WHITESPACE@333..334 "\n"
-  LET_DECL@334..369
+  LET_DECL@334..371
     LET_KW@334..337 "let"
     WHITESPACE@337..338 " "
     NAME@338..344
@@ -126,29 +126,23 @@ SOURCE_FILE@0..370
     WHITESPACE@344..345 " "
     EQ@345..346 "="
     WHITESPACE@346..347 " "
-    INTERPOLATED_STRING@347..369
+    INTERPOLATED_STRING@347..371
       STRING_START@347..350 "\"${"
       WHITESPACE@350..351 " "
-      BLOCK_EXPR@351..366
+      BLOCK_EXPR@351..356
         L_CURLY@351..352 "{"
         WHITESPACE@352..353 " "
-        LET_STMT@353..362
-          LET_KW@353..356 "let"
-          WHITESPACE@356..357 " "
-          NAME@357..358
-            LOWER_IDENT@357..358 "a"
-          WHITESPACE@358..359 " "
-          EQ@359..360 "="
-          WHITESPACE@360..361 " "
-          LITERAL@361..362
-            INT_NUMBER@361..362 "1"
-        WHITESPACE@362..363 " "
-        EXPR_STMT@363..364
-          PATH_EXPR@363..364
-            NAME_REF@363..364
-              LOWER_IDENT@363..364 "a"
-        WHITESPACE@364..365 " "
-        R_CURLY@365..366 "}"
-      WHITESPACE@366..367 " "
-      STRING_END@367..369 "}\""
-  WHITESPACE@369..370 "\n"
+        EXPR_STMT@353..354
+          LITERAL@353..354
+            INT_NUMBER@353..354 "1"
+        WHITESPACE@354..355 " "
+        R_CURLY@355..356 "}"
+      WHITESPACE@356..357 " "
+      STRING_MIDDLE@357..365 "} and ${"
+      WHITESPACE@365..366 " "
+      BLOCK_EXPR@366..368
+        L_CURLY@366..367 "{"
+        R_CURLY@367..368 "}"
+      WHITESPACE@368..369 " "
+      STRING_END@369..371 "}\""
+  WHITESPACE@371..372 "\n"

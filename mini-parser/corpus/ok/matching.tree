@@ -1,4 +1,4 @@
-SOURCE_FILE@0..847
+SOURCE_FILE@0..855
   MODULE_HEADER@0..15
     MODULE_KW@0..6 "module"
     WHITESPACE@6..7 " "
@@ -430,7 +430,7 @@ SOURCE_FILE@0..847
       WHITESPACE@521..522 "\n"
       R_CURLY@522..523 "}"
   WHITESPACE@523..525 "\n\n"
-  FN@525..673
+  FN@525..681
     FN_KW@525..527 "fn"
     WHITESPACE@527..528 " "
     NAME@528..533
@@ -464,18 +464,18 @@ SOURCE_FILE@0..847
         NAME_REF@565..571
           UPPER_IDENT@565..571 "String"
     WHITESPACE@571..572 " "
-    BLOCK_EXPR@572..673
+    BLOCK_EXPR@572..681
       L_CURLY@572..573 "{"
       WHITESPACE@573..576 "\n  "
-      EXPR_STMT@576..671
-        MATCH_EXPR@576..671
+      EXPR_STMT@576..679
+        MATCH_EXPR@576..679
           MATCH_KW@576..581 "match"
           WHITESPACE@581..582 " "
           PATH_EXPR@582..586
             NAME_REF@582..586
               LOWER_IDENT@582..586 "word"
           WHITESPACE@586..587 " "
-          MATCH_ARM_LIST@587..671
+          MATCH_ARM_LIST@587..679
             L_CURLY@587..588 "{"
             WHITESPACE@588..593 "\n    "
             MATCH_ARM@593..614
@@ -487,186 +487,198 @@ SOURCE_FILE@0..847
               LITERAL@604..614
                 STRING@604..614 "\"greeting\""
             WHITESPACE@614..619 "\n    "
-            MATCH_ARM@619..667
+            MATCH_ARM@619..675
               WILDCARD_PAT@619..620
                 UNDERSCORE@619..620 "_"
               WHITESPACE@620..621 " "
               THIN_ARROW@621..623 "->"
               WHITESPACE@623..624 " "
-              MATCH_EXPR@624..667
+              MATCH_EXPR@624..675
                 MATCH_KW@624..629 "match"
                 WHITESPACE@629..630 " "
                 PATH_EXPR@630..635
                   NAME_REF@630..635
                     LOWER_IDENT@630..635 "score"
                 WHITESPACE@635..636 " "
-                MATCH_ARM_LIST@636..667
+                MATCH_ARM_LIST@636..675
                   L_CURLY@636..637 "{"
                   WHITESPACE@637..638 " "
-                  MATCH_ARM@638..652
+                  MATCH_ARM@638..656
                     LITERAL_PAT@638..641
                       FLOAT_NUMBER@638..641 "1.5"
                     WHITESPACE@641..642 " "
                     THIN_ARROW@642..644 "->"
                     WHITESPACE@644..645 " "
-                    LITERAL@645..652
-                      STRING@645..652 "\"exact\""
-                  WHITESPACE@652..653 " "
-                  MATCH_ARM@653..665
-                    WILDCARD_PAT@653..654
-                      UNDERSCORE@653..654 "_"
-                    WHITESPACE@654..655 " "
-                    THIN_ARROW@655..657 "->"
-                    WHITESPACE@657..658 " "
-                    LITERAL@658..665
-                      STRING@658..665 "\"other\""
-                  WHITESPACE@665..666 " "
-                  R_CURLY@666..667 "}"
-            WHITESPACE@667..670 "\n  "
-            R_CURLY@670..671 "}"
-      WHITESPACE@671..672 "\n"
-      R_CURLY@672..673 "}"
-  WHITESPACE@673..675 "\n\n"
-  FN@675..846
-    FN_KW@675..677 "fn"
-    WHITESPACE@677..678 " "
-    NAME@678..684
-      LOWER_IDENT@678..684 "nested"
-    PARAM_LIST@684..698
-      L_PAREN@684..685 "("
-      PARAM@685..697
-        NAME@685..686
-          LOWER_IDENT@685..686 "t"
-        COLON@686..687 ":"
-        WHITESPACE@687..688 " "
-        NAMED_TYPE@688..697
-          NAME_REF@688..692
-            UPPER_IDENT@688..692 "Tree"
-          TYPE_ARG_LIST@692..697
-            L_ANGLE@692..693 "<"
-            NAMED_TYPE@693..696
-              NAME_REF@693..696
-                UPPER_IDENT@693..696 "Int"
-            R_ANGLE@696..697 ">"
-      R_PAREN@697..698 ")"
-    WHITESPACE@698..699 " "
-    RET_TYPE@699..705
-      THIN_ARROW@699..701 "->"
-      WHITESPACE@701..702 " "
-      NAMED_TYPE@702..705
-        NAME_REF@702..705
-          UPPER_IDENT@702..705 "Int"
-    WHITESPACE@705..706 " "
-    BLOCK_EXPR@706..846
-      L_CURLY@706..707 "{"
-      WHITESPACE@707..710 "\n  "
-      EXPR_STMT@710..844
-        MATCH_EXPR@710..844
-          MATCH_KW@710..715 "match"
-          WHITESPACE@715..716 " "
-          PATH_EXPR@716..717
-            NAME_REF@716..717
-              LOWER_IDENT@716..717 "t"
-          WHITESPACE@717..718 " "
-          MATCH_ARM_LIST@718..844
-            L_CURLY@718..719 "{"
-            WHITESPACE@719..724 "\n    "
-            MATCH_ARM@724..786
-              CTOR_PAT@724..760
-                NAME_REF@724..728
-                  UPPER_IDENT@724..728 "Node"
-                L_PAREN@728..729 "("
-                CTOR_PAT@729..733
-                  NAME_REF@729..733
-                    UPPER_IDENT@729..733 "Leaf"
-                COMMA@733..734 ","
-                WHITESPACE@734..735 " "
-                IDENT_PAT@735..740
-                  NAME@735..740
-                    LOWER_IDENT@735..740 "value"
-                COMMA@740..741 ","
-                WHITESPACE@741..742 " "
-                CTOR_PAT@742..759
-                  NAME_REF@742..746
-                    UPPER_IDENT@742..746 "Node"
-                  L_PAREN@746..747 "("
-                  WILDCARD_PAT@747..748
-                    UNDERSCORE@747..748 "_"
-                  COMMA@748..749 ","
-                  WHITESPACE@749..750 " "
-                  IDENT_PAT@750..755
-                    NAME@750..755
-                      LOWER_IDENT@750..755 "right"
-                  COMMA@755..756 ","
-                  WHITESPACE@756..757 " "
-                  WILDCARD_PAT@757..758
-                    UNDERSCORE@757..758 "_"
-                  R_PAREN@758..759 ")"
-                R_PAREN@759..760 ")"
-              WHITESPACE@760..761 " "
-              MATCH_GUARD@761..777
-                IF_KW@761..763 "if"
-                WHITESPACE@763..764 " "
-                BIN_EXPR@764..777
-                  PATH_EXPR@764..769
-                    NAME_REF@764..769
-                      LOWER_IDENT@764..769 "value"
-                  WHITESPACE@769..770 " "
-                  L_ANGLE@770..771 "<"
-                  WHITESPACE@771..772 " "
+                    BLOCK_EXPR@645..656
+                      L_CURLY@645..646 "{"
+                      WHITESPACE@646..647 " "
+                      EXPR_STMT@647..654
+                        LITERAL@647..654
+                          STRING@647..654 "\"exact\""
+                      WHITESPACE@654..655 " "
+                      R_CURLY@655..656 "}"
+                  WHITESPACE@656..657 " "
+                  MATCH_ARM@657..673
+                    WILDCARD_PAT@657..658
+                      UNDERSCORE@657..658 "_"
+                    WHITESPACE@658..659 " "
+                    THIN_ARROW@659..661 "->"
+                    WHITESPACE@661..662 " "
+                    BLOCK_EXPR@662..673
+                      L_CURLY@662..663 "{"
+                      WHITESPACE@663..664 " "
+                      EXPR_STMT@664..671
+                        LITERAL@664..671
+                          STRING@664..671 "\"other\""
+                      WHITESPACE@671..672 " "
+                      R_CURLY@672..673 "}"
+                  WHITESPACE@673..674 " "
+                  R_CURLY@674..675 "}"
+            WHITESPACE@675..678 "\n  "
+            R_CURLY@678..679 "}"
+      WHITESPACE@679..680 "\n"
+      R_CURLY@680..681 "}"
+  WHITESPACE@681..683 "\n\n"
+  FN@683..854
+    FN_KW@683..685 "fn"
+    WHITESPACE@685..686 " "
+    NAME@686..692
+      LOWER_IDENT@686..692 "nested"
+    PARAM_LIST@692..706
+      L_PAREN@692..693 "("
+      PARAM@693..705
+        NAME@693..694
+          LOWER_IDENT@693..694 "t"
+        COLON@694..695 ":"
+        WHITESPACE@695..696 " "
+        NAMED_TYPE@696..705
+          NAME_REF@696..700
+            UPPER_IDENT@696..700 "Tree"
+          TYPE_ARG_LIST@700..705
+            L_ANGLE@700..701 "<"
+            NAMED_TYPE@701..704
+              NAME_REF@701..704
+                UPPER_IDENT@701..704 "Int"
+            R_ANGLE@704..705 ">"
+      R_PAREN@705..706 ")"
+    WHITESPACE@706..707 " "
+    RET_TYPE@707..713
+      THIN_ARROW@707..709 "->"
+      WHITESPACE@709..710 " "
+      NAMED_TYPE@710..713
+        NAME_REF@710..713
+          UPPER_IDENT@710..713 "Int"
+    WHITESPACE@713..714 " "
+    BLOCK_EXPR@714..854
+      L_CURLY@714..715 "{"
+      WHITESPACE@715..718 "\n  "
+      EXPR_STMT@718..852
+        MATCH_EXPR@718..852
+          MATCH_KW@718..723 "match"
+          WHITESPACE@723..724 " "
+          PATH_EXPR@724..725
+            NAME_REF@724..725
+              LOWER_IDENT@724..725 "t"
+          WHITESPACE@725..726 " "
+          MATCH_ARM_LIST@726..852
+            L_CURLY@726..727 "{"
+            WHITESPACE@727..732 "\n    "
+            MATCH_ARM@732..794
+              CTOR_PAT@732..768
+                NAME_REF@732..736
+                  UPPER_IDENT@732..736 "Node"
+                L_PAREN@736..737 "("
+                CTOR_PAT@737..741
+                  NAME_REF@737..741
+                    UPPER_IDENT@737..741 "Leaf"
+                COMMA@741..742 ","
+                WHITESPACE@742..743 " "
+                IDENT_PAT@743..748
+                  NAME@743..748
+                    LOWER_IDENT@743..748 "value"
+                COMMA@748..749 ","
+                WHITESPACE@749..750 " "
+                CTOR_PAT@750..767
+                  NAME_REF@750..754
+                    UPPER_IDENT@750..754 "Node"
+                  L_PAREN@754..755 "("
+                  WILDCARD_PAT@755..756
+                    UNDERSCORE@755..756 "_"
+                  COMMA@756..757 ","
+                  WHITESPACE@757..758 " "
+                  IDENT_PAT@758..763
+                    NAME@758..763
+                      LOWER_IDENT@758..763 "right"
+                  COMMA@763..764 ","
+                  WHITESPACE@764..765 " "
+                  WILDCARD_PAT@765..766
+                    UNDERSCORE@765..766 "_"
+                  R_PAREN@766..767 ")"
+                R_PAREN@767..768 ")"
+              WHITESPACE@768..769 " "
+              MATCH_GUARD@769..785
+                IF_KW@769..771 "if"
+                WHITESPACE@771..772 " "
+                BIN_EXPR@772..785
                   PATH_EXPR@772..777
                     NAME_REF@772..777
-                      LOWER_IDENT@772..777 "right"
-              WHITESPACE@777..778 " "
-              THIN_ARROW@778..780 "->"
-              WHITESPACE@780..781 " "
-              PATH_EXPR@781..786
-                NAME_REF@781..786
-                  LOWER_IDENT@781..786 "value"
-            WHITESPACE@786..791 "\n    "
-            MATCH_ARM@791..829
-              CTOR_PAT@791..820
-                NAME_REF@791..795
-                  UPPER_IDENT@791..795 "Node"
-                L_PAREN@795..796 "("
-                LIST_PAT@796..813
-                  L_BRACK@796..797 "["
-                  IDENT_PAT@797..802
-                    NAME@797..802
-                      LOWER_IDENT@797..802 "first"
-                  COMMA@802..803 ","
-                  WHITESPACE@803..804 " "
-                  REST_PAT@804..812
-                    DOT2@804..806 ".."
-                    NAME@806..812
-                      LOWER_IDENT@806..812 "others"
-                  R_BRACK@812..813 "]"
-                COMMA@813..814 ","
-                WHITESPACE@814..815 " "
-                WILDCARD_PAT@815..816
-                  UNDERSCORE@815..816 "_"
-                COMMA@816..817 ","
-                WHITESPACE@817..818 " "
-                WILDCARD_PAT@818..819
-                  UNDERSCORE@818..819 "_"
-                R_PAREN@819..820 ")"
-              WHITESPACE@820..821 " "
-              THIN_ARROW@821..823 "->"
-              WHITESPACE@823..824 " "
-              PATH_EXPR@824..829
-                NAME_REF@824..829
-                  LOWER_IDENT@824..829 "first"
-            WHITESPACE@829..834 "\n    "
-            MATCH_ARM@834..840
-              WILDCARD_PAT@834..835
-                UNDERSCORE@834..835 "_"
-              WHITESPACE@835..836 " "
-              THIN_ARROW@836..838 "->"
-              WHITESPACE@838..839 " "
-              LITERAL@839..840
-                INT_NUMBER@839..840 "0"
-            WHITESPACE@840..843 "\n  "
-            R_CURLY@843..844 "}"
-      WHITESPACE@844..845 "\n"
-      R_CURLY@845..846 "}"
-  WHITESPACE@846..847 "\n"
+                      LOWER_IDENT@772..777 "value"
+                  WHITESPACE@777..778 " "
+                  L_ANGLE@778..779 "<"
+                  WHITESPACE@779..780 " "
+                  PATH_EXPR@780..785
+                    NAME_REF@780..785
+                      LOWER_IDENT@780..785 "right"
+              WHITESPACE@785..786 " "
+              THIN_ARROW@786..788 "->"
+              WHITESPACE@788..789 " "
+              PATH_EXPR@789..794
+                NAME_REF@789..794
+                  LOWER_IDENT@789..794 "value"
+            WHITESPACE@794..799 "\n    "
+            MATCH_ARM@799..837
+              CTOR_PAT@799..828
+                NAME_REF@799..803
+                  UPPER_IDENT@799..803 "Node"
+                L_PAREN@803..804 "("
+                LIST_PAT@804..821
+                  L_BRACK@804..805 "["
+                  IDENT_PAT@805..810
+                    NAME@805..810
+                      LOWER_IDENT@805..810 "first"
+                  COMMA@810..811 ","
+                  WHITESPACE@811..812 " "
+                  REST_PAT@812..820
+                    DOT2@812..814 ".."
+                    NAME@814..820
+                      LOWER_IDENT@814..820 "others"
+                  R_BRACK@820..821 "]"
+                COMMA@821..822 ","
+                WHITESPACE@822..823 " "
+                WILDCARD_PAT@823..824
+                  UNDERSCORE@823..824 "_"
+                COMMA@824..825 ","
+                WHITESPACE@825..826 " "
+                WILDCARD_PAT@826..827
+                  UNDERSCORE@826..827 "_"
+                R_PAREN@827..828 ")"
+              WHITESPACE@828..829 " "
+              THIN_ARROW@829..831 "->"
+              WHITESPACE@831..832 " "
+              PATH_EXPR@832..837
+                NAME_REF@832..837
+                  LOWER_IDENT@832..837 "first"
+            WHITESPACE@837..842 "\n    "
+            MATCH_ARM@842..848
+              WILDCARD_PAT@842..843
+                UNDERSCORE@842..843 "_"
+              WHITESPACE@843..844 " "
+              THIN_ARROW@844..846 "->"
+              WHITESPACE@846..847 " "
+              LITERAL@847..848
+                INT_NUMBER@847..848 "0"
+            WHITESPACE@848..851 "\n  "
+            R_CURLY@851..852 "}"
+      WHITESPACE@852..853 "\n"
+      R_CURLY@853..854 "}"
+  WHITESPACE@854..855 "\n"

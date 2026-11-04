@@ -327,6 +327,31 @@ mod tests {
     }
 
     #[test]
+    fn line_breaks_continue_after_operators_and_before_pipelines() {
+        check_parens("a +\n  b", "(a + b)");
+        check_parens("a\n  |> f\n  |> g", "((a |> f) |> g)");
+        check_parens("f(\n  a\n  - b\n)", "f(\n  a\n  - b\n)");
+    }
+
+    #[test]
+    fn a_line_break_before_a_minus_ends_the_expression() {
+        check_expr(
+            "a\n- b",
+            expect![[r#"
+            SOURCE_FILE@0..5
+              PATH_EXPR@0..1
+                NAME_REF@0..1
+                  LOWER_IDENT@0..1 "a"
+              WHITESPACE@1..2 "\n"
+              MINUS@2..3 "-"
+              WHITESPACE@3..4 " "
+              LOWER_IDENT@4..5 "b"
+            error 2..3: unexpected tokens at the end
+        "#]],
+        );
+    }
+
+    #[test]
     fn missing_operands() {
         check_expr(
             "1 +",

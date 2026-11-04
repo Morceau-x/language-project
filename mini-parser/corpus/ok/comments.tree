@@ -1,4 +1,4 @@
-SOURCE_FILE@0..245
+SOURCE_FILE@0..329
   MODULE_HEADER@0..15
     MODULE_KW@0..6 "module"
     WHITESPACE@6..7 " "
@@ -9,65 +9,67 @@ SOURCE_FILE@0..245
   WHITESPACE@35..36 "\n"
   COMMENT@36..74 "/* A block comment\n   on two lines. */"
   WHITESPACE@74..75 "\n"
-  FN@75..158
-    FN_KW@75..77 "fn"
-    WHITESPACE@77..78 " "
-    NAME@78..79
-      LOWER_IDENT@78..79 "f"
-    PARAM_LIST@79..87
-      L_PAREN@79..80 "("
-      PARAM@80..86
-        NAME@80..81
-          LOWER_IDENT@80..81 "x"
-        COLON@81..82 ":"
-        WHITESPACE@82..83 " "
-        NAMED_TYPE@83..86
-          NAME_REF@83..86
-            UPPER_IDENT@83..86 "Int"
-      R_PAREN@86..87 ")"
-    WHITESPACE@87..88 " "
-    RET_TYPE@88..94
-      THIN_ARROW@88..90 "->"
-      WHITESPACE@90..91 " "
-      NAMED_TYPE@91..94
-        NAME_REF@91..94
-          UPPER_IDENT@91..94 "Int"
-    WHITESPACE@94..95 " "
-    BLOCK_EXPR@95..158
-      L_CURLY@95..96 "{"
-      WHITESPACE@96..97 " "
-      COMMENT@97..115 "// after the brace"
-      WHITESPACE@115..118 "\n  "
-      EXPR_STMT@118..136
-        BIN_EXPR@118..136
-          PATH_EXPR@118..119
-            NAME_REF@118..119
-              LOWER_IDENT@118..119 "x"
-          WHITESPACE@119..120 " "
-          COMMENT@120..132 "/* inline */"
-          WHITESPACE@132..133 " "
-          PLUS@133..134 "+"
-          WHITESPACE@134..135 " "
-          LITERAL@135..136
-            INT_NUMBER@135..136 "1"
-      WHITESPACE@136..137 " "
-      COMMENT@137..156 "// after the result"
-      WHITESPACE@156..157 "\n"
-      R_CURLY@157..158 "}"
-  WHITESPACE@158..159 " "
-  COMMENT@159..183 "/* after the function */"
-  WHITESPACE@183..185 "\n\n"
-  LET_DECL@185..217
-    LET_KW@185..188 "let"
-    WHITESPACE@188..189 " "
-    NAME@189..190
-      LOWER_IDENT@189..190 "y"
-    WHITESPACE@190..191 " "
-    EQ@191..192 "="
-    WHITESPACE@192..193 " "
-    COMMENT@193..215 "/* before the value */"
-    WHITESPACE@215..216 " "
-    LITERAL@216..217
-      INT_NUMBER@216..217 "2"
-  WHITESPACE@217..219 "\n\n"
-  COMMENT@219..245 "// At the end of the file."
+  COMMENT@75..158 "/* Block comments nest: /* this one\n   is inside */ and this is still the first. */"
+  WHITESPACE@158..159 "\n"
+  FN@159..242
+    FN_KW@159..161 "fn"
+    WHITESPACE@161..162 " "
+    NAME@162..163
+      LOWER_IDENT@162..163 "f"
+    PARAM_LIST@163..171
+      L_PAREN@163..164 "("
+      PARAM@164..170
+        NAME@164..165
+          LOWER_IDENT@164..165 "x"
+        COLON@165..166 ":"
+        WHITESPACE@166..167 " "
+        NAMED_TYPE@167..170
+          NAME_REF@167..170
+            UPPER_IDENT@167..170 "Int"
+      R_PAREN@170..171 ")"
+    WHITESPACE@171..172 " "
+    RET_TYPE@172..178
+      THIN_ARROW@172..174 "->"
+      WHITESPACE@174..175 " "
+      NAMED_TYPE@175..178
+        NAME_REF@175..178
+          UPPER_IDENT@175..178 "Int"
+    WHITESPACE@178..179 " "
+    BLOCK_EXPR@179..242
+      L_CURLY@179..180 "{"
+      WHITESPACE@180..181 " "
+      COMMENT@181..199 "// after the brace"
+      WHITESPACE@199..202 "\n  "
+      EXPR_STMT@202..220
+        BIN_EXPR@202..220
+          PATH_EXPR@202..203
+            NAME_REF@202..203
+              LOWER_IDENT@202..203 "x"
+          WHITESPACE@203..204 " "
+          COMMENT@204..216 "/* inline */"
+          WHITESPACE@216..217 " "
+          PLUS@217..218 "+"
+          WHITESPACE@218..219 " "
+          LITERAL@219..220
+            INT_NUMBER@219..220 "1"
+      WHITESPACE@220..221 " "
+      COMMENT@221..240 "// after the result"
+      WHITESPACE@240..241 "\n"
+      R_CURLY@241..242 "}"
+  WHITESPACE@242..243 " "
+  COMMENT@243..267 "/* after the function */"
+  WHITESPACE@267..269 "\n\n"
+  LET_DECL@269..301
+    LET_KW@269..272 "let"
+    WHITESPACE@272..273 " "
+    NAME@273..274
+      LOWER_IDENT@273..274 "y"
+    WHITESPACE@274..275 " "
+    EQ@275..276 "="
+    WHITESPACE@276..277 " "
+    COMMENT@277..299 "/* before the value */"
+    WHITESPACE@299..300 " "
+    LITERAL@300..301
+      INT_NUMBER@300..301 "2"
+  WHITESPACE@301..303 "\n\n"
+  COMMENT@303..329 "// At the end of the file."

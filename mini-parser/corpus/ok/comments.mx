@@ -3,6 +3,8 @@ module Comments
 // A line comment.
 /* A block comment
    on two lines. */
+/* Block comments nest: /* this one
+   is inside */ and this is still the first. */
 fn f(x: Int) -> Int { // after the brace
   x /* inline */ + 1 // after the result
 } /* after the function */

@@ -124,6 +124,25 @@ mod tests {
     }
 
     #[test]
+    fn a_constructors_paren_stays_on_its_line() {
+        check(
+            pattern,
+            "Some\n(x)",
+            expect![[r#"
+                SOURCE_FILE@0..8
+                  CTOR_PAT@0..4
+                    NAME_REF@0..4
+                      UPPER_IDENT@0..4 "Some"
+                  WHITESPACE@4..5 "\n"
+                  L_PAREN@5..6 "("
+                  LOWER_IDENT@6..7 "x"
+                  R_PAREN@7..8 ")"
+                error 5..6: unexpected tokens at the end
+            "#]],
+        );
+    }
+
+    #[test]
     fn list_patterns() {
         check(
             pattern,

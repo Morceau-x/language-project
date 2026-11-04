@@ -80,9 +80,6 @@ dependencies = [
 [[package]]
 name = "check-grammar"
 version = "0.1.0"
-dependencies = [
- "maxim-compiler",
-]
 
 [[package]]
 name = "darling"
@@ -376,8 +373,8 @@ dependencies = [
 name = "mini-parser"
 version = "0.1.0"
 dependencies = [
+ "check-grammar",
  "expect-test",
- "maxim-compiler",
  "proptest",
 ]
 

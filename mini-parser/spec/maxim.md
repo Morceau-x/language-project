@@ -25,20 +25,20 @@ symbol:
 symbol ::= expression
 ```
 
-| Expression     | Matches                                                        |
-|----------------|----------------------------------------------------------------|
-| `"text"`, `'text'` | exactly that text; `'"'` is a double quote                 |
-| `#xA`          | the character with that hexadecimal code point (here, `\n`)    |
-| `[a-z_]`       | one character from the class: ranges, characters, `#xN` codes  |
-| `[^"#xA]`      | one character *not* in the class                               |
-| `A B`          | `A`, then `B`                                                  |
-| `A \| B`       | `A` or `B`                                                     |
-| `A - B`        | what matches `A` but doesn't match `B`                         |
-| `A?`           | `A` or nothing                                                 |
-| `A*`           | `A` zero or more times                                         |
-| `A+`           | `A` one or more times                                          |
-| `( … )`        | grouping                                                       |
-| `/* … */`      | a comment                                                      |
+| Expression         | Matches                                                       |
+|--------------------|---------------------------------------------------------------|
+| `"text"`, `'text'` | exactly that text; `'"'` is a double quote                    |
+| `#xA`              | the character with that hexadecimal code point (here, `\n`)   |
+| `[a-z_]`           | one character from the class: ranges, characters, `#xN` codes |
+| `[^"#xA]`          | one character *not* in the class                              |
+| `A B`              | `A`, then `B`                                                 |
+| `A \| B`           | `A` or `B`                                                    |
+| `A - B`            | what matches `A` but doesn't match `B`                        |
+| `A?`               | `A` or nothing                                                |
+| `A*`               | `A` zero or more times                                        |
+| `A+`               | `A` one or more times                                         |
+| `( … )`            | grouping                                                      |
+| `/* … */`          | a comment                                                     |
 
 From tightest to loosest: `?`, `*` and `+`; then `-`; then
 juxtaposition; then `|`. So `A B - C` means `A (B - C)`: write
@@ -61,9 +61,28 @@ which rule wins a tie. -->
 
 ### 2.1 Whitespace and comments
 
+Whitespace and comments separate tokens, and are otherwise ignored.
+
 ```ebnf
-/* TODO (Part 2a): WHITESPACE and COMMENT. */
+WHITESPACE    ::= ( " " | #x9 | #xA | #xD #xA )+
+COMMENT       ::= LINE_COMMENT | BLOCK_COMMENT
+LINE_COMMENT  ::= "//" [^#xA#xD]*
+BLOCK_COMMENT ::= "/*" ( TEXT_BEFORE_OPEN BLOCK_COMMENT )* TEXT_BEFORE_CLOSE "*/"
+ANY           ::= [#x0-#x10FFFF]
+COMMENT_TEXT  ::= ANY* - ( ANY* ( "/*" | "*/" ) ANY* )
+TEXT_BEFORE_OPEN  ::= COMMENT_TEXT - ( ANY* "*" )
+TEXT_BEFORE_CLOSE ::= COMMENT_TEXT - ( ANY* "/" )
 ```
+
+Lines end with `\n` or `\r\n`; a `\r` alone is an error.
+
+Block comments nest, as in Rust: `/* a /* b */ c */` is one comment.
+Inside one, `/*` opens a nested comment and `*/` closes the innermost,
+reading from left to right: in `*/*`, the `*/` closes first. The text
+between them contains neither, and can't end with the `*` of a `*/` or
+the `/` of a `/*` (the two `TEXT_BEFORE_` rules). `BLOCK_COMMENT` is the
+only lexical rule that refers to itself: no regular expression can
+count nesting.
 
 ### 2.2 Names and keywords
 
@@ -92,15 +111,15 @@ which rule wins a tie. -->
 ### 2.6 Rules that need context
 
 <!-- TODO (Part 2f): the three rules the lexical grammar can't express:
-the `}` that closes a hole, the `(` that starts a line (BOL_LPAREN), and
-the `<` that starts HTML. -->
+the `}` that closes a hole, the line break that is a NEWLINE, and the
+`<` that starts HTML. -->
 
 ## 3. Syntax
 
 ### 3.1 Types
 
 ```ebnf
-/* TODO (Part 3a): Type, and LParen: any `(`. */
+/* TODO (Part 3a): Type. */
 ```
 
 ### 3.2 Patterns
@@ -131,5 +150,4 @@ the `<` that starts HTML. -->
 
 ### 3.6 Disambiguation
 
-<!-- TODO (Part 3f): the rules that decide where the grammar is
-ambiguous. -->
+<!-- TODO (Part 3f): what the grammar can't express. -->

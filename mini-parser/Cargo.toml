@@ -11,6 +11,6 @@ description = "A lexer and parser for Maxim, built like rust-analyzer's (step 3 
 expect-test = "1.5"
 # Random inputs: the parser must never panic and never lose text.
 proptest = "1"
-# The reference Maxim compiler: its parser decides what's valid Maxim,
-# and the differential tests check that yours agrees.
-maxim-compiler = { path = "../example" }
+# The spec checker: it runs your spec (spec/maxim.md) on programs, and
+# the differential tests check that your parser agrees with it.
+check-grammar = { path = "check-grammar" }

@@ -15,10 +15,13 @@ the family of Elm, Gleam and OCaml. The reference compiler in
 `example/` is a Rust translation of the original, written in Haskell.
 
 This tour shows the syntax by example: enough to write the spec in
-Parts 2 and 3. When in doubt, the reference has the final word: its
-grammar is `example/src/maxim.y`, and its lexer is in
-`example/src/lexer/`. The programs in `mini-parser/corpus/ok/` use
-every feature; read `todo.mx` now, it's a small realistic program.
+Parts 2 and 3. This step's Maxim is a dialect of the reference's, with
+two changes: line breaks end statements (in the reference, statements
+just follow each other), and block comments nest. For everything else,
+the reference has the final word when in doubt: its grammar is
+`example/src/maxim.y`, and its lexer is in `example/src/lexer/`. The
+programs in `mini-parser/corpus/ok/` use every feature; read `todo.mx`
+now, it's a small realistic program.
 
 ### A file is a module
 
@@ -64,8 +67,8 @@ whose parameters can have labels, `(acc: b, item: a) -> b`.
 ### Expressions
 
 Everything in a function body is an expression, and a block's value is
-its last statement's. There are no semicolons: statements follow each
-other, usually one per line.
+its last statement's. There are no semicolons: a line break ends a
+statement, so there's one statement per line.
 
 ```text
 fn summary(tasks: List<Task>) -> String {
@@ -85,7 +88,7 @@ fn summary(tasks: List<Task>) -> String {
 | partial application       | `add(1, _, 3)`: `_` is the missing argument, the result a function  |
 | fields                    | `user.name`                                                         |
 | lambdas                   | `fn(x) { x + 1 }`, `fn(x: Int) -> Int { x + 1 }`                    |
-| blocks                    | `{ let a = 1  a + 1 }`                                              |
+| blocks                    | `{ a + 1 }`, or several statements, one per line                    |
 | `if`                      | `if x > 0 { 1 } else if x == 0 { 0 } else { -1 }`: `else` is required |
 | `match`                   | see below                                                           |
 | `?`                       | `Int.parse(text)?`: unwrap a `Result`, or return its error          |
@@ -124,37 +127,53 @@ fn describe(xs: List<Int>) -> String {
 ```
 
 A `match` has one or more arms: a pattern, an optional guard `if …`,
-`->`, and an expression. Arms follow each other without separators.
+`->`, and an expression. Each arm is on its own line, except after an
+arm whose result is a block: `match x { A -> { 1 } B -> { 2 } }`.
 Patterns are `_`, a name, a number or a string, a constructor with
 patterns inside (`Circle(r)`, `Geometry.Circle(r)`, `None`), or a list
 pattern (`[]`, `[x, y]`, `[x, ..rest]`, `[x, .._]`). There are no
 negative number patterns.
 
-### Two layout rules
+### Line breaks
 
-Without semicolons, where does a statement end? Where the next one
-starts. Two rules settle the doubtful cases:
+A line break ends a statement, but not every line break does, or you
+couldn't split a long expression. Maxim uses the rule of Scala (Go,
+Swift and Kotlin have close ones): a line break ends a statement when
+the line before could end one, and the next line could start one.
 
-- **An expression goes as far as it can.** A line that starts with an
-  operator continues the line before:
+```text
+let total = price +
+  tax                   ← continues: a line can't end with `+`
+let names = users
+  |> List.map(f)        ← continues: a statement can't start with `|>`
+let city = user.address
+  .city                 ← continues: nor with `.`
+let gap = price
+- discount              ← two statements: `-discount` is one on its own
+log(total)              ← a call
+(more) |> log           ← a new statement, not log(total)(more)
+let sum = add(a,
+  b)                    ← inside parentheses, line breaks don't count
+```
 
-  ```text
-  let total = price
-    - discount          ← continues: total = price - discount
-  ```
+So a long expression breaks *after* an operator, or *before* `|>` and
+`.`. `-` and `(` can start a statement, so on a new line they start
+one. And `{` too: as in Go, a block's `{` goes at the end of the line,
+not on the next.
 
-- **A `(` that starts a line starts something new.** A call's `(` must
-  be on the same line as what it calls:
+```text
+fn area(s: Shape) -> Float
+{                       ← an error: the declaration ended at `Float`
+```
 
-  ```text
-  log(total)            ← a call
-  (more) |> log         ← a new statement, not log(total)(more)
-  ```
+`else` can't start a statement: `}` then `else` on the next line is
+fine.
 
 ### Comments
 
 `// to the end of the line` and `/* anywhere, on several lines */`.
-Block comments don't nest.
+Block comments nest, as in Rust: `/* a /* b */ c */` is one comment, so
+you can comment out code that has comments in it.
 
 ### What this step leaves out
 
@@ -231,11 +250,11 @@ the other kinds of tokens:
 | `STRING_START`  | a string up to its first hole                         | `"Hi ${`       |
 | `STRING_MIDDLE` | from a hole's end to the next hole                    | `} and ${`     |
 | `STRING_END`    | from the last hole's end to the closing quote         | `}!"`          |
-| `BOL_LPAREN`    | a `(` that starts a line ("beginning of line")        | see the layout rules |
+| `NEWLINE`       | a line break that ends a statement                    | see "Line breaks" |
 
-`BOL_LPAREN` is a token the lexical grammar can't define: whether a
-`(` starts a line depends on what comes before it. Part 2 describes it
-in prose.
+`NEWLINE` is a token the lexical grammar can't define: whether a line
+break is one depends on the tokens around it. Part 2 describes it in
+prose.
 
 ### What a spec says besides its grammar
 
@@ -247,8 +266,8 @@ A grammar alone doesn't make a spec. Look at a real one, the
   which one is meant. C's "an `else` belongs to the nearest `if`" is
   the classic example.
 - **Context rules** for the lexer: Go's rule for inserting semicolons
-  at the ends of lines, JavaScript's rule for when `/` starts a regular
-  expression.
+  at the ends of lines (Maxim's `NEWLINE` is the same idea),
+  JavaScript's rule for when `/` starts a regular expression.
 - **What's left to later phases**: a program can follow the grammar
   and still be rejected by the type checker.
 
@@ -286,9 +305,9 @@ How can it run a grammar it has never seen? It uses an **Earley
 parser**, an algorithm (Jay Earley, 1968) that accepts *any*
 context-free grammar, ambiguous or left-recursive, at the cost of
 speed. It's the right tool for checking a grammar, and the wrong one
-for a compiler. The samples are cut into tokens by the reference
-compiler's lexer, so you can check your syntactic grammar before you
-write your own lexer.
+for a compiler. The samples are cut into tokens by a small lexer of
+the checker's own, which follows the finished spec, so you can check
+your syntactic grammar before you write your own lexer.
 
 Run it now, on the skeleton:
 

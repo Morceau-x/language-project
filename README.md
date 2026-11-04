@@ -75,5 +75,6 @@ personal/
 generates, and since step 2, `bison` (in Part 2) and `clang` (for
 native executables). Tests that need a missing tool skip that part.
 
-`mini-parser/` doesn't need the sibling folder either: its tests use
-`example/`'s parser, not its standard library.
+`mini-parser/` doesn't need the sibling folder either, nor `example/`:
+its tests compare the parser with the grammar spec in
+`mini-parser/spec/maxim.md`.

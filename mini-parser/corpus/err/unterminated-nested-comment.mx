@@ -1,0 +1,4 @@
+module M
+
+/* one /* two */ still one
+let x = 1

@@ -20,7 +20,7 @@ pub enum RawKind {
     Whitespace,
     /// `// …`, up to the end of the line.
     LineComment,
-    /// `/* … */`. Unterminated if the text ends first.
+    /// `/* … */`, which can nest. Unterminated if the text ends first.
     BlockComment { terminated: bool },
     /// A name or a keyword: `area`, `Shape`, `fn`, `_`.
     Ident,
@@ -198,6 +198,30 @@ mod tests {
                 BlockComment { terminated: true } "/* two\n */"
                 Whitespace " "
                 BlockComment { terminated: false } "/* three"
+            "#]],
+        );
+    }
+
+    #[test]
+    fn comments_nest() {
+        check(
+            "/* a /* b */ c */ x /* d /* e */",
+            expect![[r#"
+                BlockComment { terminated: true } "/* a /* b */ c */"
+                Whitespace " "
+                Ident "x"
+                Whitespace " "
+                BlockComment { terminated: false } "/* d /* e */"
+            "#]],
+        );
+        check(
+            "/**/ /*/ */ /***/",
+            expect![[r#"
+                BlockComment { terminated: true } "/**/"
+                Whitespace " "
+                BlockComment { terminated: true } "/*/ */"
+                Whitespace " "
+                BlockComment { terminated: true } "/***/"
             "#]],
         );
     }

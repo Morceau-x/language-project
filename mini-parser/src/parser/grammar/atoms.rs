@@ -78,7 +78,7 @@ pub(super) fn spread(p: &mut Parser<'_>) {
     todo!("Part 9b: spread")
 }
 
-/// `Block ::= "{" Stmt* "}"`
+/// `Block ::= "{" ( Stmt ( NEWLINE Stmt )* )? "}"`
 pub(super) fn block_expr(p: &mut Parser<'_>) -> CompletedMarker {
     todo!("Part 9d: block_expr")
 }
@@ -98,17 +98,20 @@ fn if_expr(p: &mut Parser<'_>) -> CompletedMarker {
     todo!("Part 9f: if_expr")
 }
 
-/// `Match ::= "match" Expr "{" MatchArm+ "}"`
+/// `Match ::= "match" Expr "{" Arms "}"`
 fn match_expr(p: &mut Parser<'_>) -> CompletedMarker {
     todo!("Part 9f: match_expr")
 }
 
+/// `Arms ::= Arm ( NEWLINE Arms )? | BlockArm Arms`: a line break
+/// between two arms, unless the first one's result is a block.
 fn match_arm_list(p: &mut Parser<'_>) {
     todo!("Part 9f: match_arm_list")
 }
 
-/// `MatchArm ::= Pattern ("if" Expr)? "->" Expr`
-fn match_arm(p: &mut Parser<'_>) {
+/// `Arm ::= Pattern ( "if" Expr )? "->" Expr`. Returns whether the
+/// result is a block: then another arm may follow on the same line.
+fn match_arm(p: &mut Parser<'_>) -> bool {
     todo!("Part 9f: match_arm")
 }
 
@@ -283,10 +286,10 @@ mod tests {
     #[test]
     fn blocks_and_statements() {
         check_expr(
-            "{\n  let a: Int = 1\n  f(a) g\n}",
+            "{\n  let a: Int = 1\n  f(a)\n  g\n}",
             expect![[r#"
-            SOURCE_FILE@0..29
-              BLOCK_EXPR@0..29
+            SOURCE_FILE@0..31
+              BLOCK_EXPR@0..31
                 L_CURLY@0..1 "{"
                 WHITESPACE@1..4 "\n  "
                 LET_STMT@4..18
@@ -316,33 +319,35 @@ mod tests {
                         NAME_REF@23..24
                           LOWER_IDENT@23..24 "a"
                       R_PAREN@24..25 ")"
-                WHITESPACE@25..26 " "
-                EXPR_STMT@26..27
-                  PATH_EXPR@26..27
-                    NAME_REF@26..27
-                      LOWER_IDENT@26..27 "g"
-                WHITESPACE@27..28 "\n"
-                R_CURLY@28..29 "}"
+                WHITESPACE@25..28 "\n  "
+                EXPR_STMT@28..29
+                  PATH_EXPR@28..29
+                    NAME_REF@28..29
+                      LOWER_IDENT@28..29 "g"
+                WHITESPACE@29..30 "\n"
+                R_CURLY@30..31 "}"
         "#]],
         );
     }
 
     #[test]
-    fn statements_take_as_much_as_they_can() {
-        // `- 1` continues `a`; `(b)` on its own line doesn't continue it.
+    fn line_breaks_end_statements() {
+        // `- 1` and `(b)` start their lines, and can start a statement:
+        // three statements. `+ 1` and `|> f` can't: one statement.
         check_expr(
-            "{\n  a\n  - 1\n  (b)\n}",
+            "{\n  a\n  - 1\n  (b)\n  c\n  + 1\n  |> f\n}",
             expect![[r#"
-            SOURCE_FILE@0..19
-              BLOCK_EXPR@0..19
+            SOURCE_FILE@0..36
+              BLOCK_EXPR@0..36
                 L_CURLY@0..1 "{"
                 WHITESPACE@1..4 "\n  "
-                EXPR_STMT@4..11
-                  BIN_EXPR@4..11
-                    PATH_EXPR@4..5
-                      NAME_REF@4..5
-                        LOWER_IDENT@4..5 "a"
-                    WHITESPACE@5..8 "\n  "
+                EXPR_STMT@4..5
+                  PATH_EXPR@4..5
+                    NAME_REF@4..5
+                      LOWER_IDENT@4..5 "a"
+                WHITESPACE@5..8 "\n  "
+                EXPR_STMT@8..11
+                  PREFIX_EXPR@8..11
                     MINUS@8..9 "-"
                     WHITESPACE@9..10 " "
                     LITERAL@10..11
@@ -355,8 +360,26 @@ mod tests {
                       NAME_REF@15..16
                         LOWER_IDENT@15..16 "b"
                     R_PAREN@16..17 ")"
-                WHITESPACE@17..18 "\n"
-                R_CURLY@18..19 "}"
+                WHITESPACE@17..20 "\n  "
+                EXPR_STMT@20..34
+                  BIN_EXPR@20..34
+                    BIN_EXPR@20..27
+                      PATH_EXPR@20..21
+                        NAME_REF@20..21
+                          LOWER_IDENT@20..21 "c"
+                      WHITESPACE@21..24 "\n  "
+                      PLUS@24..25 "+"
+                      WHITESPACE@25..26 " "
+                      LITERAL@26..27
+                        INT_NUMBER@26..27 "1"
+                    WHITESPACE@27..30 "\n  "
+                    PIPE_GT@30..32 "|>"
+                    WHITESPACE@32..33 " "
+                    PATH_EXPR@33..34
+                      NAME_REF@33..34
+                        LOWER_IDENT@33..34 "f"
+                WHITESPACE@34..35 "\n"
+                R_CURLY@35..36 "}"
         "#]],
         );
     }
@@ -488,64 +511,155 @@ mod tests {
     #[test]
     fn matches() {
         check_expr(
-            "match x { A(y) if y > 0 -> y _ -> 0 }",
+            "match x {\n  A(y) if y > 0 -> y\n  _ -> 0\n}",
             expect![[r#"
-            SOURCE_FILE@0..37
-              MATCH_EXPR@0..37
+                SOURCE_FILE@0..41
+                  MATCH_EXPR@0..41
+                    MATCH_KW@0..5 "match"
+                    WHITESPACE@5..6 " "
+                    PATH_EXPR@6..7
+                      NAME_REF@6..7
+                        LOWER_IDENT@6..7 "x"
+                    WHITESPACE@7..8 " "
+                    MATCH_ARM_LIST@8..41
+                      L_CURLY@8..9 "{"
+                      WHITESPACE@9..12 "\n  "
+                      MATCH_ARM@12..30
+                        CTOR_PAT@12..16
+                          NAME_REF@12..13
+                            UPPER_IDENT@12..13 "A"
+                          L_PAREN@13..14 "("
+                          IDENT_PAT@14..15
+                            NAME@14..15
+                              LOWER_IDENT@14..15 "y"
+                          R_PAREN@15..16 ")"
+                        WHITESPACE@16..17 " "
+                        MATCH_GUARD@17..25
+                          IF_KW@17..19 "if"
+                          WHITESPACE@19..20 " "
+                          BIN_EXPR@20..25
+                            PATH_EXPR@20..21
+                              NAME_REF@20..21
+                                LOWER_IDENT@20..21 "y"
+                            WHITESPACE@21..22 " "
+                            R_ANGLE@22..23 ">"
+                            WHITESPACE@23..24 " "
+                            LITERAL@24..25
+                              INT_NUMBER@24..25 "0"
+                        WHITESPACE@25..26 " "
+                        THIN_ARROW@26..28 "->"
+                        WHITESPACE@28..29 " "
+                        PATH_EXPR@29..30
+                          NAME_REF@29..30
+                            LOWER_IDENT@29..30 "y"
+                      WHITESPACE@30..33 "\n  "
+                      MATCH_ARM@33..39
+                        WILDCARD_PAT@33..34
+                          UNDERSCORE@33..34 "_"
+                        WHITESPACE@34..35 " "
+                        THIN_ARROW@35..37 "->"
+                        WHITESPACE@37..38 " "
+                        LITERAL@38..39
+                          INT_NUMBER@38..39 "0"
+                      WHITESPACE@39..40 "\n"
+                      R_CURLY@40..41 "}"
+            "#]],
+        );
+    }
+
+    #[test]
+    fn arms_with_a_block_result_can_share_a_line() {
+        check_expr(
+            "match x { A -> { 1 } B -> { 2 } }",
+            expect![[r#"
+            SOURCE_FILE@0..33
+              MATCH_EXPR@0..33
                 MATCH_KW@0..5 "match"
                 WHITESPACE@5..6 " "
                 PATH_EXPR@6..7
                   NAME_REF@6..7
                     LOWER_IDENT@6..7 "x"
                 WHITESPACE@7..8 " "
-                MATCH_ARM_LIST@8..37
+                MATCH_ARM_LIST@8..33
                   L_CURLY@8..9 "{"
                   WHITESPACE@9..10 " "
-                  MATCH_ARM@10..28
-                    CTOR_PAT@10..14
+                  MATCH_ARM@10..20
+                    CTOR_PAT@10..11
                       NAME_REF@10..11
                         UPPER_IDENT@10..11 "A"
-                      L_PAREN@11..12 "("
-                      IDENT_PAT@12..13
-                        NAME@12..13
-                          LOWER_IDENT@12..13 "y"
-                      R_PAREN@13..14 ")"
+                    WHITESPACE@11..12 " "
+                    THIN_ARROW@12..14 "->"
                     WHITESPACE@14..15 " "
-                    MATCH_GUARD@15..23
-                      IF_KW@15..17 "if"
-                      WHITESPACE@17..18 " "
-                      BIN_EXPR@18..23
-                        PATH_EXPR@18..19
-                          NAME_REF@18..19
-                            LOWER_IDENT@18..19 "y"
-                        WHITESPACE@19..20 " "
-                        R_ANGLE@20..21 ">"
-                        WHITESPACE@21..22 " "
-                        LITERAL@22..23
-                          INT_NUMBER@22..23 "0"
-                    WHITESPACE@23..24 " "
-                    THIN_ARROW@24..26 "->"
-                    WHITESPACE@26..27 " "
-                    PATH_EXPR@27..28
-                      NAME_REF@27..28
-                        LOWER_IDENT@27..28 "y"
-                  WHITESPACE@28..29 " "
-                  MATCH_ARM@29..35
-                    WILDCARD_PAT@29..30
-                      UNDERSCORE@29..30 "_"
-                    WHITESPACE@30..31 " "
-                    THIN_ARROW@31..33 "->"
-                    WHITESPACE@33..34 " "
-                    LITERAL@34..35
-                      INT_NUMBER@34..35 "0"
-                  WHITESPACE@35..36 " "
-                  R_CURLY@36..37 "}"
+                    BLOCK_EXPR@15..20
+                      L_CURLY@15..16 "{"
+                      WHITESPACE@16..17 " "
+                      EXPR_STMT@17..18
+                        LITERAL@17..18
+                          INT_NUMBER@17..18 "1"
+                      WHITESPACE@18..19 " "
+                      R_CURLY@19..20 "}"
+                  WHITESPACE@20..21 " "
+                  MATCH_ARM@21..31
+                    CTOR_PAT@21..22
+                      NAME_REF@21..22
+                        UPPER_IDENT@21..22 "B"
+                    WHITESPACE@22..23 " "
+                    THIN_ARROW@23..25 "->"
+                    WHITESPACE@25..26 " "
+                    BLOCK_EXPR@26..31
+                      L_CURLY@26..27 "{"
+                      WHITESPACE@27..28 " "
+                      EXPR_STMT@28..29
+                        LITERAL@28..29
+                          INT_NUMBER@28..29 "2"
+                      WHITESPACE@29..30 " "
+                      R_CURLY@30..31 "}"
+                  WHITESPACE@31..32 " "
+                  R_CURLY@32..33 "}"
         "#]],
         );
     }
 
     #[test]
     fn broken_matches() {
+        check_expr(
+            "match x { A -> 1 B -> 2 }",
+            expect![[r#"
+            SOURCE_FILE@0..25
+              MATCH_EXPR@0..25
+                MATCH_KW@0..5 "match"
+                WHITESPACE@5..6 " "
+                PATH_EXPR@6..7
+                  NAME_REF@6..7
+                    LOWER_IDENT@6..7 "x"
+                WHITESPACE@7..8 " "
+                MATCH_ARM_LIST@8..25
+                  L_CURLY@8..9 "{"
+                  WHITESPACE@9..10 " "
+                  MATCH_ARM@10..16
+                    CTOR_PAT@10..11
+                      NAME_REF@10..11
+                        UPPER_IDENT@10..11 "A"
+                    WHITESPACE@11..12 " "
+                    THIN_ARROW@12..14 "->"
+                    WHITESPACE@14..15 " "
+                    LITERAL@15..16
+                      INT_NUMBER@15..16 "1"
+                  WHITESPACE@16..17 " "
+                  MATCH_ARM@17..23
+                    CTOR_PAT@17..18
+                      NAME_REF@17..18
+                        UPPER_IDENT@17..18 "B"
+                    WHITESPACE@18..19 " "
+                    THIN_ARROW@19..21 "->"
+                    WHITESPACE@21..22 " "
+                    LITERAL@22..23
+                      INT_NUMBER@22..23 "2"
+                  WHITESPACE@23..24 " "
+                  R_CURLY@24..25 "}"
+            error 17..18: expected a line break between these match arms, or a block `{ … }` as the result of the first
+        "#]],
+        );
         check_expr(
             "match x { }",
             expect![[r#"

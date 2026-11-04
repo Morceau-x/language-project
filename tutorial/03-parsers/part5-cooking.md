@@ -344,7 +344,7 @@ fn starts_html(&self, range: TextRange) -> bool {
 ```
 
 ```rust
-fn can_end_expr(kind: SyntaxKind) -> bool {
+pub(crate) fn can_end_expr(kind: SyntaxKind) -> bool {
     matches!(
         kind,
         LOWER_IDENT
@@ -367,6 +367,9 @@ mode stack. The tradeoff is that the rule must hold for every
 grammatical situation, and it's easy to get wrong. Rust's lexer has no
 such rule at all: a language designed with a separate lexer in mind
 avoids them.
+
+`can_end_expr` is `pub(crate)`: the parser uses it too, in Part 7, for
+the other context rule, the one that makes a line break a `NEWLINE`.
 
 </details>
 

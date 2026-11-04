@@ -126,6 +126,13 @@ is `(-a) * b`, and `-x ** 2` is `-(x ** 2)`. And `x ** -y` works with
 no special case: the right operand of `**` starts with `-`, which `lhs`
 handles.
 
+**Line breaks.** The loop stops at a `NEWLINE`: `if p.at_newline()`,
+break, before looking at the operator. Only one binary operator can
+also start a statement, `-`, so it's the only one this changes: in a
+block, `a` newline `- 1` is two statements. `a +` newline `b` never
+sees a `NEWLINE` (the line break after `+` is whitespace), nor does
+`a` newline `|> f`.
+
 **No chaining.** `a < b < c` is an error. In the loop, remember the
 left binding power of the last comparison parsed *in this loop*: if the
 next operator is a comparison at the same level, report `comparisons
@@ -143,8 +150,8 @@ cargo test -p mini-parser --lib expressions::tests
 
 The tests of this task are `multiplication_binds_tighter_than_addition`,
 `most_operators_are_left_associative`, `power_and_concatenation_are_right_associative`,
-`the_precedence_ladder`, `prefix_operators`, `power_binds_tighter_than_prefix_minus`
-and `comparisons_dont_chain`. They print expressions with every
+`the_precedence_ladder`, `prefix_operators`, `power_binds_tighter_than_prefix_minus`,
+`comparisons_dont_chain` and `a_line_break_before_a_minus_ends_the_expression`. They print expressions with every
 operator in parentheses: `(a + (b * c))`.
 
 <details>
@@ -193,6 +200,10 @@ fn expr_bp(p: &mut Parser<'_>, min_bp: u8) -> Option<CompletedMarker> {
     // a second one at the same level would chain.
     let mut last_comparison = None;
     loop {
+        // A line break that ends a statement ends the expression too.
+        if p.at_newline() {
+            break;
+        }
         let op = p.current();
         let Some((l_bp, r_bp)) = infix_binding_power(op) else {
             break;
@@ -238,9 +249,12 @@ child and the error `expected an expression`: the test
 
 ### The `-` of Part 3
 
-The loop is **greedy**: after an operand, if the next token is an
-operator, it takes it. That's disambiguation rule 1 of your spec, for
-free: in a block, `a` newline `- 1` is one statement, `a - 1`.
+Without the `NEWLINE` check, the loop is **greedy**: after an operand,
+if the next token is an operator, it takes it. That's the reference
+compiler's rule, "an expression goes as far as it can", and its LR
+parser gets it the same way. The check makes your parser follow your
+spec instead: one `if`, because the lexer's rule already did the
+thinking.
 
 ---
 
@@ -252,9 +266,13 @@ next token is a postfix operator, wrap what you have:
 | Next token                   | Node                                                     |
 |------------------------------|----------------------------------------------------------|
 | `.`                          | `FIELD_EXPR`: a `NAME_REF`, lowercase or capitalized (`Geo.Circle`); else `expected a name after `.`` |
-| `(`, **not at a line start** | `CALL_EXPR`, with an `ARG_LIST`                          |
+| `(`                          | `CALL_EXPR`, with an `ARG_LIST`                          |
 | `?`                          | `TRY_EXPR`                                               |
 | `::`                         | `CAST_EXPR`: a capitalized `NAME_REF`                    |
+
+As in `expr_bp`, a `NEWLINE` ends the loop: `f` newline `(x)` is two
+statements. Here too, only one postfix operator can start a statement:
+`(`. `user` newline `.name` goes on.
 
 Then `arg_list`, `arg` and `spread`. An argument is a spread (`..x`),
 a labeled argument (`label: x`, two tokens of lookahead: Part 3's
@@ -266,6 +284,7 @@ cargo test -p mini-parser --lib expressions::tests
 
 The tests of this task: `postfix_operators_bind_tightest`,
 `call_arguments`, `a_paren_on_the_next_line_is_not_a_call`,
+`line_breaks_continue_after_operators_and_before_pipelines`,
 `missing_operands`. (`lambdas_are_atoms` waits for 9e, and
 `arrow_lambdas_get_their_own_error` for Part 12.)
 
@@ -282,8 +301,8 @@ loop {
 }
 ```
 
-Each arm wraps `lhs` and gives back the new, bigger node. A `match`
-arm can have a guard: `T!['('] if !p.at_line_start() => …`.
+Each arm wraps `lhs` and gives back the new, bigger node. The
+`NEWLINE` check goes at the top of the loop.
 
 </details>
 
@@ -293,6 +312,10 @@ arm can have a guard: `T!['('] if !p.at_line_start() => …`.
 ```rust
 fn postfix(p: &mut Parser<'_>, mut lhs: CompletedMarker) -> CompletedMarker {
     loop {
+        // `f` then `(x)` on the next line: two statements, not a call.
+        if p.at_newline() {
+            return lhs;
+        }
         lhs = match p.current() {
             T![.] => {
                 let m = lhs.precede(p);
@@ -303,8 +326,7 @@ fn postfix(p: &mut Parser<'_>, mut lhs: CompletedMarker) -> CompletedMarker {
                 }
                 m.complete(p, FIELD_EXPR)
             }
-            // A `(` on the next line starts a new statement, not a call.
-            T!['('] if !p.at_line_start() => {
+            T!['('] => {
                 let m = lhs.precede(p);
                 arg_list(p);
                 m.complete(p, CALL_EXPR)
@@ -368,9 +390,11 @@ pub(super) fn spread(p: &mut Parser<'_>) {
 }
 ```
 
-The guard `!p.at_line_start()` is your spec's `BOL_LPAREN`, and
-disambiguation rule 2: a `(` on the same line is always a call. The
-loop doesn't need a rule for it: being greedy, it just takes it.
+Inside the parentheses of a call, the lexer's rule turned every line
+break into whitespace, so `f(a,` newline `b)` works without a thought
+here. The test `line_breaks_continue_after_operators_and_before_pipelines`
+shows it, with a `- b` on its own line inside a call: still one
+expression.
 
 </details>
 
@@ -448,7 +472,7 @@ fn list_expr(p: &mut Parser<'_>) -> CompletedMarker {
 ## 9d. Blocks and statements
 
 ```text
-BLOCK_EXPR      "{"  (LET_STMT | EXPR_STMT)*  "}"
+BLOCK_EXPR      "{"  (LET_STMT | EXPR_STMT)*  "}"       one per line
 LET_STMT        "let"  NAME  (":"  Type)?  "="  Expr
 EXPR_STMT       Expr
 ```
@@ -459,12 +483,23 @@ caller says which kind of node to complete, `LET_STMT` or `LET_DECL`.
 That's the event design paying off: a marker's kind is chosen at the
 end.
 
-**Statements have no separator.** `block_expr` loops until `}` (or the
-end of the file): each statement starts where the last ended. `stmt` is
-a `let`, an expression (the current token is in `EXPR_FIRST`), or
-neither: then `err_and_bump("expected a statement")`, which always
-consumes the token. Without that, a stray `)` in a block would loop
-forever.
+**Statements are separated by `NEWLINE`s**, and the separator isn't a
+token: it's the bit on the next statement's first token. `block_expr`
+loops until `}` (or the end of the file). Before every statement but
+the first, if there's no `NEWLINE`, report `expected a line break: each
+statement starts on its own line`, then parse the statement anyway:
+`{ a b }` gives one error and two statements. Report it only if the
+current token can start a statement (`let`, or in `EXPR_FIRST`):
+anything else gets `stmt`'s own error, and one per place is enough.
+
+`stmt` is a `let`, an expression (the current token is in
+`EXPR_FIRST`), or neither: then `err_and_bump("expected a
+statement")`, which always consumes the token. Without that, a stray
+`)` in a block would loop forever.
+
+Where does each statement end? Where `expr` stops: at a token that
+can't continue it, or at a `NEWLINE` (9a and 9b). Nothing more to
+write for that.
 
 **A block can't hold a declaration.** If the `}` of a function is
 missing, the parser would otherwise swallow every declaration after it
@@ -477,7 +512,7 @@ mistake from making a hundred errors.
 
 ```bash
 cargo test -p mini-parser --lib atoms::tests::blocks
-cargo test -p mini-parser --lib atoms::tests::statements_take
+cargo test -p mini-parser --lib atoms::tests::line_breaks_end
 cargo test -p mini-parser --lib items::tests::lets
 ```
 
@@ -488,12 +523,17 @@ cargo test -p mini-parser --lib items::tests::lets
 pub(super) fn block_expr(p: &mut Parser<'_>) -> CompletedMarker {
     let m = p.start();
     p.bump(T!['{']);
+    let mut first = true;
     while !p.at(T!['}']) && !p.at(EOF) {
         // `fn name` or `type` can't be in a block: its `}` is missing.
         // Leave them to the declarations, rather than swallow the file.
         if p.at_ts(DECL_ONLY) || (p.at(T![fn]) && p.nth_at(1, LOWER_IDENT)) {
             break;
         }
+        if !first && !p.at_newline() && (p.at(T![let]) || p.at_ts(EXPR_FIRST)) {
+            p.error("expected a line break: each statement starts on its own line");
+        }
+        first = false;
         stmt(p);
     }
     p.expect(T!['}']);
@@ -529,9 +569,14 @@ pub(super) fn let_binding(p: &mut Parser<'_>, kind: SyntaxKind) {
 }
 ```
 
-Read the test `statements_take_as_much_as_they_can`: `a` newline `- 1`
-is one statement, `(b)` on its own line is another. Both of your
-spec's layout rules, decided by the code you've already written.
+Read the test `line_breaks_end_statements`: `a`, `- 1` and `(b)` on
+three lines are three statements; `c` then `+ 1` and `|> f` on the
+next lines is one. Every decision was made by the lexer's rule, in
+`from_lexed`: the grammar only asks `at_newline()`.
+
+Why report a missing line break, rather than stop the block? The
+programmer's intent is clear, and the rest of the block parses fine:
+an error that doesn't derail the parse is the best kind.
 
 </details>
 
@@ -550,14 +595,19 @@ Write `param_list`, `param` and `opt_ret_type` in `grammar/mod.rs`
 (functions will use them in Part 10), and `lambda_expr` in `atoms.rs`.
 
 - `param_list` is called where parameters must be: if there's no `(`,
-  report `expected `(` and the parameters`. Any `(`: no line check.
+  report `expected `(` and the parameters`. If the `(` is on the next
+  line, as in `fn f` newline `(x)`, call `not_on_new_line(p)` (in
+  `mod.rs`): it reports `a line break here ends the statement: put
+  this `(` at the end of the line before`, and the parse goes on as if
+  the `(` were on the right line.
 - `param`: a name or `_`, then maybe `:` and a type. Anything else:
   `expected a parameter`, with `err_recover` and `LIST_RECOVERY`; the
   marker you started must then be abandoned, not completed: there's no
   parameter.
 - `opt_ret_type`: a `RET_TYPE` if there's a `->`, nothing otherwise.
 - The body is a block: call `block` (in `mod.rs`), which reports
-  `expected a block` if there's no `{`.
+  `expected a block `{ … }`` if there's no `{`, and calls
+  `not_on_new_line` if the `{` is on the next line.
 
 ```bash
 cargo test -p mini-parser --lib atoms::tests::lambdas
@@ -574,6 +624,7 @@ fn param_list(p: &mut Parser<'_>) {
         p.error("expected `(` and the parameters");
         return;
     }
+    not_on_new_line(p);
     let m = p.start();
     p.bump(T!['(']);
     if !p.at(T![')']) {
@@ -633,6 +684,14 @@ fn lambda_expr(p: &mut Parser<'_>) -> CompletedMarker {
 A lambda is an atom: postfix operators apply to it, `fn(x) { x }(1)`
 calls it, and `fn(x) { x } |> g` pipes it.
 
+Your spec says a `{` or `(` on the next line ends the declaration, and
+the grammar has no `NEWLINE` there: so the program is invalid. Why
+does the parser report it and go on, rather than stop the function
+there? Because stopping would leave a function without a body, then a
+block where a declaration should be: two confusing errors for one
+mistake. Go's compiler does the same: its error for a `{` on its own
+line names the cause, the line break, rather than the missing body.
+
 </details>
 
 ---
@@ -642,7 +701,7 @@ calls it, and `fn(x) { x } |> g` pipes it.
 ```text
 IF_EXPR         "if"  Expr  BLOCK_EXPR  ("else"  (BLOCK_EXPR | IF_EXPR))?
 MATCH_EXPR      "match"  Expr  MATCH_ARM_LIST
-MATCH_ARM_LIST  "{"  MATCH_ARM*  "}"
+MATCH_ARM_LIST  "{"  MATCH_ARM*  "}"                       one per line, or after a block
 MATCH_ARM       Pattern  MATCH_GUARD?  "->"  Expr
 MATCH_GUARD     "if"  Expr
 ```
@@ -657,20 +716,41 @@ Write `if_expr`, `match_expr`, `match_arm_list` and `match_arm`.
   struct literals, which give Rust exactly this problem: Rust forbids
   them in `if` conditions).
 - `match_arm_list`: if there's no `{`, report `expected `{` and the
-  match arms`. Right after the `{`, a `}` means no arms: report
-  `expected a match arm: a `match` needs at least one`. Then loop until
-  `}`: if the current token can start a pattern (`patterns::PAT_FIRST`),
-  parse an arm; else `err_and_bump` (the guard against looping, as in
-  blocks), with a special message for `-`: `expected a match arm:
-  negative numbers can't be patterns`.
-- Arms have no separator, like statements: an arm's expression is
-  greedy, and stops where no operator continues it.
+  match arms`; if it's on the next line, `not_on_new_line(p)`. Right
+  after the `{`, a `}` means no arms: report `expected a match arm: a
+  `match` needs at least one`. Then loop until `}`: if the current
+  token can start a pattern (`patterns::PAT_FIRST`), parse an arm;
+  else `err_and_bump` (the guard against looping, as in blocks), with
+  a special message for `-`: `expected a match arm: negative numbers
+  can't be patterns`.
+- **Separators.** Your spec's `Arms`: an arm needs a `NEWLINE` before
+  it, unless the arm before it had a block as its result. That's
+  Part 3's "parse first, decide after": `match_arm` returns whether its
+  result was a `BLOCK_EXPR` (`CompletedMarker::kind()`, from Part 7),
+  and the loop remembers whether the next arm needs a `NEWLINE`. When
+  it's missing, report `expected a line break between these match
+  arms, or a block `{ … }` as the result of the first`, only at a token
+  that can start a pattern, as in blocks.
+- A guard is on the pattern's line: in `A` newline `if x -> …`, the
+  `if` starts a new arm (an error), not a guard. Take it only if
+  `!p.at_newline()`.
 
 ```bash
 cargo test -p mini-parser --lib atoms::tests::ifs
 cargo test -p mini-parser --lib atoms::tests::matches
+cargo test -p mini-parser --lib atoms::tests::arms_with
 cargo test -p mini-parser --lib atoms::tests::broken_matches
 ```
+
+<details>
+<summary>Hint: what `expr` returns</summary>
+
+`expr(p)` returns an `Option<CompletedMarker>`: `None` if there was
+no expression. "Is it `Some`, and a block?" is
+`result.is_some_and(|result| result.kind() == BLOCK_EXPR)`. A result
+like `{ 1 } + 2` is a `BIN_EXPR`, so the next arm needs its line.
+
+</details>
 
 <details>
 <summary>Solution</summary>
@@ -711,19 +791,26 @@ fn match_arm_list(p: &mut Parser<'_>) {
         p.error("expected `{` and the match arms");
         return;
     }
+    not_on_new_line(p);
     let m = p.start();
     p.bump(T!['{']);
     if p.at(T!['}']) {
         p.error("expected a match arm: a `match` needs at least one");
     }
+    let mut needs_newline = false;
     while !p.at(T!['}']) && !p.at(EOF) {
-        if p.at_ts(patterns::PAT_FIRST) {
-            match_arm(p);
+        if needs_newline && !p.at_newline() && p.at_ts(patterns::PAT_FIRST) {
+            p.error("expected a line break between these match arms, or a block `{ … }` as the result of the first");
+        }
+        needs_newline = if p.at_ts(patterns::PAT_FIRST) {
+            !match_arm(p)
         } else if p.at(T![-]) {
             p.err_and_bump("expected a match arm: negative numbers can't be patterns");
+            false
         } else {
             p.err_and_bump("expected a match arm");
-        }
+            false
+        };
     }
     p.expect(T!['}']);
     m.complete(p, MATCH_ARM_LIST);
@@ -731,24 +818,32 @@ fn match_arm_list(p: &mut Parser<'_>) {
 ```
 
 ```rust
-fn match_arm(p: &mut Parser<'_>) {
+fn match_arm(p: &mut Parser<'_>) -> bool {
     let m = p.start();
     patterns::pattern(p);
-    if p.at(T![if]) {
+    if p.at(T![if]) && !p.at_newline() {
         let guard = p.start();
         p.bump(T![if]);
         expr(p);
         guard.complete(p, MATCH_GUARD);
     }
     p.expect(T![->]);
-    expr(p);
+    let result = expr(p);
     m.complete(p, MATCH_ARM);
+    result.is_some_and(|result| result.kind() == BLOCK_EXPR)
 }
 ```
 
 `match x { -1 -> a }`: the special message, then `1 -> a` parses as an
 arm. The error points at the cause, and the rest of the match still
-has a tree.
+has a tree. After an error, `needs_newline` is `false`: the junk was
+reported already, no need to add a missing line break.
+
+Why the exception for blocks? A block's `}` ends the arm as clearly as
+a line break: `A -> { 1 } B -> { 2 }` can't be misread. Rust has the
+same exception for its commas between arms. Without a block, where an
+arm ends would depend on what can continue an expression: the
+reference grammar's problem with `-` and `(` again.
 
 </details>
 

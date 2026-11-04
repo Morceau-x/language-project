@@ -128,7 +128,8 @@ Write `line_comment` and `block_comment`. The first `/` is consumed;
 
 - A line comment goes up to the line break, not included: stop at `\n`
   and at `\r`.
-- A block comment goes up to the first `*/`, included. If the text ends
+- A block comment goes up to its `*/`, included. Comments nest: a `/*`
+  inside opens another one, which needs its own `*/`. If the text ends
   first, it's unterminated: return `BlockComment { terminated: false }`,
   having consumed everything.
 
@@ -137,10 +138,22 @@ cargo test -p mini-parser --lib lexer::raw::tests::comments
 ```
 
 <details>
-<summary>Hint: the block comment's loop</summary>
+<summary>Hint 1: the block comment's loop</summary>
 
 `bump()` returns an `Option<char>`: `None` at the end. Bump one
 character at a time; after a `*`, check whether `self.first()` is `/`.
+
+</details>
+
+<details>
+<summary>Hint 2: nesting without recursion</summary>
+
+Your spec's `BLOCK_COMMENT` refers to itself, but the lexer doesn't
+need to call itself: all it must know is how many comments are open. A
+counter, starting at 1: `/*` adds one, `*/` removes one, and the
+comment ends when it reaches 0. Consume both characters of each
+delimiter at once, so that `*/*` reads as `*/` then `*`, as your spec
+says.
 
 </details>
 
@@ -158,21 +171,38 @@ fn line_comment(&mut self) -> RawKind {
 ```rust
 fn block_comment(&mut self) -> RawKind {
     self.bump(); // the `*`
-    loop {
-        match self.bump() {
-            None => return RawKind::BlockComment { terminated: false },
-            Some('*') if self.first() == '/' => {
+    // How many comments are open: they nest, `/* a /* b */ c */`.
+    let mut depth = 1;
+    while let Some(c) = self.bump() {
+        match c {
+            '/' if self.first() == '*' => {
                 self.bump();
-                return RawKind::BlockComment { terminated: true };
+                depth += 1;
             }
-            Some(_) => {}
+            '*' if self.first() == '/' => {
+                self.bump();
+                depth -= 1;
+                if depth == 0 {
+                    return RawKind::BlockComment { terminated: true };
+                }
+            }
+            _ => {}
         }
     }
+    RawKind::BlockComment { terminated: false }
 }
 ```
 
 `/*/` isn't a complete comment: after `/*`, the `/` is a character
 inside it.
+
+A counter is enough because there's only one kind of bracket. With
+two, like `(` and `[`, you'd need a stack, to check that each closer
+matches its opener: that's a parser's job. This is why nested comments
+are the one place where a lexer goes beyond regular expressions, and
+why some languages (C, Java, JavaScript) don't nest them: a lexer made
+of regular expressions alone can't. With a generator like `lex`, you
+add the counter by hand, in the code that runs when `/*` matches.
 
 </details>
 

@@ -4,7 +4,8 @@ Steps 1 and 2 parsed a language with four operators. This step parses a
 real one: **Maxim**, the language of the reference compiler in
 `example/`, all of it except its HTML elements. Modules, types,
 functions, lambdas, pattern matching, string interpolation, a dozen
-precedence levels, no semicolons.
+precedence levels, no semicolons: line breaks end statements, as in Go
+or Scala.
 
 You do it twice, the way language designers do:
 
@@ -60,7 +61,7 @@ session or two.
 - [Part 9 — Expressions](part9-expressions.md): Pratt parsing, postfix operators, blocks
 - [Part 10 — Declarations and whole files](part10-declarations.md): the parser is complete
 - [Part 11 — A typed AST](part11-ast.md): rust-analyzer's `ast` layer, and a first client
-- [Part 12 — Errors and differential testing](part12-errors.md): recovery, validation, testing against the reference
+- [Part 12 — Errors and differential testing](part12-errors.md): recovery, validation, testing against your spec
 - [Part 13 — Explore, and clean up](part13-explore.md): HTML, incremental parsing, formatters…
 
 ---
@@ -98,8 +99,9 @@ shouldn't, or when two parts disagree. A specification fixes that:
 - a tool can check it, and find ambiguities;
 - it tells you where a recursive descent parser needs more than one
   token of lookahead, before you write one line of the parser;
-- and differential testing (Part 12) checks that your parser, the
-  reference parser and the spec all agree.
+- and it runs: the checker can judge any program with your rules, so
+  differential testing (Part 12) checks that your parser and your spec
+  agree, on tens of thousands of programs.
 
 ### The layers
 
@@ -117,14 +119,14 @@ shouldn't, or when two parts disagree. A specification fixes that:
 | Part | You build                                   | Compiler ideas                                                                                   | Files                                |
 |------|---------------------------------------------|--------------------------------------------------------------------------------------------------|--------------------------------------|
 | 1    | nothing yet: you read                       | specifications, BNF and EBNF, lexical vs syntactic grammars, the token interface                  |                                      |
-| 2    | the lexical grammar                         | regular languages, longest match, the `-` operator, context-sensitive lexing                     | `spec/maxim.md`                      |
+| 2    | the lexical grammar                         | regular languages, longest match, the `-` operator, nested comments, context-sensitive lexing    | `spec/maxim.md`                      |
 | 3    | the syntactic grammar                       | precedence levels in a grammar, associativity, ambiguity, FIRST and FOLLOW, LL(1)                | `spec/maxim.md`                      |
 | 4    | a raw lexer                                 | rustc_lexer's design: a cursor, maximal munch, errors as flags, never failing                     | `src/lexer/raw.rs`                   |
 | 5    | the cooked lexer                            | keywords, error messages, lexer modes, one token of context                                      | `src/lexer/mod.rs`                   |
 | 6    | syntax trees                                | green and red trees (rowan), trivia, building a tree from events                                 | `src/tree/`                          |
-| 7    | the parser's engine                         | events, markers, forward parents, token sets, error recovery, guaranteed progress                | `src/parser/mod.rs`                  |
+| 7    | the parser's engine                         | line breaks as separators, events, markers, forward parents, token sets, error recovery          | `src/parser/mod.rs`                  |
 | 8    | types and patterns                          | recursive descent from a grammar, left factoring, two tokens of lookahead                        | `src/parser/grammar/`                |
-| 9    | expressions                                 | Pratt parsing, binding powers, prefix and postfix operators, statements without separators        | `src/parser/grammar/`                |
+| 9    | expressions                                 | Pratt parsing, binding powers, prefix and postfix operators, statements and their separators      | `src/parser/grammar/`                |
 | 10   | declarations                                | the whole language; snapshot tests                                                               | `src/parser/grammar/items.rs`        |
 | 11   | a typed AST, and an outline                 | typed views over an untyped tree, macros that write code                                         | `src/ast/`, `src/outline.rs`         |
 | 12   | validation and better errors                | resilient parsing, cover grammars, differential and property testing                             | `src/validation.rs`, `tests/`        |
@@ -134,13 +136,13 @@ shouldn't, or when two parts disagree. A specification fixes that:
 
 | Practice                                      | Why                                                                                         | Where                     |
 |-----------------------------------------------|---------------------------------------------------------------------------------------------|---------------------------|
-| **Specify, then implement**                   | the spec is checked; the parser is checked against it and against the reference              | `spec/maxim.md`           |
+| **Specify, then implement**                   | the spec is checked on samples; the parser is checked against the spec                       | `spec/maxim.md`           |
 | **Lossless trees**                            | tools that rewrite code need every byte; the parser's tests can check that nothing is lost   | `src/tree/`               |
 | **The parser never fails**                    | any text gives a tree and a list of errors: what an editor needs                            | `src/parser/`             |
 | **Parse loosely, validate afterwards**        | with the whole node in hand, errors can say *what* is wrong, not just *where*                | `src/validation.rs`       |
 | **Snapshot tests**                            | a tree dump shows everything at once; a failure shows the exact difference                  | `corpus/`, `expect![…]`   |
 | **Fail loudly on parser bugs**                | a forgotten marker panics where it's forgotten; a parser that stops moving panics too        | `src/parser/mod.rs`       |
-| **Test against another implementation**       | the reference parser decides what's valid; thousands of random edits find the disagreements | `tests/differential.rs`   |
+| **Test against another implementation**       | your spec, run by an Earley parser, decides what's valid; random edits find the disagreements | `tests/differential.rs`   |
 
 ---
 
@@ -188,10 +190,11 @@ cargo test -p mini-parser --no-fail-fast
 cargo test -p mini-parser --no-fail-fast
 ```
 
-The first build takes a while: it builds the reference compiler in
-`example/`, which the tests compare your parser with. You should see
-**5 passed** and 114 failed. The failures say
-`not yet implemented: Part 4a: line_comment` and the like.
+The first build takes a moment. The unit tests come first: you should
+see **5 passed** and 114 failed. The failures say `not yet
+implemented: Part 4a: line_comment` and the like. The other test files
+fail too: they need the whole parser, and the differential tests a
+complete spec.
 
 ```bash
 cargo check-grammar
@@ -237,7 +240,7 @@ Everything is in `mini-parser/`, a new crate of the workspace.
 | `src/lib.rs`                           | `parse(text) -> Parse`: the layers, chained                             | provided, read it             |
 | `src/main.rs`                          | the `cargo parse` command                                               | provided                      |
 | `tests/corpus.rs`                      | snapshot tests on the corpus                                            | provided                      |
-| `tests/differential.rs`                | your parser against the reference parser                                | provided                      |
+| `tests/differential.rs`                | your parser against your spec                                           | provided                      |
 | `tests/lossless.rs`                    | properties that hold for any text                                       | provided                      |
 
 **Next:** [Part 1 — Maxim, and how languages are specified](part1-specifying.md)

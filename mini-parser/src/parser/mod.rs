@@ -13,11 +13,13 @@ mod token_set;
 use std::cell::Cell;
 
 use crate::SyntaxKind::{self, *};
-use crate::lexer::Lexed;
+use crate::T;
+use crate::lexer::{Lexed, can_end_expr};
 pub(crate) use token_set::TokenSet;
 
 /// What the parser reads: the tokens that aren't trivia, each with one
-/// more bit of information: does a line break come before it?
+/// more bit of information: does a line break that ends a statement come
+/// before it? That bit is the spec's `NEWLINE`.
 pub(crate) struct Input {
     kind: Vec<SyntaxKind>,
     newline_before: Vec<bool>,
@@ -123,9 +125,10 @@ impl<'t> Parser<'t> {
         kinds.contains(self.current())
     }
 
-    /// Is the current token the first on its line?
-    pub(crate) fn at_line_start(&self) -> bool {
-        todo!("Part 7b: at_line_start")
+    /// Does a line break that ends a statement come before the current
+    /// token? The spec's `NEWLINE`.
+    pub(crate) fn at_newline(&self) -> bool {
+        todo!("Part 7b: at_newline")
     }
 
     /// Consume the current token if it's a `kind`.
@@ -204,6 +207,7 @@ impl Marker {
 pub(crate) struct CompletedMarker {
     /// The index of its `Start` event.
     pos: u32,
+    kind: SyntaxKind,
 }
 
 impl CompletedMarker {
@@ -212,6 +216,10 @@ impl CompletedMarker {
     /// of a `BIN_EXPR` that should have started before it.
     pub(crate) fn precede(self, p: &mut Parser<'_>) -> Marker {
         todo!("Part 7c: precede")
+    }
+
+    pub(crate) fn kind(self) -> SyntaxKind {
+        self.kind
     }
 }
 
@@ -290,6 +298,43 @@ mod tests {
     }
 
     #[test]
+    fn a_line_break_needs_an_end_before_it_and_a_start_after_it() {
+        // `+` can't end a statement, `|>` can't start one, `-` can.
+        let lexed = lex("a +\nb\n|> c\n-d\n");
+        let input = Input::from_lexed(&lexed);
+        assert_eq!(
+            input.kind,
+            [
+                LOWER_IDENT,
+                PLUS,
+                LOWER_IDENT,
+                PIPE_GT,
+                LOWER_IDENT,
+                MINUS,
+                LOWER_IDENT,
+                EOF
+            ]
+        );
+        assert_eq!(
+            input.newline_before,
+            [false, false, false, false, false, true, false, false]
+        );
+    }
+
+    #[test]
+    fn line_breaks_dont_count_inside_parentheses_and_brackets() {
+        let lexed = lex("(a\nb)\n[c\nd]\n{e\nf(\n{g\nh})}");
+        let input = Input::from_lexed(&lexed);
+        let newlines: Vec<SyntaxKind> = (0..input.kind.len())
+            .filter(|&i| input.newline_before[i])
+            .map(|i| input.kind[i])
+            .collect();
+        // Before `[` and `{` at the top level; before `f`, in `{…}`; and
+        // before `h`, in `{…}` even though it's inside `(…)`.
+        assert_eq!(newlines, [T!['['], T!['{'], LOWER_IDENT, LOWER_IDENT]);
+    }
+
+    #[test]
     fn looking_ahead() {
         let lexed = lex("fn f(\nx");
         let input = Input::from_lexed(&lexed);
@@ -301,17 +346,17 @@ mod tests {
         assert_eq!(p.nth(4), EOF);
         assert_eq!(p.nth(100), EOF);
         assert!(p.at_ts(TokenSet::new(&[T![let], T![fn]])));
-        assert!(!p.at_line_start());
+        assert!(!p.at_newline());
     }
 
     #[test]
-    fn at_line_start() {
+    fn at_newline() {
         let lexed = lex("a\n(b");
         let input = Input::from_lexed(&lexed);
         let mut p = Parser::new(&input);
-        assert!(!p.at_line_start());
+        assert!(!p.at_newline());
         p.bump(LOWER_IDENT);
-        assert!(p.at_line_start());
+        assert!(p.at_newline());
     }
 
     #[test]

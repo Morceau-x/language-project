@@ -19,13 +19,22 @@ match "1."` means your `FLOAT` matches `1.` and shouldn't.
 
 ## The idea: tokens are regular
 
-Every token of Maxim can be described without nesting: a name is a
-letter then letters and digits, a comment runs to the end of the line.
-Languages like that are **regular**: a regular expression describes
-them, and a lexer recognizes them reading each character once, without
-a stack. That's why the lexical grammar never refers to itself: each
-token rule can be expanded into one big regular expression. (The
-checker rejects lexical rules that refer to themselves.)
+Almost every token of Maxim can be described without nesting: a name
+is a letter then letters and digits, a line comment runs to the end of
+the line. Languages like that are **regular**: a regular expression
+describes them, and a lexer recognizes them reading each character
+once, without a stack. Each of these token rules could be expanded
+into one big regular expression.
+
+One token isn't regular: the block comment, because block comments
+nest. No regular expression can check that every `/*` has its `*/`,
+any more than it can check parentheses: that takes counting. So
+`BLOCK_COMMENT` will refer to itself, the only lexical rule that does.
+A lexer still reads it in one pass, with a counter instead of a stack
+(Part 4). The checker allows a lexical rule to refer to itself, but not
+before reading a character: a rule that starts with itself, like
+`A ::= A "x" | "x"`, is **left-recursive**, and a lexer that followed
+it would call itself forever without moving.
 
 Two rules connect the token rules to a lexer that reads a text from
 start to end:
@@ -64,32 +73,70 @@ Define `WHITESPACE` and `COMMENT` in section 2.1.
   break is `\n`, or `\r\n` (Windows). A `\r` alone is an error.
 - **Comments** are `// …` to the end of the line (the line break isn't
   part of the comment), and `/* … */`, possibly on several lines.
-  Block comments don't nest: `/* a /* b */` is one comment.
+- **Block comments nest**, as in Rust: inside one, `/*` opens a nested
+  comment, and `*/` closes the innermost. `/* a /* b */ c */` is one
+  comment; `/* a /* b */` isn't finished.
 
 Characters are written `#x9` (a tab), `#xA` (`\n`), `#xD` (`\r`). Write
 helper rules if you like, `LINE_COMMENT` for example: any `UPPER_CASE`
 name is a lexical rule.
+
+Start without nesting if you like: a comment that ends at the first
+`*/`. The checker will tell you which nested samples fail, and the
+rule only grows from there.
 
 <details>
 <summary>Hint 1: the trap in block comments</summary>
 
 A rule like `"/*" ANY* "*/"`, with `ANY` any character, matches too
 much: `/* a */ */` would be one comment, because `ANY*` can contain
-`*/`. The checker tests exactly that. The comment must end at the
-*first* `*/`.
+`*/`. The checker tests exactly that. The text inside must not contain
+`*/`, and with nesting, not `/*` either: those start and end comments.
+
+The W3C way to say it, with `-`: "anything, except anything that
+contains `/*` or `*/`". The XML spec writes its comments like that.
+"Anything" is the class of every character, `[#x0-#x10FFFF]`.
 
 </details>
 
 <details>
-<summary>Hint 2: two ways to forbid `*/` inside</summary>
+<summary>Hint 2: nesting is recursion</summary>
 
-The regular expression way: inside, a character that isn't `*`, or
-stars followed by a character that isn't `*` or `/`; at the end, stars
-then `/`.
+A block comment is `/*`, then texts and block comments, then `*/`. So
+`BLOCK_COMMENT` uses itself, as `Expr` will in the syntactic grammar.
+With `COMMENT_TEXT` the text from Hint 1, a first attempt:
 
-The W3C way, with `-`: "anything, except anything that contains `*/`".
-The XML spec writes its comments like that. "Anything" is the class of
-every character, `[#x0-#x10FFFF]`.
+```ebnf
+BLOCK_COMMENT ::= "/*" ( COMMENT_TEXT | BLOCK_COMMENT )* "*/"
+```
+
+</details>
+
+<details>
+<summary>Hint 3: two texts in a row</summary>
+
+The first attempt still matches `/* a */ */`. `( COMMENT_TEXT |
+BLOCK_COMMENT )*` allows two texts in a row: ` a *` then `/ `. Neither
+contains `*/`, but together they do.
+
+Texts and comments must alternate: `/*`, a text, then any number of
+(a comment, a text), then `*/`. A text can be empty, so `/*/**/*/`
+still works.
+
+</details>
+
+<details>
+<summary>Hint 4: where a text meets a delimiter</summary>
+
+Two samples are left, `/* a*/* b */ */` and `/* a/*/`. A lexer reads
+from left to right, so in `*/*` the `*/` comes first and closes the
+comment, and in `/*/` the `/*` comes first and opens one. Your rule
+lets the text end with the first character of the delimiter after it:
+` a*` then `/* b */`.
+
+So the text before a nested comment can't end with `*`, and the text
+before the final `*/` can't end with `/`. Two more rules, each a
+`COMMENT_TEXT` minus what it can't end with.
 
 </details>
 
@@ -100,25 +147,44 @@ every character, `[#x0-#x10FFFF]`.
 WHITESPACE    ::= ( " " | #x9 | #xA | #xD #xA )+
 COMMENT       ::= LINE_COMMENT | BLOCK_COMMENT
 LINE_COMMENT  ::= "//" [^#xA#xD]*
-BLOCK_COMMENT ::= "/*" ( [^*] | "*"+ [^*/] )* "*"+ "/"
-```
-
-`( [^*] | "*"+ [^*/] )*` reads: characters that aren't `*`, or runs of
-stars that aren't followed by `/`. Then the end: stars, then `/`.
-
-The W3C way works too:
-
-```ebnf
+BLOCK_COMMENT ::= "/*" ( TEXT_BEFORE_OPEN BLOCK_COMMENT )* TEXT_BEFORE_CLOSE "*/"
 ANY           ::= [#x0-#x10FFFF]
-BLOCK_COMMENT ::= "/*" ( ANY* - ( ANY* "*/" ANY* ) ) "*/"
+COMMENT_TEXT  ::= ANY* - ( ANY* ( "/*" | "*/" ) ANY* )
+TEXT_BEFORE_OPEN  ::= COMMENT_TEXT - ( ANY* "*" )
+TEXT_BEFORE_CLOSE ::= COMMENT_TEXT - ( ANY* "/" )
 ```
+
+`( TEXT_BEFORE_OPEN BLOCK_COMMENT )* TEXT_BEFORE_CLOSE` is the
+alternation of Hint 3, written as pairs (a text, then a comment) and a
+last text. The parentheses in `ANY* - ( ANY* "*" )` matter: `-` binds
+tighter than juxtaposition.
 
 Then add the prose:
 
 ```markdown
-Lines end with `\n` or `\r\n`; a `\r` alone is an error. Block
-comments don't nest: the first `*/` ends one.
+Whitespace and comments separate tokens, and are otherwise ignored.
 ```
+
+before the grammar, and after it:
+
+```markdown
+Lines end with `\n` or `\r\n`; a `\r` alone is an error.
+
+Block comments nest, as in Rust: `/* a /* b */ c */` is one comment.
+Inside one, `/*` opens a nested comment and `*/` closes the innermost,
+reading from left to right: in `*/*`, the `*/` closes first. The text
+between them contains neither, and can't end with the `*` of a `*/` or
+the `/` of a `/*` (the two `TEXT_BEFORE_` rules). `BLOCK_COMMENT` is the
+only lexical rule that refers to itself: no regular expression can
+count nesting.
+```
+
+Without nesting, the comment rule could be a regular expression, and
+it's worth seeing once: `"/*" ( [^*] | "*"+ [^*/] )* "*"+ "/"` reads
+"characters that aren't `*`, or runs of stars not followed by `/`;
+then stars, then `/`". It's what most lexers did before nesting became
+common (C, Java, JavaScript don't nest; Rust, Swift, Scala and Haskell
+do).
 
 </details>
 
@@ -275,6 +341,14 @@ can't be cut as "`X*`, then `${`".
 <details>
 <summary>Solution</summary>
 
+Before the grammar, what a string is:
+
+```markdown
+A string is on one line, between double quotes. A `${` opens a *hole*:
+an expression whose value is inserted in the string. The hole ends at
+the `}` that matches its `${`.
+```
+
 ```ebnf
 ESCAPE        ::= "\" ( [nt"\$] | "u{" HEX HEX? HEX? HEX? HEX? HEX? "}" )
 HEX           ::= [0-9a-fA-F]
@@ -294,6 +368,10 @@ The rules accept `\u{D800}`, a surrogate, which isn't a valid
 character. A grammar can say it, but painfully; specs say it in prose:
 
 ```markdown
+`"Hello, ${name}!"` is three tokens around the hole's: `STRING_START`
+(`"Hello, ${`), `LOWER` (`name`), and `STRING_END` (`}!"`). A string
+with two holes has a `STRING_MIDDLE` between them.
+
 A `$` not followed by `{` is just a `$`; `\$` escapes one that is. In
 `\u{…}`, the digits must name a Unicode scalar value (not a surrogate,
 at most `10FFFF`).
@@ -342,11 +420,21 @@ starts a regular expression.
    ends the hole and starts the `STRING_END`? The lexer has to count
    the braces opened inside the hole. And a hole must fit on one line
    (the string does).
-2. **`BOL_LPAREN`.** The layout rule of Part 1: a call's `(` must be on
-   the same line as what it calls. The parser needs to know which `(`
-   start a line; the lexer tells it with a different token. "A line
-   break in the whitespace and comments just before it" is the precise
-   condition: a block comment can contain one too.
+2. **`NEWLINE`.** The line break rule of Part 1, Scala's: a line break
+   ends a statement when the token before it can end one and the token
+   after it can start one. The syntactic grammar will use a `NEWLINE`
+   token to separate statements, match arms and declarations. Say:
+   - which tokens can end a statement: the same as the ones that can
+     end an expression, in rule 3 below;
+   - which tokens can start a statement, a match arm or a declaration:
+     what an expression, a pattern, `let` or a declaration can start
+     with;
+   - the exception: inside `( … )` and `[ … ]`, line breaks are
+     whitespace, so arguments and list items can go on several lines.
+     But a lambda's body is a block inside the parentheses, and its
+     statements still need their line breaks;
+   - what several line breaks in a row make, and a block comment that
+     spans lines.
 3. **HTML.** In the full language, `<div>` starts an HTML element
    where an expression can start, and is a comparison elsewhere:
    `a <b` compares. An expression can start after a token that can't
@@ -367,10 +455,28 @@ depend on what comes before a token.
    `"${ { a } }"` the first `}` is a `"}"` token and the second closes
    the hole. A hole must fit on one line: its whitespace and comments
    can't contain a line break.
-2. **A `(` that starts a line**, that is, with a line break in the
-   whitespace and comments just before it, is the token `BOL_LPAREN`
-   ("beginning of line"), not `"("`. The syntax uses the difference: a
-   call's `(` must be on the same line as what it calls.
+2. **A line break is a `NEWLINE` token**, which separates statements,
+   match arms and declarations, when three things hold (the rule of
+   the Scala language):
+   - the token before it can end a statement: `LOWER`, `UPPER`, `"_"`,
+     `INT`, `FLOAT`, `STRING`, `STRING_END`, `")"`, `"]"`, `"}"` or
+     `"?"`;
+   - the token after it can start a statement, a match arm or a
+     declaration: `LOWER`, `UPPER`, `"_"`, `INT`, `FLOAT`, `STRING`,
+     `STRING_START`, `"("`, `"["`, `"{"`, `"-"`, `"!"`, `"fn"`, `"if"`,
+     `"match"`, `"let"`, `"import"`, `"type"`, `"cast"` or
+     `"component"`;
+   - it isn't inside parentheses or brackets, unless it's inside braces
+     inside them: in `f(x,` newline `y)`, the line break is whitespace,
+     but in `f(fn() {` newline `a` newline `b })`, the second is a
+     `NEWLINE`.
+
+   Otherwise it's whitespace. Several line breaks in a row, with
+   whitespace and comments between them, make one `NEWLINE`, and a
+   block comment that spans lines counts as a line break. So a line
+   that ends with an operator continues on the next one, and so does a
+   line that starts with `|>`, `.`, `|` or `else`; but a line that
+   starts with `-` or `(` starts something new.
 3. **A `<` followed by a letter**, where an expression can start, opens
    an HTML element, which this specification leaves out: it's an
    error. An expression can start after a token that can't end one,
@@ -381,7 +487,26 @@ depend on what comes before a token.
 ```
 
 Rule 3 is the same problem as JavaScript's `/`: one token of context
-(the previous one) decides. Part 5 implements all three.
+(the previous one) decides. Rule 2 needs more: the tokens on both
+sides, and a stack of open brackets. Go's rule is simpler, it only
+looks at the token before the line break; that's why in Go,
+`x` newline `+ y` is an error rather than a continuation. Scala looks
+at the next token too, so a line can start with `.` or `|>`.
+
+Part 5 implements rules 1 and 3 in the lexer, and Part 7 rule 2, where
+the parser reads the tokens.
+
+</details>
+
+<details>
+<summary>Why not keep the line breaks and let the grammar decide?</summary>
+
+The syntactic grammar could take line breaks as tokens and allow them
+everywhere they're allowed, but "everywhere" is almost everywhere:
+between `+` and its right operand, after `(`, after `,`, before `|>`…
+Every rule would be twice as long. Splitting the decision out keeps
+the grammar readable, as splitting out whitespace did. Scala, Kotlin
+and Swift all do it this way.
 
 </details>
 
@@ -396,7 +521,7 @@ cargo check-grammar lexical
 ```text
 Lexical grammar (section 2)
   ✓ WHITESPACE: 10 samples
-  ✓ COMMENT: 14 samples
+  ✓ COMMENT: 24 samples
   …
   ✓ STRING_END: 6 samples
 ```

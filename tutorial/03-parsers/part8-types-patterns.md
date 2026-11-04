@@ -66,8 +66,11 @@ PARAM_TYPE       (NAME  ":")?  Type                       acc: b
 Write the five functions of `types.rs`. `type_` is called where a type
 must be: if there's none, report `expected a type` with
 `err_recover` and `TYPE_RECOVERY`. The others start at their first
-token, which their caller checked: `p.bump(T![<])`. The `(` of a
-function type is any `(`: no `at_line_start` check.
+token, which their caller checked: `p.bump(T![<])`.
+
+Types don't need `at_newline`: a type always comes after `:`, `->`,
+`<`, `,` or `(`, none of which can end a statement, so a line
+break before a type is never a `NEWLINE`.
 
 `param_type` needs two tokens of lookahead: `a` alone is a type
 variable, `a:` is a label. It's Part 3's `ParamType` warning.
@@ -198,6 +201,11 @@ Two of Part 3's warnings are here:
 A rest's name is a `NAME` (it binds the rest), or `_`; anything else is
 `expected a name or `_` after `..``.
 
+A constructor's `(` must be on its line: in `Some` newline `(x)`, the
+line break is a `NEWLINE`, and the spec's `CtorPattern` can't contain
+one. Take the `(` only if `!p.at_newline()`; otherwise the pattern is
+`Some`, and the `(` is left for the caller, which will complain.
+
 ```bash
 cargo test -p mini-parser --lib grammar::patterns
 ```
@@ -237,7 +245,8 @@ fn ctor_pat(p: &mut Parser<'_>) {
     if p.eat(T![.]) {
         name_ref(p, UPPER_IDENT);
     }
-    if p.eat(T!['(']) {
+    if p.at(T!['(']) && !p.at_newline() {
+        p.bump(T!['(']);
         pattern(p);
         while p.eat(T![,]) {
             pattern(p);

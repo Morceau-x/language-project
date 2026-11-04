@@ -4,7 +4,5 @@ version = "0.1.0"
 edition = "2024"
 description = "Checks the Maxim grammar spec you write in step 3 (../spec/maxim.md)"
 
-[dependencies]
-# The reference Maxim compiler's lexer cuts the sample programs into
-# tokens, so the samples can be checked before you write your own lexer.
-maxim-compiler = { path = "../../example" }
+# No dependencies: it reads EBNF, runs an Earley parser, and has its own
+# small lexer for the samples.
